@@ -1,57 +1,120 @@
-import { db } from "./firebase-config.js";
-import { collection, addDoc, enableIndexedDbPersistence } 
+import { db, auth } from "./firebase-config.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
+from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Enable Offline Mode
-enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-        console.log("Multiple tabs open, persistence can only be enabled in one tab at a a time.");
-    } else if (err.code == 'unimplemented') {
-        console.log("Browser doesn't support persistence");
-    }
-});
+// Offline Support
+enableIndexedDbPersistence(db).catch(err => console.log(err.code));
 
-// PWA Install Logic
+let isSignup = false;
+let currentUser = null;
+
+// --- PWA INSTALL ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     document.getElementById('installBtn').style.display = 'block';
 });
-document.getElementById('installBtn').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        document.getElementById('installBtn').style.display = 'none';
+document.getElementById('installBtn').addEventListener('click', () => {
+    deferredPrompt.prompt();
+});
+
+// --- AUTH LOGIC ---
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.remove('hidden');
+        loadMyQuestions(user.uid);
+    } else {
+        currentUser = null;
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('dashboard-section').classList.add('hidden');
     }
 });
 
-// UI Logic
-window.startApp = () => {
-    const name = document.getElementById('teacherName').value;
-    const sub = document.getElementById('subject').value;
-    if(!name || !sub) return alert("Please fill in your details.");
-    
-    localStorage.setItem('tName', name);
-    localStorage.setItem('tSub', sub);
-    
-    document.getElementById('displayTeacher').innerText = `${name} (${sub})`;
-    document.getElementById('login-section').classList.add('hidden');
-    document.getElementById('input-section').classList.remove('hidden');
-}
+window.toggleAuthMode = () => {
+    isSignup = !isSignup;
+    document.getElementById('auth-title').innerText = isSignup ? "Teacher Signup" : "Teacher Login";
+    document.getElementById('authBtn').innerText = isSignup ? "Create Account" : "Login";
+    document.getElementById('tName').classList.toggle('hidden', !isSignup);
+    document.getElementById('tSubject').classList.toggle('hidden', !isSignup);
+};
 
-window.saveQuestion = async () => {
-    const btn = document.querySelector('button[onclick="saveQuestion()"]');
-    const originalText = btn.innerText;
-    btn.innerText = "Saving...";
-    btn.disabled = true;
+window.handleAuth = async () => {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
     
     try {
-        const questionData = {
-            teacher: localStorage.getItem('tName'),
-            subject: localStorage.getItem('tSub'),
-            question: document.getElementById('qText').value,
+        if (isSignup) {
+            const name = document.getElementById('tName').value;
+            const subject = document.getElementById('tSubject').value;
+            if(!name || !subject) throw new Error("Name and Subject are required for signup.");
+            
+            const cred = await createUserWithEmailAndPassword(auth, email, pass);
+            // Store name and subject in the user profile
+            await updateProfile(cred.user, { displayName: `${name}|${subject}` });
+        } else {
+            await signInWithEmailAndPassword(auth, email, pass);
+        }
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+};
+
+window.logout = () => signOut(auth);
+
+// --- IMAGE COMPRESSION (Base64) ---
+const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                // Resize to max 600px width
+                const maxWidth = 600;
+                const scaleSize = maxWidth / img.width;
+                canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
+                canvas.height = (img.width > maxWidth) ? (img.height * scaleSize) : img.height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                // Compress to JPEG 0.6 quality
+                resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+            };
+        };
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+// --- DATA LOGIC ---
+window.saveQuestion = async () => {
+    const editId = document.getElementById('editId').value;
+    const qText = document.getElementById('qText').value;
+    const file = document.getElementById('qImage').files[0];
+    const btn = document.getElementById('saveBtn');
+    
+    if(!qText) return alert("Question text is required");
+
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+
+    try {
+        let imageString = "";
+        
+        if (file) {
+            if(file.size > 5 * 1024 * 1024) throw new Error("File too large. Max 5MB");
+            imageString = await compressImage(file);
+        }
+
+        const data = {
+            question: qText,
             options: {
                 A: document.getElementById('opA').value,
                 B: document.getElementById('opB').value,
@@ -59,32 +122,102 @@ window.saveQuestion = async () => {
                 D: document.getElementById('opD').value,
             },
             answer: document.getElementById('correctAns').value,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            // Only update image if a new one is provided.
+            imageUrl: imageString || (editId ? undefined : "")
         };
 
-        // Save to Firebase
-        await addDoc(collection(db, "questions"), questionData);
+        // Clean up undefined image if editing
+        if(editId && !file) delete data.imageUrl; 
 
-        // Show local preview
-        const preview = document.getElementById('local-preview');
-        const newEntry = document.createElement('div');
-        newEntry.className = "q-preview";
-        newEntry.innerHTML = `✅ <strong>${questionData.question}</strong><br><small>Ans: ${questionData.answer}</small>`;
-        preview.prepend(newEntry);
-        
-        // Reset fields
-        document.getElementById('qText').value = "";
-        document.getElementById('opA').value = "";
-        document.getElementById('opB').value = "";
-        document.getElementById('opC').value = "";
-        document.getElementById('opD').value = "";
-        
-        alert("Question Saved Successfully!");
+        if (editId) {
+            await updateDoc(doc(db, "questions", editId), data);
+            alert("Updated Successfully!");
+            cancelEdit();
+        } else {
+            // New Question - Add Teacher Metadata
+            const [name, subject] = currentUser.displayName.split('|');
+            data.teacher = name;
+            data.subject = subject;
+            data.uid = currentUser.uid;
+            
+            await addDoc(collection(db, "questions"), data);
+            alert("Added Successfully!");
+            resetForm();
+        }
 
     } catch (e) {
-        alert("Error saving: " + e.message);
+        console.error(e);
+        alert("Error: " + e.message);
     } finally {
-        btn.innerText = originalText;
+        btn.innerText = "Submit Question";
         btn.disabled = false;
     }
+};
+
+function loadMyQuestions(uid) {
+    const qList = document.getElementById('my-questions-list');
+    const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+        qList.innerHTML = "";
+        if(snapshot.empty) { qList.innerHTML = "<p>No questions added yet.</p>"; return; }
+        
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const div = document.createElement('div');
+            div.className = "q-item";
+            div.innerHTML = `
+                <div style="font-weight:bold; margin-bottom:5px;">${data.question}</div>
+                ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
+                <div style="margin-top:10px;">
+                    <button class="secondary" style="width:auto; padding:6px 12px;" onclick="editQ('${docSnap.id}')">✏ Edit</button>
+                    <button class="delete" style="width:auto; padding:6px 12px;" onclick="deleteQ('${docSnap.id}')">🗑 Delete</button>
+                </div>
+            `;
+            // Save data to element for easy retrieval
+            div.dataset.json = JSON.stringify(data);
+            div.dataset.id = docSnap.id;
+            qList.appendChild(div);
+        });
+    });
+}
+
+window.deleteQ = async (id) => {
+    if(confirm("Are you sure you want to delete this question?")) {
+        await deleteDoc(doc(db, "questions", id));
+    }
+};
+
+window.editQ = (id) => {
+    const el = document.querySelector(`div[data-id="${id}"]`);
+    const data = JSON.parse(el.dataset.json);
+
+    document.getElementById('editId').value = id;
+    document.getElementById('qText').value = data.question;
+    document.getElementById('opA').value = data.options.A;
+    document.getElementById('opB').value = data.options.B;
+    document.getElementById('opC').value = data.options.C;
+    document.getElementById('opD').value = data.options.D;
+    document.getElementById('correctAns').value = data.answer;
+    
+    document.getElementById('saveBtn').innerText = "Update Question";
+    document.getElementById('cancelBtn').classList.remove('hidden');
+    document.querySelector('.card').scrollIntoView({behavior: 'smooth'});
+};
+
+window.cancelEdit = () => {
+    resetForm();
+    document.getElementById('editId').value = "";
+    document.getElementById('saveBtn').innerText = "Submit Question";
+    document.getElementById('cancelBtn').classList.add('hidden');
+};
+
+function resetForm() {
+    document.getElementById('qText').value = "";
+    document.getElementById('qImage').value = "";
+    document.getElementById('opA').value = "";
+    document.getElementById('opB').value = "";
+    document.getElementById('opC').value = "";
+    document.getElementById('opD').value = "";
 }
