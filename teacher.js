@@ -1,25 +1,11 @@
 import { db, auth } from "./firebase-config.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, orderBy } 
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-// Offline Support
-enableIndexedDbPersistence(db).catch(err => console.log(err.code));
 
 let isSignup = false;
 let currentUser = null;
-
-// --- PWA INSTALL ---
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBtn').style.display = 'block';
-});
-document.getElementById('installBtn').addEventListener('click', () => {
-    deferredPrompt.prompt();
-});
 
 // --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
@@ -39,8 +25,7 @@ window.toggleAuthMode = () => {
     isSignup = !isSignup;
     document.getElementById('auth-title').innerText = isSignup ? "Teacher Signup" : "Teacher Login";
     document.getElementById('authBtn').innerText = isSignup ? "Create Account" : "Login";
-    document.getElementById('tName').classList.toggle('hidden', !isSignup);
-    document.getElementById('tSubject').classList.toggle('hidden', !isSignup);
+    document.getElementById('signup-fields').classList.toggle('hidden', !isSignup);
 };
 
 window.handleAuth = async () => {
@@ -54,7 +39,7 @@ window.handleAuth = async () => {
             if(!name || !subject) throw new Error("Name and Subject are required for signup.");
             
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
-            // Store name and subject in the user profile
+            // Store name and subject in the user profile (Name|Subject)
             await updateProfile(cred.user, { displayName: `${name}|${subject}` });
         } else {
             await signInWithEmailAndPassword(auth, email, pass);
@@ -123,11 +108,9 @@ window.saveQuestion = async () => {
             },
             answer: document.getElementById('correctAns').value,
             timestamp: Date.now(),
-            // Only update image if a new one is provided.
             imageUrl: imageString || (editId ? undefined : "")
         };
 
-        // Clean up undefined image if editing
         if(editId && !file) delete data.imageUrl; 
 
         if (editId) {
@@ -135,7 +118,9 @@ window.saveQuestion = async () => {
             alert("Updated Successfully!");
             cancelEdit();
         } else {
-            // New Question - Add Teacher Metadata
+            // Check if profile exists
+            if(!currentUser.displayName) throw new Error("Profile error. Please relogin.");
+            
             const [name, subject] = currentUser.displayName.split('|');
             data.teacher = name;
             data.subject = subject;
@@ -175,7 +160,6 @@ function loadMyQuestions(uid) {
                     <button class="delete" style="width:auto; padding:6px 12px;" onclick="deleteQ('${docSnap.id}')">🗑 Delete</button>
                 </div>
             `;
-            // Save data to element for easy retrieval
             div.dataset.json = JSON.stringify(data);
             div.dataset.id = docSnap.id;
             qList.appendChild(div);
