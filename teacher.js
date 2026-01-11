@@ -11,13 +11,20 @@ let currentUser = null;
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
+        // Show Dashboard, Hide Auth
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('dashboard-section').classList.remove('hidden');
+        // Show Logout Button in Top Right
+        document.getElementById('logoutBtn').style.display = 'block';
+        
         loadMyQuestions(user.uid);
     } else {
         currentUser = null;
+        // Show Auth, Hide Dashboard
         document.getElementById('auth-section').classList.remove('hidden');
         document.getElementById('dashboard-section').classList.add('hidden');
+        // Hide Logout Button
+        document.getElementById('logoutBtn').style.display = 'none';
     }
 });
 
@@ -39,7 +46,6 @@ window.handleAuth = async () => {
             if(!name || !subject) throw new Error("Name and Subject are required for signup.");
             
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
-            // Store name and subject in the user profile (Name|Subject)
             await updateProfile(cred.user, { displayName: `${name}|${subject}` });
         } else {
             await signInWithEmailAndPassword(auth, email, pass);
@@ -51,7 +57,7 @@ window.handleAuth = async () => {
 
 window.logout = () => signOut(auth);
 
-// --- IMAGE COMPRESSION (Base64) ---
+// --- IMAGE COMPRESSION ---
 const compressImage = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -61,16 +67,12 @@ const compressImage = (file) => {
             img.src = event.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                // Resize to max 600px width
                 const maxWidth = 600;
                 const scaleSize = maxWidth / img.width;
                 canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
                 canvas.height = (img.width > maxWidth) ? (img.height * scaleSize) : img.height;
-
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
-                // Compress to JPEG 0.6 quality
                 resolve(canvas.toDataURL('image/jpeg', 0.6)); 
             };
         };
@@ -92,7 +94,6 @@ window.saveQuestion = async () => {
 
     try {
         let imageString = "";
-        
         if (file) {
             if(file.size > 5 * 1024 * 1024) throw new Error("File too large. Max 5MB");
             imageString = await compressImage(file);
@@ -118,9 +119,7 @@ window.saveQuestion = async () => {
             alert("Updated Successfully!");
             cancelEdit();
         } else {
-            // Check if profile exists
             if(!currentUser.displayName) throw new Error("Profile error. Please relogin.");
-            
             const [name, subject] = currentUser.displayName.split('|');
             data.teacher = name;
             data.subject = subject;
@@ -140,13 +139,20 @@ window.saveQuestion = async () => {
     }
 };
 
+// --- FIXED LOADING LOGIC ---
 function loadMyQuestions(uid) {
     const qList = document.getElementById('my-questions-list');
+    
+    // NOTE: This Query requires an Index in Firebase Console!
+    // If it's stuck on "Loading...", check your browser console (F12) for a link to create it.
     const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
     
     onSnapshot(q, (snapshot) => {
         qList.innerHTML = "";
-        if(snapshot.empty) { qList.innerHTML = "<p>No questions added yet.</p>"; return; }
+        if(snapshot.empty) { 
+            qList.innerHTML = "<p>No questions added yet.</p>"; 
+            return; 
+        }
         
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
@@ -164,6 +170,13 @@ function loadMyQuestions(uid) {
             div.dataset.id = docSnap.id;
             qList.appendChild(div);
         });
+    }, (error) => {
+        // This will print the error in the box instead of "Loading..."
+        console.error("Data Load Error:", error);
+        qList.innerHTML = `<div class="error-msg">
+            <strong>Error Loading Data:</strong> ${error.message}<br><br>
+            <em>If the error says "requires an index", open Browser Console (F12) and click the link provided by Firebase.</em>
+        </div>`;
     });
 }
 
