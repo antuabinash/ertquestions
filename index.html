@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        input, select, button { width: 100%; margin: 5px 0; padding: 10px; box-sizing: border-box; }
+        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+        .hidden { display: none; }
+        .q-preview { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <h2>Teacher Question Bank</h2>
+    <button id="installBtn" style="display:none; background:#333;">📲 Install App</button>
+
+    <div id="login-section">
+        <input type="text" id="teacherName" placeholder="Enter Teacher Name">
+        <input type="text" id="subject" placeholder="Subject (e.g. Math)">
+        <button onclick="startApp()">Start Adding</button>
+    </div>
+
+    <div id="input-section" class="hidden">
+        <h3>Add New Question</h3>
+        <p><strong>Teacher:</strong> <span id="displayTeacher"></span></p>
+        
+        <textarea id="qText" placeholder="Type Question Here..." rows="3" style="width:100%"></textarea>
+        <input type="text" id="opA" placeholder="Option A">
+        <input type="text" id="opB" placeholder="Option B">
+        <input type="text" id="opC" placeholder="Option C">
+        <input type="text" id="opD" placeholder="Option D">
+        
+        <label>Correct Answer:</label>
+        <select id="correctAns">
+            <option value="A">Option A</option>
+            <option value="B">Option B</option>
+            <option value="C">Option C</option>
+            <option value="D">Option D</option>
+        </select>
+        
+        <button onclick="saveQuestion()">Submit Question</button>
+        
+        <div id="local-preview"></div>
+    </div>
+
+    <script type="module" src="teacher.js"></script>
+</body>
+</html>
