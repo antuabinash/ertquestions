@@ -2,10 +2,10 @@ import { db } from "./firebase-config.js";
 import { collection, onSnapshot, deleteDoc, doc, query, orderBy } 
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Basic Password Protection
+// Password Check (Simple)
 const pass = prompt("Enter Admin Password:");
-if(pass !== "admin123") { // You can change this simple password
-    document.body.innerHTML = "<h1>Access Denied</h1>";
+if(pass !== "admin123") {
+    document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>⛔ Access Denied</h1>";
     throw new Error("Access Denied");
 }
 
@@ -13,30 +13,31 @@ const tableBody = document.getElementById('tableBody');
 const filterSelect = document.getElementById('filterSubject');
 let allData = [];
 
-// Load Data in Real-time
+// Load Data
 const q = query(collection(db, "questions"), orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snapshot) => {
     allData = [];
-    tableBody.innerHTML = "";
     const subjects = new Set();
 
     snapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        data.id = docSnap.id; // Save ID for deletion
+        data.id = docSnap.id; // Store ID for deletion
         allData.push(data);
         subjects.add(data.subject);
     });
 
-    // Populate Filter Dropdown
+    // Update Filter Dropdown
+    // Clear old options except the first one
+    while (filterSelect.options.length > 1) {
+        filterSelect.remove(1);
+    }
+    
     subjects.forEach(sub => {
         const opt = document.createElement('option');
         opt.value = sub;
         opt.innerText = sub;
-        // prevent duplicates in dropdown
-        if(![...filterSelect.options].some(o => o.value === sub)){
-           filterSelect.appendChild(opt); 
-        }
+        filterSelect.appendChild(opt);
     });
 
     renderTable(allData);
@@ -44,17 +45,28 @@ onSnapshot(q, (snapshot) => {
 
 function renderTable(data) {
     tableBody.innerHTML = "";
+    
+    if(data.length === 0) {
+        tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No questions found.</td></tr>";
+        return;
+    }
+
     data.forEach(item => {
         const row = `
             <tr>
-                <td>${item.teacher}</td>
+                <td><b>${item.teacher}</b></td>
                 <td>${item.subject}</td>
                 <td>
                     ${item.question} <br>
-                    <small style="color:gray">A: ${item.options.A} | B: ${item.options.B}...</small>
+                    <div style="font-size:0.85em; color:#666; margin-top:4px;">
+                        A) ${item.options.A} <br>
+                        B) ${item.options.B} <br>
+                        C) ${item.options.C} <br>
+                        D) ${item.options.D}
+                    </div>
                 </td>
-                <td><b>${item.answer}</b></td>
-                <td>
+                <td style="text-align:center; font-weight:bold;">${item.answer}</td>
+                <td style="text-align:center;">
                     <button class="del-btn" onclick="removeQ('${item.id}')">Delete</button>
                 </td>
             </tr>
@@ -63,7 +75,7 @@ function renderTable(data) {
     });
 }
 
-// Filter Logic
+// Filter Function
 window.filterData = () => {
     const selected = document.getElementById('filterSubject').value;
     if(selected === "all") {
@@ -74,9 +86,13 @@ window.filterData = () => {
     }
 }
 
-// Delete Logic
+// Delete Function
 window.removeQ = async (id) => {
-    if(confirm("Are you sure you want to delete this question?")) {
-        await deleteDoc(doc(db, "questions", id));
+    if(confirm("Are you sure you want to permanently delete this question?")) {
+        try {
+            await deleteDoc(doc(db, "questions", id));
+        } catch(e) {
+            alert("Error deleting: " + e.message);
+        }
     }
 }
