@@ -6,21 +6,40 @@
     <title>Teacher Portal</title>
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f0f2f5; }
+        
+        /* New Header Style */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .top-bar h2 { margin: 0; color: #333; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; display: none; } /* Hidden by default */
+        
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input, select, textarea, button { width: 100%; margin: 8px 0; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #4CAF50; color: white; border: none; font-weight: bold; cursor: pointer; }
-        button:hover { opacity: 0.9; }
-        button.secondary { background: #6c757d; }
-        button.delete { background: #dc3545; }
-        .hidden { display: none; }
-        .q-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        
+        /* Main Action Button */
+        button#saveBtn, button#authBtn { background: #4CAF50; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button#saveBtn:hover, button#authBtn:hover { opacity: 0.9; }
+        
+        /* Secondary Buttons */
+        button.secondary { background: #6c757d; color: white; border: none; }
+        button.delete { background: #dc3545; color: white; border: none; }
+        
+        .hidden { display: none !important; }
+        .q-item { border-bottom: 1px solid #eee; padding: 15px 0; }
         .q-img-preview { max-width: 150px; display: block; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
+        
+        /* Loading Error Message */
+        .error-msg { color: red; font-size: 0.9em; margin-top: 10px; }
     </style>
 </head>
 <body>
 
+    <div class="top-bar">
+        <h2>Teacher Portal</h2>
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout ➡</button>
+    </div>
+
     <div id="auth-section" class="card">
-        <h2 id="auth-title">Teacher Login</h2>
+        <h3 id="auth-title">Please Login</h3>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
         
@@ -37,7 +56,7 @@
 
     <div id="dashboard-section" class="hidden">
         <div class="card">
-            <h3>Add / Edit Question</h3>
+            <h3>Add New Question</h3>
             <input type="hidden" id="editId">
             
             <textarea id="qText" placeholder="Type Question Here..." rows="3"></textarea>
@@ -63,10 +82,7 @@
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>My Questions</h3>
-                <button onclick="logout()" class="secondary" style="width:auto; padding:5px 10px;">Logout</button>
-            </div>
+            <h3>My Questions</h3>
             <div id="my-questions-list">Loading...</div>
         </div>
     </div>
