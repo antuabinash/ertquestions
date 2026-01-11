@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Portal</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f0f2f5; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -16,19 +15,19 @@
         .hidden { display: none; }
         .q-item { border-bottom: 1px solid #eee; padding: 10px 0; }
         .q-img-preview { max-width: 150px; display: block; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
-        #installBtn { display: none; background: #007bff; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
-    <button id="installBtn">📲 Install App</button>
 
     <div id="auth-section" class="card">
         <h2 id="auth-title">Teacher Login</h2>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
-        <input type="text" id="tName" placeholder="Your Full Name" class="hidden">
-        <input type="text" id="tSubject" placeholder="Your Subject (e.g. Math)" class="hidden">
+        
+        <div id="signup-fields" class="hidden">
+            <input type="text" id="tName" placeholder="Your Full Name">
+            <input type="text" id="tSubject" placeholder="Your Subject (e.g. Math)">
+        </div>
         
         <button onclick="handleAuth()" id="authBtn">Login</button>
         <p style="text-align:center; font-size:0.9em; cursor:pointer; color:#007bff;" onclick="toggleAuthMode()">
