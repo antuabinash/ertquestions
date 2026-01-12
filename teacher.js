@@ -16,13 +16,16 @@ const examSubjects = {
     "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
 };
 
-// Make this function global so HTML can call it
+// 1. Update Subjects & Save Exam Preference
 window.updateSubjects = () => {
     const examSelect = document.getElementById("qExam");
     const subjectSelect = document.getElementById("qSubject");
     const selectedExam = examSelect.value;
     
-    // Clear current options
+    // Save Exam to Memory
+    localStorage.setItem('prefExam', selectedExam);
+
+    // Clear Subject options
     subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
     
     if (selectedExam && examSubjects[selectedExam]) {
@@ -35,6 +38,30 @@ window.updateSubjects = () => {
     }
 };
 
+// 2. Save Subject Preference
+window.saveSubjectPreference = () => {
+    const sub = document.getElementById("qSubject").value;
+    localStorage.setItem('prefSubject', sub);
+}
+
+// 3. Load Preferences on Startup
+function loadPreferences() {
+    const savedExam = localStorage.getItem('prefExam');
+    const savedSubject = localStorage.getItem('prefSubject');
+
+    if (savedExam) {
+        const examSelect = document.getElementById("qExam");
+        examSelect.value = savedExam;
+        
+        // Trigger subject update manually to populate the second dropdown
+        window.updateSubjects();
+
+        if (savedSubject) {
+            document.getElementById("qSubject").value = savedSubject;
+        }
+    }
+}
+
 // --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -42,6 +69,10 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('dashboard-section').classList.remove('hidden');
         document.getElementById('logoutBtn').style.display = 'block';
+        
+        // Load User's last choices
+        loadPreferences();
+        
         loadMyQuestions(user.uid);
     } else {
         currentUser = null;
@@ -124,8 +155,8 @@ window.saveQuestion = async () => {
         }
 
         const data = {
-            exam: qExam,         // Save Exam
-            subject: qSubject,   // Save Subject
+            exam: qExam,
+            subject: qSubject,
             question: qText,
             options: {
                 A: document.getElementById('opA').value,
@@ -168,19 +199,21 @@ function loadMyQuestions(uid) {
     
     onSnapshot(q, (snapshot) => {
         qList.innerHTML = "";
-        if(snapshot.empty) { qList.innerHTML = "<p>No questions added yet.</p>"; return; }
+        if(snapshot.empty) { qList.innerHTML = "<p style='text-align:center; color:#777;'>No questions added yet.</p>"; return; }
         
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = "q-item";
             div.innerHTML = `
-                <div style="font-size:0.85em; color:#555; font-weight:bold;">${data.exam} &bull; ${data.subject}</div>
-                <div style="margin-bottom:5px;">${data.question}</div>
+                <div style="font-size:0.85em; color:var(--primary); font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
+                    ${data.exam} &bull; ${data.subject}
+                </div>
+                <div style="margin-bottom:8px; font-size:1.05em;">${data.question}</div>
                 ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
-                <div style="margin-top:10px;">
-                    <button class="secondary" style="width:auto; padding:6px 12px;" onclick="editQ('${docSnap.id}')">✏ Edit</button>
-                    <button class="delete" style="width:auto; padding:6px 12px;" onclick="deleteQ('${docSnap.id}')">🗑 Delete</button>
+                <div style="margin-top:12px;">
+                    <button class="secondary" style="padding:6px 12px; cursor:pointer;" onclick="editQ('${docSnap.id}')">✏ Edit</button>
+                    <button class="delete" style="padding:6px 12px; cursor:pointer; margin-left:5px;" onclick="deleteQ('${docSnap.id}')">🗑 Delete</button>
                 </div>
             `;
             div.dataset.json = JSON.stringify(data);
@@ -200,11 +233,22 @@ window.editQ = (id) => {
 
     document.getElementById('editId').value = id;
     
-    // Set Exam first
+    // We don't overwrite the preferences during edit, we just set the UI
     document.getElementById('qExam').value = data.exam;
-    // Trigger update to populate subjects for this exam
-    updateSubjects();
-    // Now set Subject
+    // We need to populate subjects for the exam being edited
+    // But we don't want to save this to 'preference' just because they clicked edit
+    // So we manually populate dropdown without calling the save function
+    const subjectSelect = document.getElementById("qSubject");
+    subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
+    if (data.exam && examSubjects[data.exam]) {
+        examSubjects[data.exam].forEach(sub => {
+            const opt = document.createElement("option");
+            opt.value = sub;
+            opt.innerText = sub;
+            subjectSelect.appendChild(opt);
+        });
+    }
+    
     document.getElementById('qSubject').value = data.subject;
 
     document.getElementById('qText').value = data.question;
@@ -225,7 +269,8 @@ window.editQ = (id) => {
 };
 
 window.cancelEdit = () => {
-    resetForm();
+    // When canceling, we revert to the user's PREFERRED exam/subject (the sticky ones)
+    resetForm(); 
     document.getElementById('editId').value = "";
     document.getElementById('saveBtn').innerText = "Submit Question";
     document.getElementById('cancelBtn').classList.add('hidden');
@@ -233,8 +278,10 @@ window.cancelEdit = () => {
 };
 
 function resetForm() {
-    document.getElementById('qExam').value = "";
-    document.getElementById('qSubject').innerHTML = '<option value="" disabled selected>-- Select Exam First --</option>';
+    // DO NOT CLEAR EXAM OR SUBJECT
+    // Instead, reload them from preferences to be safe
+    loadPreferences();
+
     document.getElementById('qText').value = "";
     document.getElementById('qImage').value = "";
     document.getElementById('opA').value = "";
