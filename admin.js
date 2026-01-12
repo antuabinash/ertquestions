@@ -32,6 +32,7 @@ const compressImage = (file) => {
     });
 };
 
+// 1. Fetch Data
 onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
     allData = [];
     snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
@@ -83,6 +84,15 @@ function renderTable(data) {
     if(data.length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; return; }
     
     data.forEach(item => {
+        // Check Verification Status
+        const isVerified = item.verified === true;
+        const verifiedBadge = isVerified ? `<span class="badge-verified">✅ Verified</span><br>` : '';
+
+        // Button Logic: If verified, show "Undo". If not, show "Verify"
+        const verifyBtn = isVerified 
+            ? `<button class="btn-unverify" onclick="toggleVerify('${item.id}', false)" title="Un-verify">↩</button>`
+            : `<button class="btn-verify" onclick="toggleVerify('${item.id}', true)">✅ Verify</button>`;
+
         tbody.innerHTML += `
             <tr>
                 <td>
@@ -91,6 +101,7 @@ function renderTable(data) {
                     <small style="color:gray">${item.subject}</small>
                 </td>
                 <td>
+                    ${verifiedBadge}
                     <div id="disp-q-${item.id}">
                         ${item.question}
                         ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
@@ -131,12 +142,25 @@ function renderTable(data) {
                     </div>
                 </td>
                 <td>
-                    <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏ Edit</button>
-                    <button class="btn-delete" onclick="deleteQ('${item.id}')">🗑</button>
+                    <div class="action-container">
+                        ${verifyBtn}
+                        <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏</button>
+                        <button class="btn-delete" onclick="deleteQ('${item.id}')">🗑</button>
+                    </div>
                 </td>
             </tr>
         `;
     });
+}
+
+// --- NEW VERIFY FUNCTION ---
+window.toggleVerify = async (id, status) => {
+    try {
+        await updateDoc(doc(db, "questions", id), { verified: status });
+        // No alert needed, it updates instantly via onSnapshot
+    } catch (e) {
+        alert("Error updating status: " + e.message);
+    }
 }
 
 window.deleteQ = async (id) => {
