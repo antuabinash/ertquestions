@@ -3,38 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Portal</title>
+    <title>eRT Odisha - Teacher Portal</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f0f2f5; }
+        /* --- MODERN DARK BLUE & RED THEME --- */
+        :root {
+            --primary: #0d47a1; /* Dark Blue */
+            --primary-hover: #002171;
+            --accent: #d32f2f; /* Red */
+            --accent-hover: #9a0007;
+            --bg-color: #f4f6f8;
+            --text-dark: #333;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: var(--bg-color); color: var(--text-dark); }
         
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .top-bar h2 { margin: 0; color: #333; }
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: none; }
+        /* Header */
+        .top-bar { 
+            background: var(--primary); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            box-shadow: var(--card-shadow);
+            color: white;
+        }
+        .top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
         
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select, textarea, button { width: 100%; margin: 8px 0; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
-        
-        button#saveBtn, button#authBtn { background: #4CAF50; color: white; border: none; font-weight: bold; cursor: pointer; }
-        button#saveBtn:hover { opacity: 0.9; }
-        button.secondary { background: #6c757d; color: white; border: none; }
-        button.delete { background: #dc3545; color: white; border: none; }
-        
+        .logout-btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            font-weight: bold;
+            display: none; 
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: var(--accent-hover); }
+
+        /* Cards */
+        .card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: var(--card-shadow); 
+            margin-bottom: 20px; 
+            border-top: 4px solid var(--primary); /* Blue accent on top */
+        }
+
+        h3 { margin-top: 0; color: var(--primary); }
+
+        /* Inputs & Form */
+        input, select, textarea { 
+            width: 100%; 
+            margin: 10px 0; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .section-label { 
+            font-weight: 600; 
+            font-size: 0.9em; 
+            margin-top: 15px; 
+            display: block; 
+            color: #555; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Buttons */
+        button#saveBtn, button#authBtn { 
+            width: 100%;
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 16px;
+            margin-top: 15px;
+            border-radius: 6px;
+            padding: 14px;
+            transition: background 0.2s;
+        }
+        button#saveBtn:hover, button#authBtn:hover { background: var(--primary-hover); }
+
+        /* Secondary & Delete Buttons */
+        button.secondary { background: #546e7a; color: white; border: none; border-radius: 4px; }
+        button.delete { background: var(--accent); color: white; border: none; border-radius: 4px; }
+        button.secondary:hover { background: #37474f; }
+        button.delete:hover { background: var(--accent-hover); }
+
+        /* Helpers */
         .hidden { display: none !important; }
         .q-item { border-bottom: 1px solid #eee; padding: 15px 0; }
-        .q-img-preview { max-width: 150px; display: block; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
+        .q-img-preview { max-width: 150px; display: block; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        .section-label { font-weight: bold; font-size: 0.9em; margin-top: 10px; display: block; color:#555; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
-        <h2>Teacher Portal</h2>
+        <h2>eRT Odisha, Question Maker</h2>
         <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout ➡</button>
     </div>
 
     <div id="auth-section" class="card">
-        <h3 id="auth-title">Please Login</h3>
+        <h3 id="auth-title">Teacher Login</h3>
+        <p style="color:#666; margin-bottom:15px;">Please sign in to continue.</p>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
         
@@ -43,7 +131,7 @@
         </div>
         
         <button onclick="handleAuth()" id="authBtn">Login</button>
-        <p style="text-align:center; font-size:0.9em; cursor:pointer; color:#007bff;" onclick="toggleAuthMode()">
+        <p style="text-align:center; font-size:0.9em; cursor:pointer; color:var(--primary); margin-top:15px; font-weight:bold;" onclick="toggleAuthMode()">
             Switch to Signup / Login
         </p>
     </div>
@@ -73,7 +161,7 @@
             
             <label class="section-label">Image (Optional):</label>
             <input type="file" id="qImage" accept="image/*">
-            <div id="currentImgPreview" style="display:none; font-size:0.8em; color:gray;">(Current image hidden, upload new one to replace)</div>
+            <div id="currentImgPreview" style="display:none; font-size:0.8em; color:var(--primary); margin-top:5px;">(Current image hidden, upload new one to replace)</div>
             
             <input type="text" id="opA" placeholder="Option A">
             <input type="text" id="opB" placeholder="Option B">
@@ -89,7 +177,7 @@
             </select>
             
             <button onclick="saveQuestion()" id="saveBtn">Submit Question</button>
-            <button onclick="cancelEdit()" id="cancelBtn" class="secondary hidden">Cancel Edit</button>
+            <button onclick="cancelEdit()" id="cancelBtn" class="secondary hidden" style="width:100%; margin-top:10px; padding:12px;">Cancel Edit</button>
         </div>
 
         <div class="card">
