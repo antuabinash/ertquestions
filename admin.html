@@ -2,34 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Control Center</title>
+    <title>eRT Odisha - Admin</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #e9ecef; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        .toolbar { display: flex; gap: 20px; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 2px solid #dee2e6; }
-        .filter-group { display: flex; flex-direction: column; }
-        select { padding: 8px; min-width: 160px; border-radius: 4px; border: 1px solid #ced4da; }
-        
-        .btn-dl { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-dl:hover { background: #218838; }
+        /* --- ADMIN DARK BLUE & RED THEME --- */
+        :root {
+            --primary: #0d47a1; /* Dark Blue */
+            --primary-hover: #002171;
+            --accent: #d32f2f; /* Red */
+            --bg-color: #f4f6f8;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; vertical-align: top; }
-        th { background: #343a40; color: white; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); border-top: 5px solid var(--primary); }
         
-        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 2px; background: white; }
-        .edit-box { display: none; margin-top: 10px; background: #fff3cd; padding: 15px; border: 1px solid #ffeeba; border-radius: 5px; }
-        .edit-box input[type="text"], .edit-box textarea, .edit-box select { width: 100%; margin-bottom: 5px; padding: 5px; box-sizing: border-box; }
-        .edit-box label { font-weight: bold; font-size: 0.8em; color: #666; }
-        .edit-btns { margin-top: 10px; }
+        h1 { margin-top: 0; color: var(--primary); font-size: 1.8rem; }
+
+        /* Toolbar */
+        .toolbar { 
+            display: flex; gap: 20px; 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            align-items: center;
+        }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
+        
+        select { padding: 10px; min-width: 180px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+        select:focus { border-color: var(--primary); outline: none; }
+        
+        .btn-dl { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-dl:hover { background: var(--primary-hover); }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; vertical-align: top; }
+        th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* Edit Box */
+        .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
+        .edit-box label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #d84315; }
+        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; }
+        .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
+
+        /* Action Buttons in Table */
+        .btn-edit { background: #546e7a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-delete { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        .btn-edit:hover { background: #37474f; }
+        .btn-delete:hover { background: #b71c1c; }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Admin Control Center</h1>
+        <h1>eRT Odisha, Question Maker - Admin Panel</h1>
         
         <div class="toolbar">
             <div class="filter-group">
