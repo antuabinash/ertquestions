@@ -3,14 +3,13 @@ import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy }
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const pass = prompt("Enter Admin Password:");
-if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
+if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:#d32f2f;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
 
 let allData = [];
 const examSelect = document.getElementById('filterExam');
 const teacherSelect = document.getElementById('filterTeacher');
 const subjectSelect = document.getElementById('filterSubject');
 
-// Helper: Image Compression for Admin
 const compressImage = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -33,24 +32,19 @@ const compressImage = (file) => {
     });
 };
 
-// 1. Fetch Data
 onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
     allData = [];
     snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
     updateDropdowns();
 });
 
-// 2. Populate Filters
 function updateDropdowns() {
-    // Unique Exams
     const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
     populateSelect(examSelect, exams, "All Exams");
 
-    // Unique Teachers
     const teachers = [...new Set(allData.map(d => d.teacher))];
     populateSelect(teacherSelect, teachers, "All Teachers");
 
-    // Unique Subjects
     const subjects = [...new Set(allData.map(d => d.subject))];
     populateSelect(subjectSelect, subjects, "All Subjects");
 
@@ -69,7 +63,6 @@ function populateSelect(el, items, defaultText) {
     });
 }
 
-// 3. Filter Logic
 window.applyFilters = () => {
     const e = examSelect.value;
     const t = teacherSelect.value;
@@ -83,18 +76,17 @@ window.applyFilters = () => {
     renderTable(filtered);
 }
 
-// 4. Render Table
 function renderTable(data) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
     
-    if(data.length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>No questions found.</td></tr>"; return; }
+    if(data.length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; return; }
     
     data.forEach(item => {
         tbody.innerHTML += `
             <tr>
                 <td>
-                    <span style="color:#007bff; font-weight:bold;">${item.exam || 'No Exam'}</span><br>
+                    <span style="color:#0d47a1; font-weight:bold; text-transform:uppercase;">${item.exam || 'No Exam'}</span><br>
                     <b>${item.teacher}</b><br>
                     <small style="color:gray">${item.subject}</small>
                 </td>
@@ -126,8 +118,8 @@ function renderTable(data) {
                         </select>
 
                         <div class="edit-btns">
-                            <button onclick="saveAdminEdit('${item.id}')" style="background:#28a745; color:white; border:none;">Save</button>
-                            <button onclick="toggleEdit('${item.id}')">Cancel</button>
+                            <button onclick="saveAdminEdit('${item.id}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:bold;">Save</button>
+                            <button onclick="toggleEdit('${item.id}')" style="background:#757575; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
                         </div>
                     </div>
                 </td>
@@ -135,19 +127,18 @@ function renderTable(data) {
                     <div id="disp-ops-${item.id}">
                         A: ${item.options.A}<br>B: ${item.options.B}<br>
                         C: ${item.options.C}<br>D: ${item.options.D}<br>
-                        <strong>Ans: ${item.answer}</strong>
+                        <strong style="color:#d32f2f;">Ans: ${item.answer}</strong>
                     </div>
                 </td>
                 <td>
-                    <button onclick="toggleEdit('${item.id}')">✏ Edit</button>
-                    <button onclick="deleteQ('${item.id}')" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:3px;">🗑</button>
+                    <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏ Edit</button>
+                    <button class="btn-delete" onclick="deleteQ('${item.id}')">🗑</button>
                 </td>
             </tr>
         `;
     });
 }
 
-// 5. Actions
 window.deleteQ = async (id) => {
     if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id));
 }
