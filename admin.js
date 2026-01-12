@@ -3,7 +3,7 @@ import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy }
 from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const pass = prompt("Enter Admin Password:");
-if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:#d32f2f;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
+if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
 
 let allData = [];
 const examSelect = document.getElementById('filterExam');
@@ -48,7 +48,7 @@ function updateDropdowns() {
 
     const subjects = [...new Set(allData.map(d => d.subject))];
     populateSelect(subjectSelect, subjects, "All Subjects");
-
+    
     applyFilters();
 }
 
@@ -84,13 +84,15 @@ function renderTable(data) {
     if(data.length === 0) { tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; return; }
     
     data.forEach(item => {
-        // Check Verification Status
+        // --- BUTTON LOGIC IS HERE ---
         const isVerified = item.verified === true;
-        const verifiedBadge = isVerified ? `<span class="badge-verified">✅ Verified</span><br>` : '';
+        
+        // 1. Badge (Shows above question)
+        const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
 
-        // Button Logic: If verified, show "Undo". If not, show "Verify"
+        // 2. Button (Shows in Action column)
         const verifyBtn = isVerified 
-            ? `<button class="btn-unverify" onclick="toggleVerify('${item.id}', false)" title="Un-verify">↩</button>`
+            ? `<button class="btn-unverify" onclick="toggleVerify('${item.id}', false)" title="Undo Verification">↩ Undo</button>`
             : `<button class="btn-verify" onclick="toggleVerify('${item.id}', true)">✅ Verify</button>`;
 
         tbody.innerHTML += `
@@ -108,18 +110,13 @@ function renderTable(data) {
                     </div>
 
                     <div id="edit-${item.id}" class="edit-box">
-                        <label>Question:</label>
-                        <textarea id="txt-${item.id}" rows="2">${item.question}</textarea>
-                        
-                        <label>New Image:</label>
-                        <input type="file" id="file-${item.id}">
-                        
+                        <label>Question:</label> <textarea id="txt-${item.id}" rows="2">${item.question}</textarea>
+                        <label>New Image:</label> <input type="file" id="file-${item.id}">
                         <label>Options:</label>
                         <input type="text" id="opA-${item.id}" value="${item.options.A}">
                         <input type="text" id="opB-${item.id}" value="${item.options.B}">
                         <input type="text" id="opC-${item.id}" value="${item.options.C}">
                         <input type="text" id="opD-${item.id}" value="${item.options.D}">
-                        
                         <label>Ans:</label>
                         <select id="ans-${item.id}">
                             <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
@@ -127,10 +124,9 @@ function renderTable(data) {
                             <option value="C" ${item.answer === 'C' ? 'selected' : ''}>C</option>
                             <option value="D" ${item.answer === 'D' ? 'selected' : ''}>D</option>
                         </select>
-
                         <div class="edit-btns">
-                            <button onclick="saveAdminEdit('${item.id}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px; font-weight:bold;">Save</button>
-                            <button onclick="toggleEdit('${item.id}')" style="background:#757575; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
+                            <button onclick="saveAdminEdit('${item.id}')" style="background:#0d47a1; color:white; border:none; padding:5px 10px;">Save</button>
+                            <button onclick="toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:5px 10px;">Cancel</button>
                         </div>
                     </div>
                 </td>
@@ -143,8 +139,7 @@ function renderTable(data) {
                 </td>
                 <td>
                     <div class="action-container">
-                        ${verifyBtn}
-                        <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏</button>
+                        ${verifyBtn}  <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏ Edit</button>
                         <button class="btn-delete" onclick="deleteQ('${item.id}')">🗑</button>
                     </div>
                 </td>
@@ -153,13 +148,12 @@ function renderTable(data) {
     });
 }
 
-// --- NEW VERIFY FUNCTION ---
+// --- VERIFY FUNCTION ---
 window.toggleVerify = async (id, status) => {
     try {
         await updateDoc(doc(db, "questions", id), { verified: status });
-        // No alert needed, it updates instantly via onSnapshot
     } catch (e) {
-        alert("Error updating status: " + e.message);
+        alert("Error: " + e.message);
     }
 }
 
@@ -186,7 +180,6 @@ window.toggleEdit = (id) => {
 window.saveAdminEdit = async (id) => {
     const btn = document.querySelector(`#edit-${id} button`);
     btn.innerText = "Saving...";
-    
     try {
         const file = document.getElementById(`file-${id}`).files[0];
         const updates = {
@@ -199,12 +192,10 @@ window.saveAdminEdit = async (id) => {
             },
             answer: document.getElementById(`ans-${id}`).value
         };
-
         if (file) {
             if(file.size > 5 * 1024 * 1024) throw new Error("File too large");
             updates.imageUrl = await compressImage(file);
         }
-
         await updateDoc(doc(db, "questions", id), updates);
         alert("Updated!");
     } catch (e) {
@@ -217,17 +208,15 @@ window.downloadJSON = () => {
     const e = examSelect.value;
     const t = teacherSelect.value;
     const s = subjectSelect.value;
-    
     const dataToDownload = allData.filter(item => {
         return (e === "all" || item.exam === e) &&
                (t === "all" || item.teacher === t) && 
                (s === "all" || item.subject === s);
     });
-
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
     const dl = document.createElement('a');
     dl.setAttribute("href", dataStr);
-    dl.setAttribute("download", `questions_${e}_${s}.json`);
+    dl.setAttribute("download", `questions_export_${Date.now()}.json`);
     document.body.appendChild(dl);
     dl.click();
     dl.remove();
