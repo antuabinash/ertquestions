@@ -16,7 +16,9 @@
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
         .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); border-top: 5px solid var(--primary); }
         
-        h1 { margin-top: 0; color: var(--primary); font-size: 1.8rem; }
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .app-logo { height: 50px; width: 50px; border-radius: 50%; object-fit: cover; }
+        h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
 
         /* Toolbar */
         .toolbar { 
@@ -64,7 +66,6 @@
         .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; }
         .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
 
-        /* Action Buttons in Table */
         .btn-edit { background: #546e7a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         .btn-delete { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
         .btn-edit:hover { background: #37474f; }
@@ -75,7 +76,10 @@
 <body>
 
     <div class="container">
-        <h1>eRT Odisha, Question Maker - Admin Panel</h1>
+        <div class="header">
+            <img src="logo.jpg" alt="Logo" class="app-logo">
+            <h1>eRT Odisha - Admin Panel</h1>
+        </div>
         
         <div class="toolbar">
             <div class="filter-group">
