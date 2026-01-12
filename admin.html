@@ -10,6 +10,7 @@
             --primary-hover: #002171;
             --accent: #d32f2f; /* Red */
             --bg-color: #f4f6f8;
+            --success: #2e7d32; /* Green for Verify */
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -66,10 +67,34 @@
         .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; }
         .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
 
-        .btn-edit { background: #546e7a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-delete { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        /* --- ACTION BUTTONS --- */
+        .action-container { display: flex; gap: 5px; flex-wrap: wrap; }
+        
+        .btn-verify { background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
+        .btn-verify:hover { background: #1b5e20; }
+        
+        .btn-unverify { background: #757575; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
+        .btn-unverify:hover { background: #424242; }
+
+        .btn-edit { background: #546e7a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
         .btn-edit:hover { background: #37474f; }
+        
+        .btn-delete { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
         .btn-delete:hover { background: #b71c1c; }
+
+        /* Verified Badge */
+        .badge-verified {
+            display: inline-block;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
 
     </style>
 </head>
