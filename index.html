@@ -7,19 +7,15 @@
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f0f2f5; }
         
-        /* New Header Style */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .top-bar h2 { margin: 0; color: #333; }
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; display: none; } /* Hidden by default */
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; display: none; }
         
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         input, select, textarea, button { width: 100%; margin: 8px 0; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
         
-        /* Main Action Button */
         button#saveBtn, button#authBtn { background: #4CAF50; color: white; border: none; font-weight: bold; cursor: pointer; }
-        button#saveBtn:hover, button#authBtn:hover { opacity: 0.9; }
-        
-        /* Secondary Buttons */
+        button#saveBtn:hover { opacity: 0.9; }
         button.secondary { background: #6c757d; color: white; border: none; }
         button.delete { background: #dc3545; color: white; border: none; }
         
@@ -27,8 +23,7 @@
         .q-item { border-bottom: 1px solid #eee; padding: 15px 0; }
         .q-img-preview { max-width: 150px; display: block; margin-top: 5px; border-radius: 4px; border: 1px solid #ddd; }
         
-        /* Loading Error Message */
-        .error-msg { color: red; font-size: 0.9em; margin-top: 10px; }
+        .section-label { font-weight: bold; font-size: 0.9em; margin-top: 10px; display: block; color:#555; }
     </style>
 </head>
 <body>
@@ -45,7 +40,6 @@
         
         <div id="signup-fields" class="hidden">
             <input type="text" id="tName" placeholder="Your Full Name">
-            <input type="text" id="tSubject" placeholder="Your Subject (e.g. Math)">
         </div>
         
         <button onclick="handleAuth()" id="authBtn">Login</button>
@@ -59,17 +53,34 @@
             <h3>Add New Question</h3>
             <input type="hidden" id="editId">
             
+            <label class="section-label">1. Select Exam:</label>
+            <select id="qExam" onchange="updateSubjects()">
+                <option value="" disabled selected>-- Choose Exam --</option>
+                <option value="OAV">OAV</option>
+                <option value="NAVODAYA">NAVODAYA</option>
+                <option value="EKALABYA">EKALABYA</option>
+                <option value="PATHANI SAMANTA">PATHANI SAMANTA</option>
+                <option value="NMMS">NMMS</option>
+            </select>
+
+            <label class="section-label">2. Select Subject:</label>
+            <select id="qSubject">
+                <option value="" disabled selected>-- Select Exam First --</option>
+            </select>
+
+            <label class="section-label">3. Question Details:</label>
             <textarea id="qText" placeholder="Type Question Here..." rows="3"></textarea>
             
-            <label style="font-weight:bold; font-size:0.9em;">Image (Optional):</label>
+            <label class="section-label">Image (Optional):</label>
             <input type="file" id="qImage" accept="image/*">
+            <div id="currentImgPreview" style="display:none; font-size:0.8em; color:gray;">(Current image hidden, upload new one to replace)</div>
             
             <input type="text" id="opA" placeholder="Option A">
             <input type="text" id="opB" placeholder="Option B">
             <input type="text" id="opC" placeholder="Option C">
             <input type="text" id="opD" placeholder="Option D">
             
-            <label>Correct Answer:</label>
+            <label class="section-label">4. Correct Answer:</label>
             <select id="correctAns">
                 <option value="A">Option A</option>
                 <option value="B">Option B</option>
