@@ -7,23 +7,46 @@ from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 let isSignup = false;
 let currentUser = null;
 
+// --- EXAM & SUBJECT LOGIC ---
+const examSubjects = {
+    "OAV": ["English", "Math", "Science", "Social Science"],
+    "NAVODAYA": ["Mental Ability", "Math", "Language"],
+    "EKALABYA": ["Mental Ability", "Math", "English"],
+    "PATHANI SAMANTA": ["Math"],
+    "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
+};
+
+// Make this function global so HTML can call it
+window.updateSubjects = () => {
+    const examSelect = document.getElementById("qExam");
+    const subjectSelect = document.getElementById("qSubject");
+    const selectedExam = examSelect.value;
+    
+    // Clear current options
+    subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
+    
+    if (selectedExam && examSubjects[selectedExam]) {
+        examSubjects[selectedExam].forEach(sub => {
+            const opt = document.createElement("option");
+            opt.value = sub;
+            opt.innerText = sub;
+            subjectSelect.appendChild(opt);
+        });
+    }
+};
+
 // --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
-        // Show Dashboard, Hide Auth
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('dashboard-section').classList.remove('hidden');
-        // Show Logout Button in Top Right
         document.getElementById('logoutBtn').style.display = 'block';
-        
         loadMyQuestions(user.uid);
     } else {
         currentUser = null;
-        // Show Auth, Hide Dashboard
         document.getElementById('auth-section').classList.remove('hidden');
         document.getElementById('dashboard-section').classList.add('hidden');
-        // Hide Logout Button
         document.getElementById('logoutBtn').style.display = 'none';
     }
 });
@@ -38,15 +61,12 @@ window.toggleAuthMode = () => {
 window.handleAuth = async () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
-    
     try {
         if (isSignup) {
             const name = document.getElementById('tName').value;
-            const subject = document.getElementById('tSubject').value;
-            if(!name || !subject) throw new Error("Name and Subject are required for signup.");
-            
+            if(!name) throw new Error("Name is required.");
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
-            await updateProfile(cred.user, { displayName: `${name}|${subject}` });
+            await updateProfile(cred.user, { displayName: name });
         } else {
             await signInWithEmailAndPassword(auth, email, pass);
         }
@@ -80,14 +100,18 @@ const compressImage = (file) => {
     });
 };
 
-// --- DATA LOGIC ---
+// --- SAVE QUESTION ---
 window.saveQuestion = async () => {
     const editId = document.getElementById('editId').value;
+    const qExam = document.getElementById('qExam').value;
+    const qSubject = document.getElementById('qSubject').value;
     const qText = document.getElementById('qText').value;
     const file = document.getElementById('qImage').files[0];
     const btn = document.getElementById('saveBtn');
     
-    if(!qText) return alert("Question text is required");
+    if(!qExam) return alert("Please select an Exam.");
+    if(!qSubject) return alert("Please select a Subject.");
+    if(!qText) return alert("Question text is required.");
 
     btn.innerText = "Processing...";
     btn.disabled = true;
@@ -100,6 +124,8 @@ window.saveQuestion = async () => {
         }
 
         const data = {
+            exam: qExam,         // Save Exam
+            subject: qSubject,   // Save Subject
             question: qText,
             options: {
                 A: document.getElementById('opA').value,
@@ -119,12 +145,8 @@ window.saveQuestion = async () => {
             alert("Updated Successfully!");
             cancelEdit();
         } else {
-            if(!currentUser.displayName) throw new Error("Profile error. Please relogin.");
-            const [name, subject] = currentUser.displayName.split('|');
-            data.teacher = name;
-            data.subject = subject;
+            data.teacher = currentUser.displayName;
             data.uid = currentUser.uid;
-            
             await addDoc(collection(db, "questions"), data);
             alert("Added Successfully!");
             resetForm();
@@ -139,27 +161,22 @@ window.saveQuestion = async () => {
     }
 };
 
-// --- FIXED LOADING LOGIC ---
+// --- LOAD QUESTIONS ---
 function loadMyQuestions(uid) {
     const qList = document.getElementById('my-questions-list');
-    
-    // NOTE: This Query requires an Index in Firebase Console!
-    // If it's stuck on "Loading...", check your browser console (F12) for a link to create it.
     const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
     
     onSnapshot(q, (snapshot) => {
         qList.innerHTML = "";
-        if(snapshot.empty) { 
-            qList.innerHTML = "<p>No questions added yet.</p>"; 
-            return; 
-        }
+        if(snapshot.empty) { qList.innerHTML = "<p>No questions added yet.</p>"; return; }
         
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const div = document.createElement('div');
             div.className = "q-item";
             div.innerHTML = `
-                <div style="font-weight:bold; margin-bottom:5px;">${data.question}</div>
+                <div style="font-size:0.85em; color:#555; font-weight:bold;">${data.exam} &bull; ${data.subject}</div>
+                <div style="margin-bottom:5px;">${data.question}</div>
                 ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
                 <div style="margin-top:10px;">
                     <button class="secondary" style="width:auto; padding:6px 12px;" onclick="editQ('${docSnap.id}')">✏ Edit</button>
@@ -170,20 +187,11 @@ function loadMyQuestions(uid) {
             div.dataset.id = docSnap.id;
             qList.appendChild(div);
         });
-    }, (error) => {
-        // This will print the error in the box instead of "Loading..."
-        console.error("Data Load Error:", error);
-        qList.innerHTML = `<div class="error-msg">
-            <strong>Error Loading Data:</strong> ${error.message}<br><br>
-            <em>If the error says "requires an index", open Browser Console (F12) and click the link provided by Firebase.</em>
-        </div>`;
     });
 }
 
 window.deleteQ = async (id) => {
-    if(confirm("Are you sure you want to delete this question?")) {
-        await deleteDoc(doc(db, "questions", id));
-    }
+    if(confirm("Delete this question?")) await deleteDoc(doc(db, "questions", id));
 };
 
 window.editQ = (id) => {
@@ -191,6 +199,14 @@ window.editQ = (id) => {
     const data = JSON.parse(el.dataset.json);
 
     document.getElementById('editId').value = id;
+    
+    // Set Exam first
+    document.getElementById('qExam').value = data.exam;
+    // Trigger update to populate subjects for this exam
+    updateSubjects();
+    // Now set Subject
+    document.getElementById('qSubject').value = data.subject;
+
     document.getElementById('qText').value = data.question;
     document.getElementById('opA').value = data.options.A;
     document.getElementById('opB').value = data.options.B;
@@ -198,6 +214,11 @@ window.editQ = (id) => {
     document.getElementById('opD').value = data.options.D;
     document.getElementById('correctAns').value = data.answer;
     
+    if(data.imageUrl) {
+        document.getElementById('currentImgPreview').style.display = 'block';
+        document.getElementById('currentImgPreview').innerHTML = `<img src="${data.imageUrl}" style="height:50px;"> <br> Upload new to replace`;
+    }
+
     document.getElementById('saveBtn').innerText = "Update Question";
     document.getElementById('cancelBtn').classList.remove('hidden');
     document.querySelector('.card').scrollIntoView({behavior: 'smooth'});
@@ -208,9 +229,12 @@ window.cancelEdit = () => {
     document.getElementById('editId').value = "";
     document.getElementById('saveBtn').innerText = "Submit Question";
     document.getElementById('cancelBtn').classList.add('hidden');
+    document.getElementById('currentImgPreview').style.display = 'none';
 };
 
 function resetForm() {
+    document.getElementById('qExam').value = "";
+    document.getElementById('qSubject').innerHTML = '<option value="" disabled selected>-- Select Exam First --</option>';
     document.getElementById('qText').value = "";
     document.getElementById('qImage').value = "";
     document.getElementById('opA').value = "";
