@@ -101,7 +101,7 @@
                     <option value="all">All Subjects</option>
                 </select>
             </div>
-            <button class="btn-dl" onclick="downloadJSON()">⬇ Download JSON</button>
+            <button class="btn-dl" onclick="downloadJSON()">⬇ Download Verified JSON</button>
         </div>
 
         <table>
@@ -129,13 +129,9 @@
         import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // --- 1. ENABLE FAST CACHE (This fixes slow loading) ---
+        // Enable Fast Loading (Cache)
         enableIndexedDbPersistence(db).catch((err) => {
-            if (err.code == 'failed-precondition') {
-                console.log('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
-            } else if (err.code == 'unimplemented') {
-                console.log('The current browser does not support all of the features required to enable persistence');
-            }
+            console.log("Persistence suppressed (Likely multiple tabs open).");
         });
 
         // 2. PASSWORD CHECK
@@ -155,14 +151,11 @@
         onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
             allData = [];
             snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
-            
-            // Only update dropdowns if it's the first load or filters need refreshing
             updateDropdowns();
         });
 
         // 4. DROPDOWNS
         function updateDropdowns() {
-            // Check if user has selected something, so we don't reset it
             const currentExam = examSelect.value;
             const currentTeacher = teacherSelect.value;
             const currentSubject = subjectSelect.value;
@@ -342,19 +335,36 @@
             }
         }
 
+        // --- UPDATED DOWNLOAD FUNCTION ---
         window.downloadJSON = () => {
             const e = examSelect.value;
             const t = teacherSelect.value;
             const s = subjectSelect.value;
+            
+            // 1. FILTER: Must match dropdowns AND be Verified
             const dataToDownload = allData.filter(item => {
-                return (e === "all" || item.exam === e) &&
-                       (t === "all" || item.teacher === t) && 
-                       (s === "all" || item.subject === s);
+                const matchesFilters = (e === "all" || item.exam === e) &&
+                                       (t === "all" || item.teacher === t) && 
+                                       (s === "all" || item.subject === s);
+                return matchesFilters && item.verified === true; // Only Verified!
             });
+
+            if (dataToDownload.length === 0) {
+                return alert("No VERIFIED questions found matching your filters.");
+            }
+
+            // 2. NAME GENERATION
+            // Clean names to be file-system safe (replace spaces with underscores if you prefer, but spaces are fine)
+            const fTeacher = t === "all" ? "AllTeachers" : t;
+            const fSubject = s === "all" ? "AllSubjects" : s;
+            
+            // Format: Teacher_Subject_Timestamp.json
+            const filename = `${fTeacher}_${fSubject}_${Date.now()}.json`;
+
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
             const dl = document.createElement('a');
             dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", `questions_export_${Date.now()}.json`);
+            dl.setAttribute("download", filename);
             document.body.appendChild(dl);
             dl.click();
             dl.remove();
