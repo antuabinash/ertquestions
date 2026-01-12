@@ -6,11 +6,11 @@
     <style>
         /* --- ADMIN THEME --- */
         :root {
-            --primary: #0d47a1; /* Dark Blue */
+            --primary: #0d47a1;
             --primary-hover: #002171;
-            --accent: #d32f2f; /* Red */
+            --accent: #d32f2f;
             --bg-color: #f4f6f8;
-            --success: #2e7d32; /* Green */
+            --success: #2e7d32;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -21,25 +21,13 @@
         .app-logo { height: 50px; width: 50px; border-radius: 50%; object-fit: cover; }
         h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
 
-        /* Toolbar */
-        .toolbar { 
-            display: flex; gap: 20px; 
-            background: #fff; 
-            padding: 20px; 
-            border-radius: 8px; 
-            margin-bottom: 25px; 
-            flex-wrap: wrap; 
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            align-items: center;
-        }
+        .toolbar { display: flex; gap: 20px; background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 25px; flex-wrap: wrap; border: 1px solid #e0e0e0; align-items: center; }
         .filter-group { display: flex; flex-direction: column; }
         .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
         select { padding: 10px; min-width: 180px; border-radius: 6px; border: 1px solid #ccc; }
         
         .btn-dl { background: var(--primary); color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto;}
         
-        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
         th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; vertical-align: top; }
         th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
@@ -49,24 +37,17 @@
         
         /* Edit Box */
         .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
-        .edit-box label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #d84315; }
-        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; }
+        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; display:block; margin-bottom: 10px; }
         .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
 
-        /* --- ACTION BUTTONS & BADGES --- */
-        .action-container { display: flex; gap: 5px; flex-wrap: wrap; }
+        /* --- ACTION BUTTONS --- */
+        .action-container { display: flex; flex-direction: column; gap: 8px; }
         
-        /* Green Verify Button */
-        .btn-verify { background: var(--success); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em; font-weight: bold; }
-        .btn-verify:hover { background: #1b5e20; }
-        
-        /* Grey Undo Button */
-        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
-        
-        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
-        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center; }
+        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
 
-        /* Verified Badge */
         .badge-verified {
             display: inline-block;
             background-color: #e8f5e9;
@@ -79,6 +60,18 @@
             text-transform: uppercase;
             margin-bottom: 8px;
         }
+
+        /* Loading Spinner */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -115,14 +108,257 @@
             <thead>
                 <tr>
                     <th style="width:20%">Info</th>
-                    <th style="width:35%">Question</th>
-                    <th style="width:20%">Answer</th>
-                    <th style="width:25%">Actions</th> </tr>
+                    <th style="width:40%">Question</th>
+                    <th style="width:25%">Answer</th>
+                    <th style="width:15%">Actions</th>
+                </tr>
             </thead>
-            <tbody id="tableBody"></tbody>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="4" style="text-align:center; padding:40px;">
+                        <div class="loader"></div>
+                        <p style="margin-top:10px; color:#666;">Loading questions...</p>
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 
-    <script type="module" src="admin.js"></script>
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, enableIndexedDbPersistence } 
+        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // --- 1. ENABLE FAST CACHE (This fixes slow loading) ---
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') {
+                console.log('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
+            } else if (err.code == 'unimplemented') {
+                console.log('The current browser does not support all of the features required to enable persistence');
+            }
+        });
+
+        // 2. PASSWORD CHECK
+        const pass = prompt("Enter Admin Password:");
+        if(pass !== "admin123") { 
+            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; 
+            throw new Error("Stop"); 
+        }
+
+        let allData = [];
+        const examSelect = document.getElementById('filterExam');
+        const teacherSelect = document.getElementById('filterTeacher');
+        const subjectSelect = document.getElementById('filterSubject');
+        const tableBody = document.getElementById('tableBody');
+
+        // 3. FETCH DATA
+        onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
+            allData = [];
+            snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
+            
+            // Only update dropdowns if it's the first load or filters need refreshing
+            updateDropdowns();
+        });
+
+        // 4. DROPDOWNS
+        function updateDropdowns() {
+            // Check if user has selected something, so we don't reset it
+            const currentExam = examSelect.value;
+            const currentTeacher = teacherSelect.value;
+            const currentSubject = subjectSelect.value;
+
+            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
+            populateSelect(examSelect, exams, "All Exams", currentExam);
+
+            const teachers = [...new Set(allData.map(d => d.teacher))];
+            populateSelect(teacherSelect, teachers, "All Teachers", currentTeacher);
+
+            const subjects = [...new Set(allData.map(d => d.subject))];
+            populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
+            
+            applyFilters();
+        }
+
+        function populateSelect(el, items, defaultText, selectedValue) {
+            el.innerHTML = `<option value="all">${defaultText}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item; 
+                opt.innerText = item;
+                if(item === selectedValue) opt.selected = true;
+                el.appendChild(opt);
+            });
+        }
+
+        // 5. FILTER
+        window.applyFilters = () => {
+            const e = examSelect.value;
+            const t = teacherSelect.value;
+            const s = subjectSelect.value;
+            
+            const filtered = allData.filter(item => {
+                return (e === "all" || item.exam === e) &&
+                       (t === "all" || item.teacher === t) && 
+                       (s === "all" || item.subject === s);
+            });
+            renderTable(filtered);
+        }
+
+        // 6. RENDER TABLE
+        function renderTable(data) {
+            tableBody.innerHTML = "";
+            
+            if(data.length === 0) { 
+                tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; 
+                return; 
+            }
+            
+            data.forEach(item => {
+                const isVerified = item.verified === true;
+                const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
+                
+                const verifyBtn = isVerified 
+                    ? `<button class="btn-unverify" onclick="window.toggleVerify('${item.id}', false)">↩ Undo</button>`
+                    : `<button class="btn-verify" onclick="window.toggleVerify('${item.id}', true)">✅ Verify</button>`;
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>
+                            <span style="color:#0d47a1; font-weight:bold; text-transform:uppercase;">${item.exam || 'No Exam'}</span><br>
+                            <b>${item.teacher}</b><br>
+                            <small style="color:gray">${item.subject}</small>
+                        </td>
+                        <td>
+                            ${verifiedBadge}
+                            <div id="disp-q-${item.id}">
+                                ${item.question}
+                                ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
+                            </div>
+                            <div id="edit-${item.id}" class="edit-box">
+                                <label>Question:</label> <textarea id="txt-${item.id}" rows="2">${item.question}</textarea>
+                                <label>New Image:</label> <input type="file" id="file-${item.id}">
+                                <label>Options:</label>
+                                <input type="text" id="opA-${item.id}" value="${item.options.A}" placeholder="A">
+                                <input type="text" id="opB-${item.id}" value="${item.options.B}" placeholder="B">
+                                <input type="text" id="opC-${item.id}" value="${item.options.C}" placeholder="C">
+                                <input type="text" id="opD-${item.id}" value="${item.options.D}" placeholder="D">
+                                <label>Ans:</label>
+                                <select id="ans-${item.id}">
+                                    <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
+                                    <option value="B" ${item.answer === 'B' ? 'selected' : ''}>B</option>
+                                    <option value="C" ${item.answer === 'C' ? 'selected' : ''}>C</option>
+                                    <option value="D" ${item.answer === 'D' ? 'selected' : ''}>D</option>
+                                </select>
+                                <div class="edit-btns">
+                                    <button onclick="window.saveAdminEdit('${item.id}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
+                                    <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div id="disp-ops-${item.id}">
+                                A: ${item.options.A}<br>B: ${item.options.B}<br>
+                                C: ${item.options.C}<br>D: ${item.options.D}<br>
+                                <strong style="color:#d32f2f;">Ans: ${item.answer}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-container">
+                                ${verifyBtn}
+                                <button class="btn-edit" onclick="window.toggleEdit('${item.id}')">✏ Edit</button>
+                                <button class="btn-delete" onclick="window.deleteQ('${item.id}')">🗑 Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 7. GLOBAL FUNCTIONS
+        window.toggleVerify = async (id, status) => {
+            try { await updateDoc(doc(db, "questions", id), { verified: status }); } 
+            catch (e) { alert("Error: " + e.message); }
+        }
+
+        window.deleteQ = async (id) => {
+            if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id));
+        }
+
+        window.toggleEdit = (id) => {
+            const box = document.getElementById(`edit-${id}`);
+            const dispQ = document.getElementById(`disp-q-${id}`);
+            const dispOps = document.getElementById(`disp-ops-${id}`);
+            if (box.style.display === "block") {
+                box.style.display = "none";
+                dispQ.style.display = "block";
+                dispOps.style.visibility = "visible";
+            } else {
+                box.style.display = "block";
+                dispQ.style.display = "none";
+                dispOps.style.visibility = "hidden";
+            }
+        }
+
+        window.saveAdminEdit = async (id) => {
+            const btn = document.querySelector(`#edit-${id} button`);
+            btn.innerText = "Saving...";
+            try {
+                const file = document.getElementById(`file-${id}`).files[0];
+                const updates = {
+                    question: document.getElementById(`txt-${id}`).value,
+                    options: {
+                        A: document.getElementById(`opA-${id}`).value,
+                        B: document.getElementById(`opB-${id}`).value,
+                        C: document.getElementById(`opC-${id}`).value,
+                        D: document.getElementById(`opD-${id}`).value,
+                    },
+                    answer: document.getElementById(`ans-${id}`).value
+                };
+                if (file) {
+                    if(file.size > 5 * 1024 * 1024) throw new Error("File too large");
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = async (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = async () => {
+                            const canvas = document.createElement('canvas');
+                            const scale = 600 / img.width;
+                            canvas.width = 600;
+                            canvas.height = img.height * scale;
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            updates.imageUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            await updateDoc(doc(db, "questions", id), updates);
+                            alert("Updated!");
+                        }
+                    }
+                } else {
+                    await updateDoc(doc(db, "questions", id), updates);
+                    alert("Updated!");
+                }
+            } catch (e) {
+                alert("Error: " + e.message);
+                btn.innerText = "Save";
+            }
+        }
+
+        window.downloadJSON = () => {
+            const e = examSelect.value;
+            const t = teacherSelect.value;
+            const s = subjectSelect.value;
+            const dataToDownload = allData.filter(item => {
+                return (e === "all" || item.exam === e) &&
+                       (t === "all" || item.teacher === t) && 
+                       (s === "all" || item.subject === s);
+            });
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", `questions_export_${Date.now()}.json`);
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        }
+    </script>
 </body>
 </html>
