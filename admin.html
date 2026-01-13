@@ -134,7 +134,6 @@
             console.log("Persistence suppressed (Likely multiple tabs open).");
         });
 
-        // 2. PASSWORD CHECK
         const pass = prompt("Enter Admin Password:");
         if(pass !== "admin123") { 
             document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; 
@@ -147,14 +146,12 @@
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
 
-        // 3. FETCH DATA
         onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
             allData = [];
             snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
             updateDropdowns();
         });
 
-        // 4. DROPDOWNS
         function updateDropdowns() {
             const currentExam = examSelect.value;
             const currentTeacher = teacherSelect.value;
@@ -183,7 +180,6 @@
             });
         }
 
-        // 5. FILTER
         window.applyFilters = () => {
             const e = examSelect.value;
             const t = teacherSelect.value;
@@ -197,7 +193,6 @@
             renderTable(filtered);
         }
 
-        // 6. RENDER TABLE
         function renderTable(data) {
             tableBody.innerHTML = "";
             
@@ -267,14 +262,16 @@
             });
         }
 
-        // 7. GLOBAL FUNCTIONS
         window.toggleVerify = async (id, status) => {
             try { await updateDoc(doc(db, "questions", id), { verified: status }); } 
             catch (e) { alert("Error: " + e.message); }
         }
 
+        // --- CONFIRMATION DIALOG ENSURED ---
         window.deleteQ = async (id) => {
-            if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id));
+            if(confirm("Are you sure you want to permanently delete this question?")) {
+                await deleteDoc(doc(db, "questions", id));
+            }
         }
 
         window.toggleEdit = (id) => {
@@ -335,30 +332,25 @@
             }
         }
 
-        // --- UPDATED DOWNLOAD FUNCTION ---
         window.downloadJSON = () => {
             const e = examSelect.value;
             const t = teacherSelect.value;
             const s = subjectSelect.value;
             
-            // 1. FILTER: Must match dropdowns AND be Verified
+            // FILTER ONLY VERIFIED QUESTIONS
             const dataToDownload = allData.filter(item => {
                 const matchesFilters = (e === "all" || item.exam === e) &&
                                        (t === "all" || item.teacher === t) && 
                                        (s === "all" || item.subject === s);
-                return matchesFilters && item.verified === true; // Only Verified!
+                return matchesFilters && item.verified === true; 
             });
 
             if (dataToDownload.length === 0) {
                 return alert("No VERIFIED questions found matching your filters.");
             }
 
-            // 2. NAME GENERATION
-            // Clean names to be file-system safe (replace spaces with underscores if you prefer, but spaces are fine)
             const fTeacher = t === "all" ? "AllTeachers" : t;
             const fSubject = s === "all" ? "AllSubjects" : s;
-            
-            // Format: Teacher_Subject_Timestamp.json
             const filename = `${fTeacher}_${fSubject}_${Date.now()}.json`;
 
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
