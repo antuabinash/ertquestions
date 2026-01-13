@@ -7,7 +7,6 @@ from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 let isSignup = false;
 let currentUser = null;
 
-// --- EXAM & SUBJECT LOGIC ---
 const examSubjects = {
     "OAV": ["English", "Math", "Science", "Social Science"],
     "NAVODAYA": ["Mental Ability", "Math", "Language"],
@@ -16,16 +15,13 @@ const examSubjects = {
     "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
 };
 
-// 1. Update Subjects & Save Exam Preference
 window.updateSubjects = () => {
     const examSelect = document.getElementById("qExam");
     const subjectSelect = document.getElementById("qSubject");
     const selectedExam = examSelect.value;
     
-    // Save Exam to Memory
     localStorage.setItem('prefExam', selectedExam);
 
-    // Clear Subject options
     subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
     
     if (selectedExam && examSubjects[selectedExam]) {
@@ -38,13 +34,11 @@ window.updateSubjects = () => {
     }
 };
 
-// 2. Save Subject Preference
 window.saveSubjectPreference = () => {
     const sub = document.getElementById("qSubject").value;
     localStorage.setItem('prefSubject', sub);
 }
 
-// 3. Load Preferences on Startup
 function loadPreferences() {
     const savedExam = localStorage.getItem('prefExam');
     const savedSubject = localStorage.getItem('prefSubject');
@@ -52,27 +46,20 @@ function loadPreferences() {
     if (savedExam) {
         const examSelect = document.getElementById("qExam");
         examSelect.value = savedExam;
-        
-        // Trigger subject update manually to populate the second dropdown
         window.updateSubjects();
-
         if (savedSubject) {
             document.getElementById("qSubject").value = savedSubject;
         }
     }
 }
 
-// --- AUTH LOGIC ---
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUser = user;
         document.getElementById('auth-section').classList.add('hidden');
         document.getElementById('dashboard-section').classList.remove('hidden');
         document.getElementById('logoutBtn').style.display = 'block';
-        
-        // Load User's last choices
         loadPreferences();
-        
         loadMyQuestions(user.uid);
     } else {
         currentUser = null;
@@ -108,7 +95,6 @@ window.handleAuth = async () => {
 
 window.logout = () => signOut(auth);
 
-// --- IMAGE COMPRESSION ---
 const compressImage = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -131,7 +117,6 @@ const compressImage = (file) => {
     });
 };
 
-// --- SAVE QUESTION ---
 window.saveQuestion = async () => {
     const editId = document.getElementById('editId').value;
     const qExam = document.getElementById('qExam').value;
@@ -192,7 +177,6 @@ window.saveQuestion = async () => {
     }
 };
 
-// --- LOAD QUESTIONS ---
 function loadMyQuestions(uid) {
     const qList = document.getElementById('my-questions-list');
     const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
@@ -203,11 +187,18 @@ function loadMyQuestions(uid) {
         
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
+            
+            // --- NEW: VERIFIED CHECK ---
+            const verifiedBadge = data.verified === true 
+                ? `<span class="verified-badge-teacher">✅ Verified</span>` 
+                : '';
+
             const div = document.createElement('div');
             div.className = "q-item";
             div.innerHTML = `
                 <div style="font-size:0.85em; color:var(--primary); font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
-                    ${data.exam} &bull; ${data.subject}
+                    ${data.exam} &bull; ${data.subject} 
+                    ${verifiedBadge}
                 </div>
                 <div style="margin-bottom:8px; font-size:1.05em;">${data.question}</div>
                 ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
@@ -223,8 +214,12 @@ function loadMyQuestions(uid) {
     });
 }
 
+// --- CONFIRMATION DIALOG ENSURED ---
 window.deleteQ = async (id) => {
-    if(confirm("Delete this question?")) await deleteDoc(doc(db, "questions", id));
+    // This pops up the box asking Yes/No
+    if(confirm("Are you sure you want to delete this question? This cannot be undone.")) {
+        await deleteDoc(doc(db, "questions", id));
+    }
 };
 
 window.editQ = (id) => {
@@ -232,12 +227,9 @@ window.editQ = (id) => {
     const data = JSON.parse(el.dataset.json);
 
     document.getElementById('editId').value = id;
-    
-    // We don't overwrite the preferences during edit, we just set the UI
     document.getElementById('qExam').value = data.exam;
-    // We need to populate subjects for the exam being edited
-    // But we don't want to save this to 'preference' just because they clicked edit
-    // So we manually populate dropdown without calling the save function
+    
+    // We update subjects dropdown based on exam so the correct subject can be selected
     const subjectSelect = document.getElementById("qSubject");
     subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
     if (data.exam && examSubjects[data.exam]) {
@@ -250,7 +242,6 @@ window.editQ = (id) => {
     }
     
     document.getElementById('qSubject').value = data.subject;
-
     document.getElementById('qText').value = data.question;
     document.getElementById('opA').value = data.options.A;
     document.getElementById('opB').value = data.options.B;
@@ -269,7 +260,6 @@ window.editQ = (id) => {
 };
 
 window.cancelEdit = () => {
-    // When canceling, we revert to the user's PREFERRED exam/subject (the sticky ones)
     resetForm(); 
     document.getElementById('editId').value = "";
     document.getElementById('saveBtn').innerText = "Submit Question";
@@ -278,10 +268,7 @@ window.cancelEdit = () => {
 };
 
 function resetForm() {
-    // DO NOT CLEAR EXAM OR SUBJECT
-    // Instead, reload them from preferences to be safe
     loadPreferences();
-
     document.getElementById('qText').value = "";
     document.getElementById('qImage').value = "";
     document.getElementById('opA').value = "";
