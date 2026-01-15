@@ -17,7 +17,7 @@
             --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 700px; margin: auto; background-color: var(--bg-color); color: var(--text-main); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 700px; margin: auto; background-color: var(--bg-color); color: var(--text-main); user-select: none; }
 
         /* --- HEADER --- */
         .top-bar { 
@@ -36,30 +36,36 @@
         .sub-text { font-size: 0.75em; font-weight: 400; opacity: 0.9; display: block; text-transform: uppercase; letter-spacing: 1px;}
 
         /* --- PROGRESS BAR --- */
-        .progress-container {
+        .quiz-status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .progress-text { font-weight: bold; color: var(--primary); font-size: 0.9rem; }
+        
+        .progress-track {
             background: #e0e0e0;
             border-radius: 10px;
-            height: 10px;
-            width: 100%;
-            margin-bottom: 20px;
+            height: 12px;
+            flex-grow: 1;
+            margin-left: 15px;
             overflow: hidden;
-            display: none; /* Hidden until quiz starts */
+            position: relative;
         }
         .progress-fill {
             height: 100%;
-            background: var(--accent);
+            background: linear-gradient(90deg, var(--primary) 0%, #1976d2 100%);
             width: 0%;
-            transition: width 0.3s ease;
-        }
-        .question-counter {
-            text-align: right;
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 5px;
-            display: none;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
         }
 
-        /* --- TILES (Exams/Subjects) --- */
+        /* --- TILES --- */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .tile {
             background: white;
@@ -80,7 +86,7 @@
         /* --- QUIZ SLIDE --- */
         .quiz-slide {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 16px;
             box-shadow: var(--card-shadow);
             animation: slideIn 0.3s ease-out;
@@ -97,11 +103,11 @@
         
         .opt-btn {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
             border: 2px solid #e0e0e0;
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             text-align: left;
             font-size: 1rem;
@@ -110,8 +116,6 @@
             position: relative;
         }
         .opt-btn:hover { background-color: #f9f9f9; border-color: #bbb; }
-        
-        /* States */
         .opt-btn.correct { background-color: #e8f5e9 !important; border-color: var(--correct) !important; color: var(--correct); font-weight: bold; }
         .opt-btn.wrong { background-color: #ffebee !important; border-color: var(--wrong) !important; color: var(--wrong); opacity: 0.8; }
         .opt-btn.disabled { pointer-events: none; }
@@ -119,10 +123,11 @@
         .next-btn {
             background: var(--primary); color: white; border: none; padding: 12px 30px; 
             border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer;
-            margin-top: 20px; align-self: flex-end; display: none; /* Hidden until answer */
+            margin-top: 20px; align-self: flex-end; display: none;
             box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3);
+            animation: popIn 0.3s ease-back;
         }
-        .next-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         /* --- RESULTS VIEW --- */
         .results-card { text-align: center; background: white; padding: 40px 20px; border-radius: 16px; box-shadow: var(--card-shadow); }
@@ -136,17 +141,25 @@
         .review-item.good { border-left: 4px solid var(--correct); }
         .review-item.bad { border-left: 4px solid var(--wrong); }
         
-        .play-again-btn {
-            background: var(--accent); color: white; border: none; padding: 15px 40px; 
-            border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px;
-            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+        /* New Action Buttons */
+        .action-grid { display: grid; gap: 10px; margin-top: 20px; }
+        .action-btn {
+            border: none; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
+            transition: transform 0.1s;
         }
+        .action-btn:active { transform: scale(0.98); }
+        
+        .btn-replay { background: #1976d2; color: white; } /* Blue - Same Questions */
+        .btn-new { background: #2e7d32; color: white; }    /* Green - New Questions */
+        .btn-exit { background: #757575; color: white; }    /* Grey - Exit */
 
         /* --- UTILS --- */
         .nav-header { display: flex; align-items: center; margin-bottom: 15px; }
         .back-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #777; margin-right: 10px; }
         .hidden { display: none !important; }
         .loader { text-align: center; padding: 50px; color: #666; }
+        .offline-msg { text-align: center; padding: 50px; }
+        .retry-btn { margin-top: 15px; padding: 10px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -158,9 +171,9 @@
 
     <div id="app-content">
         
-        <div id="quiz-header" class="hidden">
-            <div class="question-counter" id="q-counter">Question 1 of 10</div>
-            <div class="progress-container">
+        <div id="quiz-header" class="quiz-status-bar">
+            <span id="q-counter" class="progress-text">Q 1/10</span>
+            <div class="progress-track">
                 <div class="progress-fill" id="progress-bar"></div>
             </div>
         </div>
@@ -194,8 +207,11 @@
             <div class="score-circle" id="final-score">0</div>
             <p id="score-text" style="font-weight:bold; color:#555;">You scored X out of 10</p>
             
-            <button class="play-again-btn" onclick="startNewSession()">🔄 Play Again</button>
-            <button class="play-again-btn" onclick="goHome()" style="background:#555; margin-left:10px;">🏠 Home</button>
+            <div class="action-grid">
+                <button class="action-btn btn-replay" onclick="restartCurrentSet()">↩ Play Again (Same Questions)</button>
+                <button class="action-btn btn-new" onclick="startNewSession()">🔄 Play New Round</button>
+                <button class="action-btn btn-exit" onclick="goHome()">🚪 Exit</button>
+            </div>
 
             <div class="review-list" id="review-list"></div>
         </div>
@@ -207,10 +223,19 @@
         import { collection, query, where, getDocs, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Enable Offline Cache
         enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed."));
 
-        // DATA CONFIG
+        window.addEventListener('online', () => window.location.reload());
+        if (!navigator.onLine) {
+            document.getElementById('app-content').innerHTML = `
+                <div class="offline-msg">
+                    <h2 style="color:var(--accent);">No Internet Connection</h2>
+                    <p>Please check your data or Wi-Fi.</p>
+                    <button class="retry-btn" onclick="window.location.reload()">Retry ↻</button>
+                </div>
+            `;
+        }
+
         const examSubjects = {
             "OAV": ["English", "Math", "Science", "Social Science"],
             "NAVODAYA": ["Mental Ability", "Math", "Language"],
@@ -222,11 +247,12 @@
         // STATE
         let currentExam = "";
         let currentSubject = "";
-        let allFetchedQuestions = []; // Store ALL verified questions here
-        let sessionQuestions = [];    // Store ONLY the 10 for this game
+        let allFetchedQuestions = []; 
+        let sessionQuestions = [];    
         let currentIndex = 0;
         let score = 0;
-        let userReview = []; // Track answers for review
+        let userReview = [];
+        let isQuizActive = false;
 
         // DOM ELEMENTS
         const views = {
@@ -238,7 +264,24 @@
         };
         const quizHeader = document.getElementById('quiz-header');
 
-        // --- INIT ---
+        // --- BACK BUTTON INTERCEPTION ---
+        window.onpopstate = function(event) {
+            if (isQuizActive) {
+                if (confirm("Are you sure you want to quit the quiz? Your progress will be lost.")) {
+                    exitQuiz(); 
+                } else {
+                    history.pushState(null, null, window.location.href);
+                }
+            }
+        };
+
+        function exitQuiz() {
+            isQuizActive = false;
+            hideAllViews();
+            quizHeader.style.display = 'none';
+            views.subjects.classList.remove('hidden');
+        }
+
         function init() {
             const grid = document.getElementById('exam-grid');
             grid.innerHTML = "";
@@ -252,11 +295,11 @@
         }
         init();
 
-        // --- NAVIGATION ---
         window.goHome = () => {
+            isQuizActive = false;
             hideAllViews();
             views.exams.classList.remove('hidden');
-            quizHeader.classList.add('hidden');
+            quizHeader.style.display = 'none';
         };
 
         function hideAllViews() {
@@ -281,14 +324,12 @@
             views.subjects.classList.remove('hidden');
         };
 
-        // --- DATA FETCHING (ONCE PER SUBJECT) ---
         window.fetchAndStart = async (subject) => {
             currentSubject = subject;
             hideAllViews();
             views.loading.classList.remove('hidden');
 
             try {
-                // Fetch ALL verified questions for this subject
                 const q = query(
                     collection(db, "questions"), 
                     where("exam", "==", currentExam),
@@ -301,7 +342,7 @@
                 allFetchedQuestions = [];
                 
                 if(snapshot.empty) {
-                    views.loading.innerHTML = "<p>No verified questions found yet. Please check back later.</p><button class='play-again-btn' onclick='goHome()'>Back</button>";
+                    views.loading.innerHTML = "<p>No verified questions found yet.</p><button class='play-again-btn' onclick='goHome()'>Back</button>";
                     return;
                 }
 
@@ -309,49 +350,56 @@
                     allFetchedQuestions.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Start the Game
                 startNewSession();
 
             } catch (error) {
                 console.error(error);
-                let msg = error.message;
-                if(msg.includes("index")) msg = "System Setup Required (Index). Ask Admin to fix.";
-                views.loading.innerHTML = `<p style="color:red">Error: ${msg}</p><button onclick="goHome()">Go Back</button>`;
+                views.loading.innerHTML = `<p style="color:red">Error: ${error.message}</p><button onclick="goHome()">Go Back</button>`;
             }
         };
 
-        // --- GAME LOGIC ---
+        // --- NEW SESSION (SHUFFLE) ---
         window.startNewSession = () => {
-            // 1. Shuffle all available questions
+            // Push history for back button protection
+            history.pushState(null, null, window.location.href);
+            isQuizActive = true;
+
+            // Shuffle and pick new 10
             const shuffled = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
-            
-            // 2. Pick top 10 (or less if not enough data)
             sessionQuestions = shuffled.slice(0, 10);
             
-            // 3. Reset State
+            resetAndStart();
+        };
+
+        // --- RESTART SAME SET (NO SHUFFLE) ---
+        window.restartCurrentSet = () => {
+            history.pushState(null, null, window.location.href);
+            isQuizActive = true;
+            resetAndStart(); // Uses existing 'sessionQuestions'
+        };
+
+        function resetAndStart() {
             currentIndex = 0;
             score = 0;
             userReview = [];
             
-            // 4. Show Quiz UI
             hideAllViews();
             views.quiz.classList.remove('hidden');
-            quizHeader.classList.remove('hidden');
+            quizHeader.style.display = 'flex';
             
             renderSlide();
-        };
+        }
 
         function renderSlide() {
             const data = sessionQuestions[currentIndex];
             const container = document.getElementById('quiz-card-container');
             const nextBtn = document.getElementById('next-btn');
             
-            // Update Progress Bar
             const total = sessionQuestions.length;
-            document.getElementById('q-counter').innerText = `Question ${currentIndex + 1} of ${total}`;
-            document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
+            document.getElementById('q-counter').innerText = `Q ${currentIndex + 1}/${total}`;
+            const pct = ((currentIndex + 1) / total) * 100;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
 
-            // Reset UI
             nextBtn.style.display = 'none';
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
@@ -374,10 +422,8 @@
             const feedback = document.getElementById('feedback-msg');
             const nextBtn = document.getElementById('next-btn');
 
-            // Disable all
             btns.forEach(b => b.classList.add('disabled'));
 
-            // Check correctness
             const isCorrect = selected === correct;
             if(isCorrect) {
                 btn.classList.add('correct');
@@ -385,14 +431,12 @@
                 feedback.innerHTML = `<span style="color:var(--correct)">✅ Correct!</span>`;
             } else {
                 btn.classList.add('wrong');
-                // Highlight correct one
                 btns.forEach(b => {
                     if(b.innerText.startsWith(correct + ")")) b.classList.add('correct');
                 });
                 feedback.innerHTML = `<span style="color:var(--wrong)">❌ Wrong! Answer is ${correct}</span>`;
             }
 
-            // Save for Review
             const qData = sessionQuestions[currentIndex];
             userReview.push({
                 q: qData.question,
@@ -401,7 +445,6 @@
                 correctAns: qData.options[correct]
             });
 
-            // Show Next Button
             nextBtn.style.display = 'block';
         };
 
@@ -415,14 +458,14 @@
         };
 
         function showResults() {
+            isQuizActive = false;
             hideAllViews();
-            quizHeader.classList.add('hidden');
+            quizHeader.style.display = 'none';
             views.results.classList.remove('hidden');
 
             document.getElementById('final-score').innerText = score;
             document.getElementById('score-text').innerText = `You scored ${score} out of ${sessionQuestions.length}`;
 
-            // Generate Review List
             const list = document.getElementById('review-list');
             list.innerHTML = "";
             userReview.forEach((item, i) => {
