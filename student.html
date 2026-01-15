@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eRT Odisha - Student Portal</title>
     <style>
-        /* --- THEME COLORS (Matches Teacher/Admin) --- */
+        /* --- PROFESSIONAL THEME --- */
         :root {
-            --primary: #0d47a1; /* Dark Blue */
-            --primary-hover: #002171;
-            --accent: #d32f2f; /* Red */
-            --bg-color: #f4f6f8;
-            --correct: #2e7d32; /* Green */
-            --wrong: #c62828; /* Red */
-            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --primary: #0d47a1;
+            --primary-light: #e3f2fd;
+            --accent: #d32f2f;
+            --bg-color: #f0f2f5;
+            --correct: #2e7d32;
+            --wrong: #c62828;
+            --text-main: #333;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; max-width: 700px; margin: auto; background-color: var(--bg-color); color: var(--text-main); }
 
         /* --- HEADER --- */
         .top-bar { 
@@ -28,131 +29,177 @@
             gap: 15px;
             box-shadow: var(--card-shadow);
             color: white;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
-        .app-logo { height: 50px; width: 50px; border-radius: 50%; border: 2px solid white; background: white; object-fit: cover; }
-        .top-bar h1 { margin: 0; font-size: 1.4rem; line-height: 1.2; font-weight: 600; }
-        .sub-text { font-size: 0.7em; font-weight: 400; opacity: 0.9; display: block; }
+        .app-logo { height: 45px; width: 45px; border-radius: 50%; border: 2px solid white; background: white; object-fit: cover; }
+        .top-bar h1 { margin: 0; font-size: 1.3rem; line-height: 1.2; font-weight: 700; }
+        .sub-text { font-size: 0.75em; font-weight: 400; opacity: 0.9; display: block; text-transform: uppercase; letter-spacing: 1px;}
 
-        /* --- GRID TILES (Exams & Subjects) --- */
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        
+        /* --- PROGRESS BAR --- */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: none; /* Hidden until quiz starts */
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-counter {
+            text-align: right;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            display: none;
+        }
+
+        /* --- TILES (Exams/Subjects) --- */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
         .tile {
             background: white;
-            padding: 30px 15px;
+            padding: 25px 15px;
             border-radius: 12px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            border-bottom: 5px solid var(--primary);
-            font-weight: bold;
-            font-size: 1.1em;
+            border-bottom: 4px solid var(--primary);
+            font-weight: 700;
             color: var(--primary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-        .tile:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .tile:active { transform: scale(0.98); }
-
-        /* Subject Tile Variant */
+        .tile:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
         .tile.subject-tile { border-bottom-color: var(--accent); color: var(--accent); }
 
-        /* --- QUIZ QUESTION CARD --- */
-        .quiz-card {
+        /* --- QUIZ SLIDE --- */
+        .quiz-slide {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-            animation: fadeIn 0.4s ease-out;
-            border-top: 4px solid var(--primary);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            animation: slideIn 0.3s ease-out;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
-        .q-text { font-size: 1.15em; font-weight: 600; margin-bottom: 15px; color: #222; line-height: 1.4; }
-        .q-img { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; display: block; }
-        
-        .options-grid { display: grid; gap: 10px; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .q-text { font-size: 1.25em; font-weight: 600; margin-bottom: 20px; line-height: 1.5; color: #222; }
+        .q-img { max-width: 100%; height: auto; border-radius: 8px; margin: 0 auto 20px auto; border: 1px solid #eee; display: block; max-height: 250px; }
         
         .opt-btn {
-            padding: 14px;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
             border: 2px solid #e0e0e0;
             background: white;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             text-align: left;
-            font-size: 1em;
-            transition: all 0.2s;
+            font-size: 1rem;
             color: #444;
-            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
         }
-        .opt-btn:hover { background-color: #f5f5f5; border-color: #bbb; }
-
-        /* Correct/Wrong States */
+        .opt-btn:hover { background-color: #f9f9f9; border-color: #bbb; }
+        
+        /* States */
         .opt-btn.correct { background-color: #e8f5e9 !important; border-color: var(--correct) !important; color: var(--correct); font-weight: bold; }
         .opt-btn.wrong { background-color: #ffebee !important; border-color: var(--wrong) !important; color: var(--wrong); opacity: 0.8; }
+        .opt-btn.disabled { pointer-events: none; }
 
-        /* --- NAVIGATION & HELPERS --- */
-        .nav-header { display: flex; align-items: center; margin-bottom: 20px; }
-        .back-btn { 
-            background: white; border: 1px solid #ccc; font-size: 1.2rem; cursor: pointer; color: var(--primary); 
-            margin-right: 15px; padding: 5px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .next-btn {
+            background: var(--primary); color: white; border: none; padding: 12px 30px; 
+            border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer;
+            margin-top: 20px; align-self: flex-end; display: none; /* Hidden until answer */
+            box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3);
         }
-        .back-btn:hover { background-color: #e3f2fd; border-color: var(--primary); }
-        .section-title { font-size: 1.3rem; font-weight: bold; color: #444; }
+        .next-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
 
-        .hidden { display: none; }
+        /* --- RESULTS VIEW --- */
+        .results-card { text-align: center; background: white; padding: 40px 20px; border-radius: 16px; box-shadow: var(--card-shadow); }
+        .score-circle {
+            width: 120px; height: 120px; border-radius: 50%; background: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold;
+            margin: 0 auto 20px auto; border: 5px solid var(--primary-light);
+        }
+        .review-list { text-align: left; margin-top: 30px; max-height: 300px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 8px; }
+        .review-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .review-item.good { border-left: 4px solid var(--correct); }
+        .review-item.bad { border-left: 4px solid var(--wrong); }
         
-        /* Loader Animation */
-        .loader-container { text-align: center; padding: 50px; color: #666; }
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
+        .play-again-btn {
+            background: var(--accent); color: white; border: none; padding: 15px 40px; 
+            border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Offline Message */
-        .offline-msg { text-align: center; padding: 50px; }
-        .retry-btn { margin-top: 15px; padding: 10px 25px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+        /* --- UTILS --- */
+        .nav-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .back-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #777; margin-right: 10px; }
+        .hidden { display: none !important; }
+        .loader { text-align: center; padding: 50px; color: #666; }
     </style>
 </head>
 <body>
 
     <div class="top-bar">
         <img src="logo.jpg" alt="Logo" class="app-logo">
-        <h1>eRT Odisha<br><span class="sub-text">Student Learning Portal</span></h1>
+        <h1>eRT Odisha<br><span class="sub-text">Student Quiz Portal</span></h1>
     </div>
 
     <div id="app-content">
+        
+        <div id="quiz-header" class="hidden">
+            <div class="question-counter" id="q-counter">Question 1 of 10</div>
+            <div class="progress-container">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
         <div id="view-exams">
-            <h2 style="color:#555; text-align:center; margin-bottom:25px; font-weight:500;">Select Your Exam</h2>
-            <div class="grid-container" id="exam-grid">
-                </div>
+            <h2 style="text-align:center; color:#555; margin-bottom:20px;">Select Exam</h2>
+            <div class="grid-container" id="exam-grid"></div>
         </div>
 
         <div id="view-subjects" class="hidden">
             <div class="nav-header">
-                <button class="back-btn" onclick="goBackToExams()">⬅</button>
-                <span class="section-title" id="selected-exam-title">Exam Name</span>
+                <button class="back-btn" onclick="goHome()">⬅</button>
+                <h3 id="selected-exam-title" style="margin:0;">Exam</h3>
             </div>
-            <div class="grid-container" id="subject-grid">
-                </div>
+            <div class="grid-container" id="subject-grid"></div>
+        </div>
+
+        <div id="view-loading" class="hidden loader">
+            <div style="font-size:2rem;">⏳</div>
+            <p>Loading verified questions...</p>
         </div>
 
         <div id="view-quiz" class="hidden">
-            <div class="nav-header">
-                <button class="back-btn" onclick="goBackToSubjects()">⬅</button>
-                <span class="section-title" id="selected-subject-title">Subject Name</span>
-            </div>
-            <div id="quiz-list">
+            <div class="quiz-slide" id="quiz-card-container">
                 </div>
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question ➡</button>
         </div>
+
+        <div id="view-results" class="hidden results-card">
+            <h2 style="margin-top:0;">Quiz Completed!</h2>
+            <div class="score-circle" id="final-score">0</div>
+            <p id="score-text" style="font-weight:bold; color:#555;">You scored X out of 10</p>
+            
+            <button class="play-again-btn" onclick="startNewSession()">🔄 Play Again</button>
+            <button class="play-again-btn" onclick="goHome()" style="background:#555; margin-left:10px;">🏠 Home</button>
+
+            <div class="review-list" id="review-list"></div>
+        </div>
+
     </div>
 
     <script type="module">
@@ -160,24 +207,10 @@
         import { collection, query, where, getDocs, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Enable Offline Persistence for Students
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.log("Persistence suppressed (Likely multiple tabs open).");
-        });
+        // Enable Offline Cache
+        enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed."));
 
-        // --- OFFLINE DETECTION ---
-        window.addEventListener('online', () => window.location.reload());
-        if (!navigator.onLine) {
-            document.getElementById('app-content').innerHTML = `
-                <div class="offline-msg">
-                    <h2 style="color:var(--accent);">No Internet Connection</h2>
-                    <p>Please check your data or Wi-Fi.</p>
-                    <button class="retry-btn" onclick="window.location.reload()">Retry ↻</button>
-                </div>
-            `;
-        }
-
-        // --- CONFIG DATA ---
+        // DATA CONFIG
         const examSubjects = {
             "OAV": ["English", "Math", "Science", "Social Science"],
             "NAVODAYA": ["Mental Ability", "Math", "Language"],
@@ -186,153 +219,221 @@
             "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
         };
 
+        // STATE
         let currentExam = "";
-        
-        // --- DOM ELEMENTS ---
-        const viewExams = document.getElementById('view-exams');
-        const viewSubjects = document.getElementById('view-subjects');
-        const viewQuiz = document.getElementById('view-quiz');
-        const examGrid = document.getElementById('exam-grid');
-        const subjectGrid = document.getElementById('subject-grid');
-        const quizList = document.getElementById('quiz-list');
+        let currentSubject = "";
+        let allFetchedQuestions = []; // Store ALL verified questions here
+        let sessionQuestions = [];    // Store ONLY the 10 for this game
+        let currentIndex = 0;
+        let score = 0;
+        let userReview = []; // Track answers for review
 
-        // --- 1. INITIALIZE EXAM TILES ---
+        // DOM ELEMENTS
+        const views = {
+            exams: document.getElementById('view-exams'),
+            subjects: document.getElementById('view-subjects'),
+            loading: document.getElementById('view-loading'),
+            quiz: document.getElementById('view-quiz'),
+            results: document.getElementById('view-results')
+        };
+        const quizHeader = document.getElementById('quiz-header');
+
+        // --- INIT ---
         function init() {
-            examGrid.innerHTML = "";
+            const grid = document.getElementById('exam-grid');
+            grid.innerHTML = "";
             Object.keys(examSubjects).forEach(exam => {
                 const tile = document.createElement('div');
                 tile.className = 'tile';
                 tile.innerText = exam;
                 tile.onclick = () => showSubjects(exam);
-                examGrid.appendChild(tile);
+                grid.appendChild(tile);
             });
         }
         init();
 
-        // --- 2. SHOW SUBJECTS ---
+        // --- NAVIGATION ---
+        window.goHome = () => {
+            hideAllViews();
+            views.exams.classList.remove('hidden');
+            quizHeader.classList.add('hidden');
+        };
+
+        function hideAllViews() {
+            Object.values(views).forEach(el => el.classList.add('hidden'));
+        }
+
         window.showSubjects = (exam) => {
             currentExam = exam;
             document.getElementById('selected-exam-title').innerText = exam;
+            const grid = document.getElementById('subject-grid');
+            grid.innerHTML = "";
             
-            subjectGrid.innerHTML = "";
-            const subjects = examSubjects[exam];
-            subjects.forEach(sub => {
+            examSubjects[exam].forEach(sub => {
                 const tile = document.createElement('div');
-                tile.className = 'tile subject-tile'; // Adds Red styling
+                tile.className = 'tile subject-tile';
                 tile.innerText = sub;
-                tile.onclick = () => loadQuiz(sub);
-                subjectGrid.appendChild(tile);
+                tile.onclick = () => fetchAndStart(sub);
+                grid.appendChild(tile);
             });
 
-            viewExams.classList.add('hidden');
-            viewSubjects.classList.remove('hidden');
-        }
+            hideAllViews();
+            views.subjects.classList.remove('hidden');
+        };
 
-        // --- 3. LOAD QUIZ (FETCH DATA) ---
-        window.loadQuiz = async (subject) => {
-            document.getElementById('selected-subject-title').innerText = `${currentExam} > ${subject}`;
-            viewSubjects.classList.add('hidden');
-            viewQuiz.classList.remove('hidden');
-            
-            // Show Loader
-            quizList.innerHTML = `
-                <div class="loader-container">
-                    <div class="loader"></div>
-                    <p>Loading Verified Questions...</p>
-                </div>
-            `;
+        // --- DATA FETCHING (ONCE PER SUBJECT) ---
+        window.fetchAndStart = async (subject) => {
+            currentSubject = subject;
+            hideAllViews();
+            views.loading.classList.remove('hidden');
 
             try {
-                // QUERY: Exam + Subject + Verified Only
+                // Fetch ALL verified questions for this subject
                 const q = query(
                     collection(db, "questions"), 
                     where("exam", "==", currentExam),
                     where("subject", "==", subject),
-                    where("verified", "==", true), // Only Verified!
+                    where("verified", "==", true),
                     orderBy("timestamp", "desc")
                 );
 
                 const snapshot = await getDocs(q);
+                allFetchedQuestions = [];
                 
-                quizList.innerHTML = "";
                 if(snapshot.empty) {
-                    quizList.innerHTML = '<div class="loader-container"><p>No verified questions found for this subject yet.</p></div>';
+                    views.loading.innerHTML = "<p>No verified questions found yet. Please check back later.</p><button class='play-again-btn' onclick='goHome()'>Back</button>";
                     return;
                 }
 
                 snapshot.forEach(doc => {
-                    renderQuestionCard(doc.data(), doc.id);
+                    allFetchedQuestions.push({ id: doc.id, ...doc.data() });
                 });
+
+                // Start the Game
+                startNewSession();
 
             } catch (error) {
                 console.error(error);
-                quizList.innerHTML = `<div class="loader-container" style="color:var(--wrong)">
-                    <strong>Error Loading Data</strong><br>
-                    ${error.message}<br><br>
-                    <em>If seeing "Index" error, ask Admin to check console.</em>
-                </div>`;
+                let msg = error.message;
+                if(msg.includes("index")) msg = "System Setup Required (Index). Ask Admin to fix.";
+                views.loading.innerHTML = `<p style="color:red">Error: ${msg}</p><button onclick="goHome()">Go Back</button>`;
             }
-        }
+        };
 
-        // --- 4. RENDER SINGLE QUESTION CARD ---
-        function renderQuestionCard(data, id) {
-            const card = document.createElement('div');
-            card.className = 'quiz-card';
+        // --- GAME LOGIC ---
+        window.startNewSession = () => {
+            // 1. Shuffle all available questions
+            const shuffled = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
+            
+            // 2. Pick top 10 (or less if not enough data)
+            sessionQuestions = shuffled.slice(0, 10);
+            
+            // 3. Reset State
+            currentIndex = 0;
+            score = 0;
+            userReview = [];
+            
+            // 4. Show Quiz UI
+            hideAllViews();
+            views.quiz.classList.remove('hidden');
+            quizHeader.classList.remove('hidden');
+            
+            renderSlide();
+        };
+
+        function renderSlide() {
+            const data = sessionQuestions[currentIndex];
+            const container = document.getElementById('quiz-card-container');
+            const nextBtn = document.getElementById('next-btn');
+            
+            // Update Progress Bar
+            const total = sessionQuestions.length;
+            document.getElementById('q-counter').innerText = `Question ${currentIndex + 1} of ${total}`;
+            document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
+
+            // Reset UI
+            nextBtn.style.display = 'none';
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
 
-            card.innerHTML = `
+            container.innerHTML = `
                 ${imgHTML}
-                <div class="q-text">Q: ${data.question}</div>
-                <div class="options-grid" id="opts-${id}">
-                    <button class="opt-btn" onclick="checkAns('${id}', 'A', '${data.answer}')">A) ${data.options.A}</button>
-                    <button class="opt-btn" onclick="checkAns('${id}', 'B', '${data.answer}')">B) ${data.options.B}</button>
-                    <button class="opt-btn" onclick="checkAns('${id}', 'C', '${data.answer}')">C) ${data.options.C}</button>
-                    <button class="opt-btn" onclick="checkAns('${id}', 'D', '${data.answer}')">D) ${data.options.D}</button>
+                <div class="q-text">${data.question}</div>
+                <div id="options-area">
+                    <button class="opt-btn" onclick="selectAnswer(this, 'A', '${data.answer}')">A) ${data.options.A}</button>
+                    <button class="opt-btn" onclick="selectAnswer(this, 'B', '${data.answer}')">B) ${data.options.B}</button>
+                    <button class="opt-btn" onclick="selectAnswer(this, 'C', '${data.answer}')">C) ${data.options.C}</button>
+                    <button class="opt-btn" onclick="selectAnswer(this, 'D', '${data.answer}')">D) ${data.options.D}</button>
                 </div>
-                <div id="feedback-${id}" style="margin-top:15px; font-weight:bold; font-size:1.1em;"></div>
+                <div id="feedback-msg" style="margin-top:10px; font-weight:bold; height:20px;"></div>
             `;
-            quizList.appendChild(card);
         }
 
-        // --- 5. CHECK ANSWER LOGIC ---
-        window.checkAns = (id, selected, correct) => {
-            const container = document.getElementById(`opts-${id}`);
-            const buttons = container.getElementsByClassName('opt-btn');
-            const feedback = document.getElementById(`feedback-${id}`);
+        window.selectAnswer = (btn, selected, correct) => {
+            const btns = document.querySelectorAll('.opt-btn');
+            const feedback = document.getElementById('feedback-msg');
+            const nextBtn = document.getElementById('next-btn');
 
-            // Disable all buttons after click
-            for(let btn of buttons) {
-                btn.disabled = true;
-                btn.style.cursor = "default";
-                // Highlight the correct one
-                if(btn.innerText.startsWith(correct + ")")) {
-                    btn.classList.add('correct');
-                }
-            }
+            // Disable all
+            btns.forEach(b => b.classList.add('disabled'));
 
-            // If selected was wrong, mark it red
-            if(selected !== correct) {
-                for(let btn of buttons) {
-                    if(btn.innerText.startsWith(selected + ")")) {
-                        btn.classList.add('wrong');
-                    }
-                }
-                feedback.innerHTML = `<span style="color:var(--wrong)">❌ Incorrect. The answer is ${correct}.</span>`;
+            // Check correctness
+            const isCorrect = selected === correct;
+            if(isCorrect) {
+                btn.classList.add('correct');
+                score++;
+                feedback.innerHTML = `<span style="color:var(--correct)">✅ Correct!</span>`;
             } else {
-                feedback.innerHTML = `<span style="color:var(--correct)">✅ Correct! Great Job.</span>`;
+                btn.classList.add('wrong');
+                // Highlight correct one
+                btns.forEach(b => {
+                    if(b.innerText.startsWith(correct + ")")) b.classList.add('correct');
+                });
+                feedback.innerHTML = `<span style="color:var(--wrong)">❌ Wrong! Answer is ${correct}</span>`;
             }
-        }
 
-        // --- NAVIGATION FUNCTIONS ---
-        window.goBackToExams = () => {
-            viewSubjects.classList.add('hidden');
-            viewExams.classList.remove('hidden');
-        }
+            // Save for Review
+            const qData = sessionQuestions[currentIndex];
+            userReview.push({
+                q: qData.question,
+                correct: isCorrect,
+                yourAns: qData.options[selected],
+                correctAns: qData.options[correct]
+            });
 
-        window.goBackToSubjects = () => {
-            viewQuiz.classList.add('hidden');
-            viewSubjects.classList.remove('hidden');
+            // Show Next Button
+            nextBtn.style.display = 'block';
+        };
+
+        window.nextQuestion = () => {
+            currentIndex++;
+            if(currentIndex < sessionQuestions.length) {
+                renderSlide();
+            } else {
+                showResults();
+            }
+        };
+
+        function showResults() {
+            hideAllViews();
+            quizHeader.classList.add('hidden');
+            views.results.classList.remove('hidden');
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('score-text').innerText = `You scored ${score} out of ${sessionQuestions.length}`;
+
+            // Generate Review List
+            const list = document.getElementById('review-list');
+            list.innerHTML = "";
+            userReview.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = `review-item ${item.correct ? 'good' : 'bad'}`;
+                div.innerHTML = `
+                    <strong>Q${i+1}: ${item.q}</strong><br>
+                    <span style="color:#666; font-size:0.9em;">You: ${item.yourAns} | Correct: <b>${item.correctAns}</b></span>
+                `;
+                list.appendChild(div);
+            });
         }
     </script>
 </body>
