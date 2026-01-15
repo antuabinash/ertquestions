@@ -14,7 +14,7 @@
             --correct: #2e7d32;
             --wrong: #c62828;
             --text-main: #333;
-            --board-bg: #fffbe6; /* Light Yellow Graph Paper */
+            --board-bg: #ffffff; /* Clean White Board */
         }
 
         /* --- LAYOUT RESET --- */
@@ -87,12 +87,14 @@
             padding: 10px 15px 0 15px;
         }
 
-        /* 1. Question Area (Scrolls if too big, but keeps space for board) */
+        /* 1. Question Area */
         #quiz-question-area {
             flex-shrink: 0; 
-            max-height: 60%; /* Limit question height so board always shows */
+            max-height: 55%; /* Keep space for board */
             overflow-y: auto;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 5px;
         }
 
         .q-text { font-size: 1.15em; font-weight: 600; margin-bottom: 0.5em; line-height: 1.3; color: #222; }
@@ -109,46 +111,52 @@
         .opt-btn.wrong { background-color: #ffebee !important; border-color: var(--wrong) !important; color: var(--wrong); opacity: 0.7; }
         .opt-btn.disabled { pointer-events: none; }
 
-        /* 2. CALCULATION BOARD (Fills remaining space) */
+        /* 2. CALCULATION BOARD (Clean) */
         #calc-board-container {
             flex-grow: 1; /* FILL SPACE */
             background-color: var(--board-bg);
-            background-image: radial-gradient(#ccc 1px, transparent 1px);
-            background-size: 20px 20px;
-            border: 2px dashed #ccc;
-            border-radius: 8px 8px 0 0; /* Rounded top */
+            /* Removed grid lines for clean look */
             position: relative;
-            min-height: 150px; /* Ensure strictly min height */
+            min-height: 150px;
             touch-action: none;
             overflow: hidden;
-            border-bottom: none; /* Connects visually to footer */
+            cursor: crosshair;
         }
 
         canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
-        /* BOARD CONTROLS (Bottom Left) */
-        .board-controls {
+        /* SMART BUTTON (Floating) */
+        #smart-board-btn {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 5;
-        }
-
-        .tool-icon {
+            bottom: 15px;
+            left: 15px;
+            width: 45px; height: 45px;
+            border-radius: 50%;
             background: white;
             border: 1px solid #ccc;
-            width: 40px; height: 40px;
-            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
+            z-index: 10;
+            transition: all 0.2s;
+            user-select: none;
         }
-        .tool-icon:active { transform: scale(0.9); }
-        .tool-icon.active { background: var(--primary); color: white; border-color: var(--primary); }
+        #smart-board-btn:active { transform: scale(0.9); }
+        
+        /* State: Delete Mode */
+        #smart-board-btn.is-delete {
+            background: #ffebee;
+            color: #c62828;
+            border-color: #ef9a9a;
+        }
+        
+        /* State: Pen Mode (Default) */
+        #smart-board-btn.is-pen {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-color: #90caf9;
+        }
 
         /* --- OTHER VIEWS --- */
         .scrollable-view { overflow-y: auto; height: 100%; padding: 15px; }
@@ -220,15 +228,7 @@
 
             <div id="calc-board-container">
                 <canvas id="drawing-canvas"></canvas>
-                
-                <div class="board-controls">
-                    <div class="tool-icon active" id="btn-pen" onclick="activatePen()">✏️</div>
-                    <div class="tool-icon" onclick="clearCanvas()">🗑️</div>
-                </div>
-                
-                <div style="position:absolute; top:5px; right:10px; font-size:0.7em; color:#999; pointer-events:none;">
-                    Rough Space
-                </div>
+                <div id="smart-board-btn" class="is-pen" onclick="handleBoardBtn()">✏️</div>
             </div>
         </div>
 
@@ -285,6 +285,7 @@
         // CANVAS VARS
         let canvas, ctx, isDrawing = false;
         let lastX = 0, lastY = 0;
+        let boardIsDirty = false; // Track if user has drawn
 
         const views = {
             exams: document.getElementById('view-exams'),
@@ -298,6 +299,7 @@
         const nextBtn = document.getElementById('next-btn');
         const quizContent = document.getElementById('quiz-card-content');
         const boardContainer = document.getElementById('calc-board-container');
+        const smartBtn = document.getElementById('smart-board-btn');
 
         // --- BACK BUTTON ---
         window.onpopstate = function(event) {
@@ -338,18 +340,15 @@
             canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
             canvas.addEventListener('touchend', stopDraw);
             
-            // Handle Resize
             window.addEventListener('resize', resizeCanvas);
         }
 
         function resizeCanvas() {
             if(!canvas) return;
-            // Get exact pixel size of the container
             const rect = boardContainer.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
-            
-            // Reset context styles after resize
+            // Reset styles after resize
             ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
@@ -361,6 +360,12 @@
             const rect = canvas.getBoundingClientRect();
             lastX = e.clientX - rect.left;
             lastY = e.clientY - rect.top;
+
+            // CHANGE BUTTON TO CLEAR ICON
+            if (!boardIsDirty) {
+                boardIsDirty = true;
+                updateSmartBtn();
+            }
         }
 
         function draw(e) {
@@ -377,14 +382,29 @@
 
         function stopDraw() { isDrawing = false; }
         
-        window.clearCanvas = () => {
-            if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.handleBoardBtn = () => {
+            if (boardIsDirty) {
+                // It is a Clear Button
+                if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                boardIsDirty = false;
+                updateSmartBtn();
+            } else {
+                // It is a Pen button (Do nothing, just visual indicator)
+                // Optionally show a "Write anywhere" hint
+            }
         };
 
-        window.activatePen = () => {
-            // Visual feedback only, pen is always active in this layout
-            // Could add eraser logic later if needed
-        };
+        function updateSmartBtn() {
+            if (boardIsDirty) {
+                smartBtn.innerHTML = "🗑️";
+                smartBtn.classList.remove('is-pen');
+                smartBtn.classList.add('is-delete');
+            } else {
+                smartBtn.innerHTML = "✏️";
+                smartBtn.classList.remove('is-delete');
+                smartBtn.classList.add('is-pen');
+            }
+        }
 
 
         // --- INIT APP ---
@@ -398,7 +418,7 @@
                 tile.onclick = () => showSubjects(exam);
                 grid.appendChild(tile);
             });
-            initCanvas(); // Init canvas once on load
+            initCanvas(); 
         }
         init();
 
@@ -468,9 +488,7 @@
             quizHeader.style.display = 'flex';
             quizFooter.style.display = 'block';
             
-            // Important: Delay resize to ensure layout is computed
             setTimeout(resizeCanvas, 50);
-            
             renderSlide();
         }
 
@@ -485,8 +503,10 @@
             nextBtn.innerText = (currentIndex === total - 1) ? "Finish 🏁" : "Next ➡";
             nextBtn.style.opacity = "0.5";
 
-            // Clear board for new question
-            clearCanvas();
+            // Clear board
+            if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            boardIsDirty = false;
+            updateSmartBtn();
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
 
@@ -501,7 +521,6 @@
                 </div>
             `;
             
-            // Adjust canvas size again just in case content shifted height
             setTimeout(resizeCanvas, 10);
         }
 
