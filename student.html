@@ -10,18 +10,18 @@
             --primary: #0d47a1;
             --primary-light: #e3f2fd;
             --accent: #d32f2f;
-            --bg-color: #ffffff; /* White bg for clean look */
+            --bg-color: #ffffff; 
             --correct: #2e7d32;
             --wrong: #c62828;
             --text-main: #333;
         }
 
-        /* --- LAYOUT RESET FOR FULL HEIGHT (NO SCROLL) --- */
+        /* --- LAYOUT RESET --- */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* LOCK SCROLL */
+            overflow: hidden; /* Lock Body Scroll */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
@@ -68,14 +68,14 @@
         .progress-track { background: #e0e0e0; border-radius: 10px; height: 6px; flex-grow: 1; margin-left: 15px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, #1976d2 100%); width: 0%; transition: width 0.3s ease; }
 
-        /* --- MAIN CONTENT AREA (Flex Container) --- */
+        /* --- MAIN CONTENT AREA --- */
         #app-content {
             flex: 1; /* Takes all remaining space */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content vertically */
-            padding: 15px;
-            overflow: hidden; /* Force fit */
+            justify-content: flex-start; /* ALIGN TO TOP */
+            padding: 20px 15px;
+            overflow: hidden; /* We auto-fit text to avoid scroll */
             position: relative;
         }
 
@@ -86,8 +86,9 @@
             border-top: 1px solid #e0e0e0;
             display: none;
             flex-shrink: 0;
-            height: 60px; /* Fixed height for calculations */
+            height: 60px; 
             box-sizing: border-box;
+            z-index: 20; /* Ensure above content */
         }
 
         /* --- NEXT BUTTON --- */
@@ -101,21 +102,20 @@
         .next-btn:active { transform: scale(0.98); }
         .next-btn:disabled { background: #bdbdbd; cursor: not-allowed; box-shadow: none; }
 
-        /* --- QUIZ CARD (Auto-Scaling) --- */
-        /* This container holds the Q & Options. We scale its font-size to fit. */
+        /* --- QUIZ CONTAINER (Top Aligned) --- */
         #quiz-card-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* Pushes content UP */
             height: 100%;
             width: 100%;
-            font-size: 100%; /* Default start */
+            font-size: 100%; 
         }
 
         .q-text { 
-            font-size: 1.3em; /* Relative to container */
+            font-size: 1.3em; 
             font-weight: 600; 
-            margin-bottom: 0.5em; 
+            margin-bottom: 0.8em; 
             line-height: 1.3; 
             color: #222; 
         }
@@ -123,11 +123,9 @@
         .q-img { 
             max-width: 100%; 
             border-radius: 8px; 
-            margin: 0 auto 0.5em auto; 
+            margin: 0 auto 1em auto; 
             border: 1px solid #eee; 
             display: block; 
-            
-            /* Smart Image Sizing: Don't let image take more than 30% of screen */
             max-height: 25vh; 
             object-fit: contain;
         }
@@ -135,18 +133,19 @@
         #options-area {
             display: flex;
             flex-direction: column;
-            gap: 0.5em;
+            gap: 0.6em;
+            margin-bottom: 1em; /* Space for feedback below */
         }
 
         .opt-btn {
             width: 100%;
-            padding: 0.8em; /* Relative padding */
+            padding: 0.9em; 
             border: 2px solid #e0e0e0;
             background: #f9f9f9;
             border-radius: 8px;
             cursor: pointer;
             text-align: left;
-            font-size: 1em; /* Relative font */
+            font-size: 1em; 
             color: #444;
             transition: all 0.2s;
         }
@@ -156,10 +155,20 @@
         .opt-btn.wrong { background-color: #ffebee !important; border-color: var(--wrong) !important; color: var(--wrong); opacity: 0.7; }
         .opt-btn.disabled { pointer-events: none; }
 
-        /* --- OTHER VIEWS (Scrollable if needed, like Results) --- */
+        /* --- FEEDBACK MESSAGE --- */
+        #feedback-msg {
+            text-align: center; 
+            font-weight: bold; 
+            height: 30px; 
+            color: var(--primary); 
+            margin-top: auto; /* Pushes to bottom of container if space exists */
+            padding-bottom: 5px;
+        }
+
+        /* --- OTHER VIEWS --- */
         .scrollable-view { overflow-y: auto; height: 100%; padding-bottom: 20px; }
 
-        /* --- TILES & MENUS --- */
+        /* --- TILES --- */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding: 10px 0; }
         .tile {
             background: white; padding: 25px 10px; border-radius: 12px; text-align: center;
@@ -228,10 +237,10 @@
             <p>Loading...</p>
         </div>
 
-        <div id="view-quiz" class="hidden" style="height:100%;">
+        <div id="view-quiz" class="hidden" style="height:100%; display:flex; flex-direction:column;">
             <div id="quiz-card-container">
                 </div>
-            <div id="feedback-msg" style="text-align:center; font-weight:bold; height:20px; color:var(--primary); margin-top:5px;"></div>
+            <div id="feedback-msg"></div>
         </div>
 
         <div id="view-results" class="hidden scrollable-view results-card">
@@ -301,7 +310,6 @@
         const nextBtn = document.getElementById('next-btn');
         const container = document.getElementById('quiz-card-container');
 
-        // --- BACK BUTTON ---
         window.onpopstate = function(event) {
             if (isQuizActive) {
                 if (confirm("Quit Quiz?")) exitQuiz(); 
@@ -317,7 +325,6 @@
             views.subjects.classList.remove('hidden');
         }
 
-        // --- INIT ---
         function init() {
             const grid = document.getElementById('exam-grid');
             grid.innerHTML = "";
@@ -404,7 +411,6 @@
             renderSlide();
         }
 
-        // --- RENDER & AUTO-FIT ---
         function renderSlide() {
             const data = sessionQuestions[currentIndex];
             const feedback = document.getElementById('feedback-msg');
@@ -431,29 +437,19 @@
                 </div>
             `;
             
-            adjustFontSize(); // MAGIC FUNCTION TO FIT CONTENT
+            adjustFontSize(); // FIT CONTENT
         }
 
-        // --- AUTO-SHRINK TEXT TO FIT ---
         function adjustFontSize() {
-            let size = 100; // start at 100%
+            let size = 100;
             container.style.fontSize = "100%";
             
-            // Allow browser to render
             setTimeout(() => {
                 const parent = document.getElementById('app-content');
-                // While content is taller than screen space, reduce font size
-                while (container.scrollHeight > parent.clientHeight && size > 60) {
+                // Shrink text if content overflows
+                while (container.scrollHeight > parent.clientHeight && size > 65) {
                     size -= 5;
                     container.style.fontSize = size + "%";
-                }
-                // Fallback: If still too big (unlikely), allow scroll
-                if(container.scrollHeight > parent.clientHeight) {
-                    container.style.justifyContent = 'flex-start'; // Align top
-                    parent.style.overflowY = 'auto'; // Turn scroll ON
-                } else {
-                    container.style.justifyContent = 'center'; // Center vertically
-                    parent.style.overflowY = 'hidden'; // Keep scroll OFF
                 }
             }, 10);
         }
