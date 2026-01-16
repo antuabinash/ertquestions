@@ -365,7 +365,7 @@
                     let detailsHTML = "";
                     if (data.type === "SUBJECTIVE") {
                         detailsHTML = `<small style="color:#d32f2f;">${data.category}</small><br>
-                                       <strong>Ans:</strong> ${data.answerText || 'See Image'}
+                                       <strong>Ans:</strong> <span style="white-space: pre-wrap;">${data.answerText || 'See Image'}</span>
                                        ${data.answerImage ? '<br>[Has Answer Image]' : ''}`;
                     } else {
                         detailsHTML = `<strong>Ans:</strong> ${data.answer}`;
@@ -375,7 +375,7 @@
                     div.className = "q-item";
                     div.innerHTML = `
                         <div style="font-size:0.85em; color:var(--primary); font-weight:bold;">${data.exam} • ${data.subject} ${badge}</div>
-                        <div style="margin:5px 0;">${data.question}</div>
+                        <div style="margin:5px 0; white-space: pre-wrap;">${data.question}</div>
                         ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
                         <div style="margin-top:5px; font-size:0.9em; color:#555;">${detailsHTML}</div>
                         <div style="margin-top:10px;">
