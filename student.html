@@ -45,7 +45,7 @@
         .top-bar h1 { margin: 0; font-size: 1rem; line-height: 1.2; font-weight: 700; }
         .sub-text { font-size: 0.7em; font-weight: 400; opacity: 0.9; display: block; text-transform: uppercase; }
 
-        /* --- PROGRESS BAR (Entrance Only) --- */
+        /* --- PROGRESS BAR (Only for Entrance) --- */
         .quiz-status-bar {
             background: #fafafa; padding: 8px 15px; border-bottom: 1px solid #eee;
             display: none; align-items: center; justify-content: space-between;
@@ -90,7 +90,14 @@
             transition: all 0.3s ease;
         }
 
-        .q-text { font-size: 1.15em; font-weight: 600; margin-bottom: 0.5em; line-height: 1.3; color: #222; }
+        .q-text { 
+            font-size: 1.15em; 
+            font-weight: 600; 
+            margin-bottom: 0.5em; 
+            line-height: 1.3; 
+            color: #222; 
+            white-space: pre-wrap; /* KEEPS LINE BREAKS */
+        }
         .q-img { max-width: 100%; border-radius: 8px; margin: 0 auto 0.5em auto; border: 1px solid #eee; display: block; max-height: 180px; object-fit: contain; }
         
         /* Options (Entrance) */
@@ -112,6 +119,7 @@
         .board-answer-box {
             margin-top: 15px; padding: 15px; background: #e8f5e9; border-left: 4px solid #2e7d32;
             border-radius: 4px; display: none; animation: fadeIn 0.3s; font-size: 0.95em; line-height: 1.5;
+            white-space: pre-wrap; /* KEEPS LINE BREAKS IN ANSWER */
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
