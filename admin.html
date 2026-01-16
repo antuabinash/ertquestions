@@ -35,8 +35,11 @@
         th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
         tr:nth-child(even) { background-color: #f8f9fa; }
         
+        /* PRESERVE LINE BREAKS IN TABLE */
+        .content-text { white-space: pre-wrap; word-wrap: break-word; }
+
         .thumb { max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; display: block; margin-top: 5px;}
-        .ans-thumb { border-color: #2e7d32; } /* Green border for answer images */
+        .ans-thumb { border-color: #2e7d32; } 
 
         /* Edit Box */
         .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
@@ -55,12 +58,7 @@
             display: inline-block; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;
             padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;
         }
-        .badge-type {
-            display: inline-block; background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb;
-            padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: bold; margin-bottom: 5px;
-        }
 
-        /* Loading Spinner */
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -182,7 +180,6 @@
                 const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
                 const verifyBtn = isVerified ? `<button class="btn-unverify" onclick="window.toggleVerify('${item.id}', false)">↩ Undo</button>` : `<button class="btn-verify" onclick="window.toggleVerify('${item.id}', true)">✅ Verify</button>`;
                 
-                // Determine Mode (MCQ vs Subjective)
                 const isSubjective = item.type === "SUBJECTIVE";
 
                 // 1. Build Answer Column HTML
@@ -191,7 +188,7 @@
                     answerDisplay = `
                         <div style="font-size:0.9em;">
                             <span style="color:#d32f2f; font-weight:bold; font-size:0.8em; border:1px solid #d32f2f; padding:2px 4px; border-radius:4px;">${item.category || 'Subjective'}</span><br>
-                            <div style="margin-top:5px; white-space: pre-wrap;">${item.answerText || '<i>No text answer</i>'}</div>
+                            <div class="content-text" style="margin-top:5px;">${item.answerText || '<i>No text answer</i>'}</div>
                             ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb ans-thumb" title="Answer Image"></a>` : ''}
                         </div>`;
                 } else {
@@ -203,7 +200,7 @@
                         </div>`;
                 }
 
-                // 2. Build Edit Form HTML (Conditionals)
+                // 2. Build Edit Form
                 let editFields = "";
                 if (isSubjective) {
                     editFields = `
@@ -243,16 +240,18 @@
                         </td>
                         <td>
                             ${verifiedBadge}
-                            <div id="disp-q-${item.id}">
+                            <div id="disp-q-${item.id}" class="content-text">
                                 ${item.question}
                                 ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
                             </div>
                             
                             <div id="edit-${item.id}" class="edit-box">
-                                <label>Question:</label> <textarea id="txt-${item.id}" rows="2">${item.question}</textarea>
+                                <label>Question:</label> <textarea id="txt-${item.id}" rows="3">${item.question}</textarea>
                                 <label>New Question Image:</label> <input type="file" id="file-${item.id}">
                                 
-                                ${editFields} <div class="edit-btns">
+                                ${editFields}
+
+                                <div class="edit-btns">
                                     <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
                                     <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
                                 </div>
@@ -273,7 +272,7 @@
             });
         }
 
-        // --- GLOBAL ACTIONS ---
+        // --- ACTIONS ---
         window.toggleVerify = async (id, status) => { try { await updateDoc(doc(db, "questions", id), { verified: status }); } catch (e) { alert("Error: " + e.message); } }
         window.deleteQ = async (id) => { if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id)); }
 
@@ -310,13 +309,11 @@
                 const qFile = document.getElementById(`file-${id}`).files[0];
                 let updates = { question: document.getElementById(`txt-${id}`).value };
 
-                // Process Question Image
                 if (qFile) {
                     if(qFile.size > 5*1024*1024) throw new Error("Image too large");
                     updates.imageUrl = await compressImage(qFile);
                 }
 
-                // Process Type Specific Fields
                 if (type === "SUBJECTIVE") {
                     updates.category = document.getElementById(`cat-${id}`).value;
                     updates.answerText = document.getElementById(`ansTxt-${id}`).value;
@@ -337,6 +334,8 @@
 
                 await updateDoc(doc(db, "questions", id), updates);
                 alert("Updated!");
+                btn.innerText = "Save";
+                window.toggleEdit(id); // Close edit box
             } catch (e) {
                 alert("Error: " + e.message); btn.innerText = "Save";
             }
