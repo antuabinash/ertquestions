@@ -14,14 +14,13 @@
             --correct: #2e7d32;
             --wrong: #c62828;
             --text-main: #333;
-            --board-bg: #ffffff; /* Clean White Board */
+            --board-bg: #ffffff;
         }
 
         /* --- LAYOUT RESET --- */
         html, body {
             height: 100%;
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             overflow: hidden; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
@@ -31,12 +30,9 @@
         }
 
         body {
-            display: flex;
-            flex-direction: column;
-            max-width: 700px;
-            margin: 0 auto;
-            border-left: 1px solid #ddd;
-            border-right: 1px solid #ddd;
+            display: flex; flex-direction: column;
+            max-width: 700px; margin: 0 auto;
+            border-left: 1px solid #ddd; border-right: 1px solid #ddd;
         }
 
         /* --- HEADER --- */
@@ -49,7 +45,7 @@
         .top-bar h1 { margin: 0; font-size: 1rem; line-height: 1.2; font-weight: 700; }
         .sub-text { font-size: 0.7em; font-weight: 400; opacity: 0.9; display: block; text-transform: uppercase; }
 
-        /* --- PROGRESS BAR --- */
+        /* --- PROGRESS BAR (Entrance Only) --- */
         .quiz-status-bar {
             background: #fafafa; padding: 8px 15px; border-bottom: 1px solid #eee;
             display: none; align-items: center; justify-content: space-between;
@@ -59,12 +55,10 @@
         .progress-track { background: #e0e0e0; border-radius: 10px; height: 6px; flex-grow: 1; margin-left: 15px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, #1976d2 100%); width: 0%; transition: width 0.3s ease; }
 
-        /* --- MAIN CONTENT FLEX WRAPPER --- */
+        /* --- MAIN CONTENT --- */
         #app-content {
-            flex: 1; 
-            display: flex; flex-direction: column; 
-            overflow: hidden; 
-            position: relative;
+            flex: 1; display: flex; flex-direction: column; 
+            overflow: hidden; position: relative;
         }
 
         /* --- FOOTER --- */
@@ -81,27 +75,26 @@
         .next-btn:active { transform: scale(0.98); }
         .next-btn:disabled { background: #bdbdbd; cursor: not-allowed; box-shadow: none; }
 
-        /* --- QUIZ SPECIFIC LAYOUT --- */
+        /* --- QUIZ VIEWS --- */
         #view-quiz {
-            height: 100%; display: flex; flex-direction: column;
-            padding: 10px 15px 0 15px;
+            height: 100%; display: flex; flex-direction: column; padding: 10px 15px 0 15px;
         }
 
-        /* 1. Question Area */
+        /* Question Area */
         #quiz-question-area {
             flex-shrink: 0; 
-            max-height: 55%; /* Keep space for board */
+            /* Default for Entrance (Split Screen) */
+            max-height: 55%; 
             overflow-y: auto;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 5px;
+            margin-bottom: 5px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px;
+            transition: all 0.3s ease;
         }
 
         .q-text { font-size: 1.15em; font-weight: 600; margin-bottom: 0.5em; line-height: 1.3; color: #222; }
         .q-img { max-width: 100%; border-radius: 8px; margin: 0 auto 0.5em auto; border: 1px solid #eee; display: block; max-height: 180px; object-fit: contain; }
         
+        /* Options (Entrance) */
         #options-area { display: flex; flex-direction: column; gap: 8px; }
-
         .opt-btn {
             width: 100%; padding: 10px; border: 2px solid #e0e0e0; background: #f9f9f9;
             border-radius: 8px; cursor: pointer; text-align: left; font-size: 0.95em; color: #444; transition: all 0.2s;
@@ -111,53 +104,37 @@
         .opt-btn.wrong { background-color: #ffebee !important; border-color: var(--wrong) !important; color: var(--wrong); opacity: 0.7; }
         .opt-btn.disabled { pointer-events: none; }
 
-        /* 2. CALCULATION BOARD (Clean) */
-        #calc-board-container {
-            flex-grow: 1; /* FILL SPACE */
-            background-color: var(--board-bg);
-            position: relative;
-            min-height: 150px;
-            touch-action: none;
-            overflow: hidden;
-            cursor: crosshair;
+        /* Answer Reveal (Board) */
+        .btn-show-ans {
+            width: 100%; background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; 
+            padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
+        .board-answer-box {
+            margin-top: 15px; padding: 15px; background: #e8f5e9; border-left: 4px solid #2e7d32;
+            border-radius: 4px; display: none; animation: fadeIn 0.3s; font-size: 0.95em; line-height: 1.5;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Canvas Board (Entrance Only) */
+        #calc-board-container {
+            flex-grow: 1; background-color: var(--board-bg); position: relative;
+            min-height: 150px; touch-action: none; overflow: hidden; cursor: crosshair;
+            display: block; /* Default visible */
+        }
         canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
-        /* SMART BUTTON (Floating - RIGHT BOTTOM) */
+        /* Smart Button */
         #smart-board-btn {
-            position: absolute;
-            bottom: 15px;
-            right: 15px; /* MOVED TO RIGHT */
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            background: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 10;
-            transition: all 0.2s;
-            user-select: none;
+            position: absolute; bottom: 15px; right: 15px;
+            width: 45px; height: 45px; border-radius: 50%; background: white; border: 1px solid #ccc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer; z-index: 10; transition: all 0.2s;
         }
         #smart-board-btn:active { transform: scale(0.9); }
-        
-        /* State: Delete Mode */
-        #smart-board-btn.is-delete {
-            background: #ffebee;
-            color: #c62828;
-            border-color: #ef9a9a;
-        }
-        
-        /* State: Pen Mode (Default) */
-        #smart-board-btn.is-pen {
-            background: #e3f2fd;
-            color: #0d47a1;
-            border-color: #90caf9;
-        }
+        #smart-board-btn.is-delete { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+        #smart-board-btn.is-pen { background: #e3f2fd; color: #0d47a1; border-color: #90caf9; }
 
-        /* --- OTHER VIEWS --- */
+        /* Common Views */
         .scrollable-view { overflow-y: auto; height: 100%; padding: 15px; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding: 10px 0; }
         .tile {
@@ -166,19 +143,14 @@
             border-bottom: 4px solid var(--primary); font-weight: 700; color: var(--primary); text-transform: uppercase;
         }
         .tile.subject-tile { border-bottom-color: var(--accent); color: var(--accent); }
+        .tile.type-tile { border-bottom-color: #ff9800; color: #f57c00; } 
 
+        /* Results & Utils */
         .results-card { text-align: center; padding: 20px; }
-        .score-circle {
-            width: 100px; height: 100px; border-radius: 50%; background: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold;
-            margin: 0 auto 15px auto; border: 5px solid var(--primary-light);
-        }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold; margin: 0 auto 15px auto; border: 5px solid var(--primary-light); }
         .action-grid { display: grid; gap: 10px; margin-top: 20px; }
         .action-btn { border: none; padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: bold; color: white; cursor: pointer; }
-        .btn-replay { background: #1976d2; }
-        .btn-new { background: #2e7d32; }
-        .btn-exit { background: #757575; }
-
+        .btn-replay { background: #1976d2; } .btn-new { background: #2e7d32; } .btn-exit { background: #757575; }
         .nav-header { display: flex; align-items: center; margin-bottom: 15px; }
         .back-btn { background: #f0f0f0; border: none; font-size: 1.2rem; padding: 5px 12px; border-radius: 6px; margin-right: 10px; }
         .hidden { display: none !important; }
@@ -191,7 +163,7 @@
 
     <div class="top-bar">
         <img src="logo.jpg" alt="Logo" class="app-logo">
-        <div><h1>eRT Odisha</h1><span class="sub-text">Student Quiz</span></div>
+        <div><h1>eRT Odisha</h1><span class="sub-text">Student Portal</span></div>
     </div>
 
     <div id="quiz-header" class="quiz-status-bar">
@@ -200,7 +172,6 @@
     </div>
 
     <div id="app-content">
-        
         <div id="view-exams" class="scrollable-view">
             <h2 style="text-align:center; color:#555; margin-bottom:20px; font-size:1.2rem;">Select Exam</h2>
             <div class="grid-container" id="exam-grid"></div>
@@ -214,17 +185,23 @@
             <div class="grid-container" id="subject-grid"></div>
         </div>
 
-        <div id="view-loading" class="hidden loader">
-            <div style="font-size:2rem;">⏳</div><p>Loading...</p>
+        <div id="view-types" class="hidden scrollable-view">
+            <div class="nav-header">
+                <button class="back-btn" onclick="goBackToSubjects()">⬅</button>
+                <h3 id="selected-subject-title" style="margin:0;">Subject</h3>
+            </div>
+            <div class="grid-container" id="type-grid">
+                <div class="tile type-tile" onclick="fetchAndStartBoard('Very Short')">Very Short Questions</div>
+                <div class="tile type-tile" onclick="fetchAndStartBoard('Short')">Short Questions</div>
+                <div class="tile type-tile" onclick="fetchAndStartBoard('Long')">Long Questions</div>
+            </div>
         </div>
 
-        <div id="view-quiz" class="hidden">
-            
-            <div id="quiz-question-area">
-                <div id="quiz-card-content">
-                    </div>
-            </div>
+        <div id="view-loading" class="hidden loader"><div style="font-size:2rem;">⏳</div><p>Loading...</p></div>
 
+        <div id="view-quiz" class="hidden">
+            <div id="quiz-question-area"><div id="quiz-card-content"></div></div>
+            
             <div id="calc-board-container">
                 <canvas id="drawing-canvas"></canvas>
                 <div id="smart-board-btn" class="is-pen" onclick="handleBoardBtn()">✏️</div>
@@ -240,10 +217,8 @@
                 <button class="action-btn btn-new" onclick="startNewSession()">🔄 New Round</button>
                 <button class="action-btn btn-exit" onclick="goHome()">🚪 Exit</button>
             </div>
-            <div style="text-align:left; margin-top:20px; font-weight:bold; color:#555;">Review:</div>
-            <div id="review-list" style="text-align:left; margin-top:10px;"></div>
+            <div id="review-list" style="text-align:left; margin-top:20px;"></div>
         </div>
-
     </div>
 
     <div id="quiz-footer">
@@ -260,35 +235,36 @@
         window.addEventListener('online', () => window.location.reload());
         if (!navigator.onLine) {
             document.getElementById('app-content').innerHTML = `
-                <div class="offline-msg">
-                    <h2 style="color:var(--accent);">No Internet</h2>
-                    <button class="retry-btn" onclick="window.location.reload()">Retry ↻</button>
-                </div>
+                <div class="offline-msg"><h2 style="color:var(--accent);">No Internet</h2><button class="retry-btn" onclick="window.location.reload()">Retry ↻</button></div>
             `;
         }
 
-        const examSubjects = {
-            "OAV": ["English", "Math", "Science", "Social Science"],
-            "NAVODAYA": ["Mental Ability", "Math", "Language"],
-            "EKALABYA": ["Mental Ability", "Math", "English"],
-            "PATHANI SAMANTA": ["Math"],
-            "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
+        // --- EXAM CONFIGURATION ---
+        const examConfig = {
+            "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"] },
+            "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
+            "EKALABYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "English"] },
+            "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] },
+            "NMMS": { type: "MCQ", subjects: ["Mental Ability", "Math", "Science", "Social Science"] },
+            "5TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] },
+            "8TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] }
         };
 
-        // VARIABLES
-        let currentExam = "", currentSubject = "";
+        let currentExam = "", currentSubject = "", currentCategory = "";
+        let isBoardMode = false;
         let allFetchedQuestions = [], sessionQuestions = [];    
-        let currentIndex = 0, score = 0;
-        let userReview = [], isQuizActive = false;
+        let currentIndex = 0, score = 0, userReview = [], isQuizActive = false;
 
-        // CANVAS VARS
-        let canvas, ctx, isDrawing = false;
-        let lastX = 0, lastY = 0;
-        let boardIsDirty = false; // Track if user has drawn
+        // CANVAS
+        let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0, boardIsDirty = false;
+        const boardContainer = document.getElementById('calc-board-container');
+        const qArea = document.getElementById('quiz-question-area');
+        const smartBtn = document.getElementById('smart-board-btn');
 
         const views = {
             exams: document.getElementById('view-exams'),
             subjects: document.getElementById('view-subjects'),
+            types: document.getElementById('view-types'),
             loading: document.getElementById('view-loading'),
             quiz: document.getElementById('view-quiz'),
             results: document.getElementById('view-results')
@@ -297,227 +273,171 @@
         const quizFooter = document.getElementById('quiz-footer');
         const nextBtn = document.getElementById('next-btn');
         const quizContent = document.getElementById('quiz-card-content');
-        const boardContainer = document.getElementById('calc-board-container');
-        const smartBtn = document.getElementById('smart-board-btn');
 
-        // --- BACK BUTTON ---
-        window.onpopstate = function(event) {
-            if (isQuizActive) {
-                if (confirm("Quit Quiz?")) exitQuiz(); 
-                else history.pushState(null, null, window.location.href);
-            }
-        };
-
-        function exitQuiz() {
-            isQuizActive = false;
-            hideAllViews();
-            quizHeader.style.display = 'none';
-            quizFooter.style.display = 'none';
-            views.subjects.classList.remove('hidden');
-        }
-
-        // --- CANVAS LOGIC ---
-        function initCanvas() {
-            canvas = document.getElementById('drawing-canvas');
-            ctx = canvas.getContext('2d');
-            resizeCanvas();
-
-            // Pen Style
-            ctx.lineWidth = 3;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#00008b'; // Blue Ink
-
-            // Events
-            canvas.addEventListener('mousedown', startDraw);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDraw);
-            canvas.addEventListener('mouseout', stopDraw);
-            
-            // Touch Events (Mobile)
-            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, {passive: false});
-            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
-            canvas.addEventListener('touchend', stopDraw);
-            
-            window.addEventListener('resize', resizeCanvas);
-        }
-
-        function resizeCanvas() {
-            if(!canvas) return;
-            const rect = boardContainer.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            // Reset styles after resize
-            ctx.lineWidth = 3;
-            ctx.lineJoin = 'round';
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#00008b';
-        }
-
-        function startDraw(e) {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            lastX = e.clientX - rect.left;
-            lastY = e.clientY - rect.top;
-
-            // CHANGE BUTTON TO CLEAR ICON
-            if (!boardIsDirty) {
-                boardIsDirty = true;
-                updateSmartBtn();
-            }
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            lastX = x; lastY = y;
-        }
-
-        function stopDraw() { isDrawing = false; }
+        // --- NAVIGATION ---
+        window.onpopstate = function(event) { if (isQuizActive && confirm("Quit Quiz?")) exitQuiz(); else history.pushState(null, null, window.location.href); };
         
-        window.handleBoardBtn = () => {
-            if (boardIsDirty) {
-                // It is a Clear Button
-                if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
-                boardIsDirty = false;
-                updateSmartBtn();
-            }
-        };
-
-        function updateSmartBtn() {
-            if (boardIsDirty) {
-                smartBtn.innerHTML = "🗑️";
-                smartBtn.classList.remove('is-pen');
-                smartBtn.classList.add('is-delete');
-            } else {
-                smartBtn.innerHTML = "✏️";
-                smartBtn.classList.remove('is-delete');
-                smartBtn.classList.add('is-pen');
-            }
-        }
-
-
-        // --- INIT APP ---
+        function exitQuiz() { isQuizActive = false; hideAllViews(); quizHeader.style.display = 'none'; quizFooter.style.display = 'none'; views.subjects.classList.remove('hidden'); }
         function init() {
-            const grid = document.getElementById('exam-grid');
-            grid.innerHTML = "";
-            Object.keys(examSubjects).forEach(exam => {
-                const tile = document.createElement('div');
-                tile.className = 'tile';
-                tile.innerText = exam;
-                tile.onclick = () => showSubjects(exam);
-                grid.appendChild(tile);
+            const grid = document.getElementById('exam-grid'); grid.innerHTML = "";
+            Object.keys(examConfig).forEach(exam => {
+                const tile = document.createElement('div'); tile.className = 'tile'; tile.innerText = exam;
+                tile.onclick = () => showSubjects(exam); grid.appendChild(tile);
             });
-            initCanvas(); 
+            initCanvas();
         }
         init();
 
-        window.goHome = () => {
-            isQuizActive = false;
-            hideAllViews();
-            views.exams.classList.remove('hidden');
-            quizHeader.style.display = 'none';
-            quizFooter.style.display = 'none';
-        };
-
+        window.goHome = () => { isQuizActive = false; hideAllViews(); views.exams.classList.remove('hidden'); quizHeader.style.display = 'none'; quizFooter.style.display = 'none'; };
+        window.goBackToSubjects = () => { hideAllViews(); views.subjects.classList.remove('hidden'); };
+        
         function hideAllViews() { Object.values(views).forEach(el => el.classList.add('hidden')); }
 
         window.showSubjects = (exam) => {
-            currentExam = exam;
+            currentExam = exam; isBoardMode = (examConfig[exam].type === "BOARD");
             document.getElementById('selected-exam-title').innerText = exam;
-            const grid = document.getElementById('subject-grid');
-            grid.innerHTML = "";
-            examSubjects[exam].forEach(sub => {
-                const tile = document.createElement('div');
-                tile.className = 'tile subject-tile';
-                tile.innerText = sub;
-                tile.onclick = () => fetchAndStart(sub);
+            const grid = document.getElementById('subject-grid'); grid.innerHTML = "";
+            
+            examConfig[exam].subjects.forEach(sub => {
+                const tile = document.createElement('div'); tile.className = 'tile subject-tile'; tile.innerText = sub;
+                tile.onclick = () => isBoardMode ? showTypes(sub) : fetchAndStart(sub);
                 grid.appendChild(tile);
             });
-            hideAllViews();
-            views.subjects.classList.remove('hidden');
+            hideAllViews(); views.subjects.classList.remove('hidden');
         };
 
-        window.fetchAndStart = async (subject) => {
+        window.showTypes = (subject) => {
             currentSubject = subject;
-            hideAllViews();
-            views.loading.classList.remove('hidden');
+            document.getElementById('selected-subject-title').innerText = subject;
+            hideAllViews(); views.types.classList.remove('hidden');
+        };
+
+        // --- DATA FETCHING ---
+        window.fetchAndStart = async (subject) => {
+            currentSubject = subject; isBoardMode = false;
+            runQuery();
+        };
+
+        window.fetchAndStartBoard = async (category) => {
+            currentCategory = category; isBoardMode = true;
+            runQuery();
+        };
+
+        async function runQuery() {
+            hideAllViews(); views.loading.classList.remove('hidden');
             try {
-                const q = query(collection(db, "questions"), where("exam", "==", currentExam), where("subject", "==", subject), where("verified", "==", true), orderBy("timestamp", "desc"));
+                let q;
+                if(isBoardMode) {
+                    q = query(collection(db, "questions"), where("exam", "==", currentExam), where("subject", "==", currentSubject), where("category", "==", currentCategory), where("verified", "==", true), orderBy("timestamp", "desc"));
+                } else {
+                    q = query(collection(db, "questions"), where("exam", "==", currentExam), where("subject", "==", currentSubject), where("verified", "==", true), orderBy("timestamp", "desc"));
+                }
+
                 const snapshot = await getDocs(q);
                 allFetchedQuestions = [];
-                if(snapshot.empty) {
-                    views.loading.innerHTML = "<p>No questions found.</p><button class='retry-btn' onclick='goHome()'>Back</button>";
-                    return;
-                }
+                if(snapshot.empty) { views.loading.innerHTML = "<p>No questions found.</p><button class='retry-btn' onclick='goHome()'>Back</button>"; return; }
+                
                 snapshot.forEach(doc => allFetchedQuestions.push({ id: doc.id, ...doc.data() }));
                 startNewSession();
             } catch (error) {
-                views.loading.innerHTML = `<p style="color:red">Error: ${error.message}</p><button class="retry-btn" onclick="goHome()">Go Back</button>`;
+                let msg = error.message;
+                if (msg.includes("index")) msg += `<br><br><a href="https://console.firebase.google.com/v1/r/project/ertquiz/firestore/indexes" target="_blank" style="color:red; font-weight:bold;">Create Index Required</a>`;
+                views.loading.innerHTML = `<p style="color:red">Error: ${msg}</p><button class="retry-btn" onclick="goHome()">Go Back</button>`;
             }
-        };
+        }
 
         window.startNewSession = () => {
-            history.pushState(null, null, window.location.href);
-            isQuizActive = true;
+            history.pushState(null, null, window.location.href); isQuizActive = true;
             const shuffled = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
-            sessionQuestions = shuffled.slice(0, 10);
+            sessionQuestions = isBoardMode ? shuffled : shuffled.slice(0, 10);
             resetAndStart();
         };
-
-        window.restartCurrentSet = () => {
-            history.pushState(null, null, window.location.href);
-            isQuizActive = true;
-            resetAndStart();
-        };
+        
+        window.restartCurrentSet = () => { history.pushState(null, null, window.location.href); isQuizActive = true; resetAndStart(); };
 
         function resetAndStart() {
             currentIndex = 0; score = 0; userReview = [];
-            hideAllViews();
-            views.quiz.classList.remove('hidden');
-            quizHeader.style.display = 'flex';
+            hideAllViews(); views.quiz.classList.remove('hidden');
+            
+            // --- DYNAMIC LAYOUT SWITCHER ---
+            if (isBoardMode) {
+                // Board Mode: No Header, No Canvas, Full Height Text
+                quizHeader.style.display = 'none';
+                boardContainer.style.display = 'none'; // HIDE CANVAS
+                qArea.style.maxHeight = '100%'; 
+                qArea.style.flexGrow = '1';
+            } else {
+                // Entrance Mode: Header, Canvas, Split Screen
+                quizHeader.style.display = 'flex';
+                boardContainer.style.display = 'block'; // SHOW CANVAS
+                qArea.style.maxHeight = '55%'; 
+                qArea.style.flexGrow = '0';
+            }
             quizFooter.style.display = 'block';
             
-            setTimeout(resizeCanvas, 50);
+            // Delay resize to let DOM update
+            if(!isBoardMode) setTimeout(resizeCanvas, 50);
             renderSlide();
         }
 
         function renderSlide() {
             const data = sessionQuestions[currentIndex];
             const total = sessionQuestions.length;
-            
-            document.getElementById('q-counter').innerText = `Q ${currentIndex + 1}/${total}`;
-            document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
 
-            nextBtn.disabled = true; 
-            nextBtn.innerText = (currentIndex === total - 1) ? "Finish 🏁" : "Next ➡";
-            nextBtn.style.opacity = "0.5";
+            if(!isBoardMode) {
+                // Clear board only in Entrance Mode
+                if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                boardIsDirty = false; updateSmartBtn();
+                document.getElementById('q-counter').innerText = `Q ${currentIndex + 1}/${total}`;
+                document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
+            }
 
-            // Clear board
-            if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
-            boardIsDirty = false;
-            updateSmartBtn();
+            // BUTTON LOGIC
+            if (isBoardMode) {
+                nextBtn.disabled = false;
+                nextBtn.style.opacity = "1";
+                if (currentIndex === total - 1) {
+                    nextBtn.innerText = "🏠 Back to Menu";
+                    nextBtn.style.background = "#555";
+                } else {
+                    nextBtn.innerText = "Next ➡";
+                    nextBtn.style.background = "var(--primary)";
+                }
+            } else {
+                nextBtn.disabled = true; 
+                nextBtn.innerText = (currentIndex === total - 1) ? "Finish 🏁" : "Next ➡";
+                nextBtn.style.opacity = "0.5";
+                nextBtn.style.background = "var(--primary)";
+            }
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
 
-            quizContent.innerHTML = `
-                ${imgHTML}
-                <div class="q-text">${data.question}</div>
-                <div id="options-area">
-                    <button class="opt-btn" onclick="selectAnswer(this, 'A', '${data.answer}')">A) ${data.options.A}</button>
-                    <button class="opt-btn" onclick="selectAnswer(this, 'B', '${data.answer}')">B) ${data.options.B}</button>
-                    <button class="opt-btn" onclick="selectAnswer(this, 'C', '${data.answer}')">C) ${data.options.C}</button>
-                    <button class="opt-btn" onclick="selectAnswer(this, 'D', '${data.answer}')">D) ${data.options.D}</button>
-                </div>
-            `;
-            
-            setTimeout(resizeCanvas, 10);
+            if (isBoardMode) {
+                // BOARD LAYOUT
+                quizContent.innerHTML = `
+                    ${imgHTML}
+                    <div class="q-text">${data.question}</div>
+                    <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">👁️ Show Answer</button>
+                    <div class="board-answer-box">
+                        <strong>Answer:</strong><br>
+                        ${data.answerText || ''}
+                        ${data.answerImage ? `<br><img src="${data.answerImage}" class="q-img" style="margin-top:10px;">` : ''}
+                    </div>
+                `;
+            } else {
+                // ENTRANCE LAYOUT
+                quizContent.innerHTML = `
+                    ${imgHTML}
+                    <div class="q-text">${data.question}</div>
+                    <div id="options-area">
+                        <button class="opt-btn" onclick="selectAnswer(this, 'A', '${data.answer}')">A) ${data.options.A}</button>
+                        <button class="opt-btn" onclick="selectAnswer(this, 'B', '${data.answer}')">B) ${data.options.B}</button>
+                        <button class="opt-btn" onclick="selectAnswer(this, 'C', '${data.answer}')">C) ${data.options.C}</button>
+                        <button class="opt-btn" onclick="selectAnswer(this, 'D', '${data.answer}')">D) ${data.options.D}</button>
+                    </div>
+                `;
+            }
+            if(!isBoardMode) setTimeout(resizeCanvas, 10);
         }
 
         window.selectAnswer = (btn, selected, correct) => {
@@ -525,45 +445,54 @@
             btns.forEach(b => b.classList.add('disabled'));
 
             const isCorrect = selected === correct;
-            if(isCorrect) {
-                btn.classList.add('correct'); score++;
-            } else {
-                btn.classList.add('wrong');
-                btns.forEach(b => { if(b.innerText.startsWith(correct + ")")) b.classList.add('correct'); });
-            }
+            if(isCorrect) { btn.classList.add('correct'); score++; } 
+            else { btn.classList.add('wrong'); btns.forEach(b => { if(b.innerText.startsWith(correct + ")")) b.classList.add('correct'); }); }
+
             const qData = sessionQuestions[currentIndex];
             userReview.push({ q: qData.question, correct: isCorrect, yourAns: qData.options[selected], correctAns: qData.options[correct] });
-            nextBtn.disabled = false;
-            nextBtn.style.opacity = "1";
+            nextBtn.disabled = false; nextBtn.style.opacity = "1";
         };
 
         window.nextQuestion = () => {
+            if (isBoardMode && currentIndex === sessionQuestions.length - 1) {
+                goHome(); return;
+            }
             currentIndex++;
             if(currentIndex < sessionQuestions.length) renderSlide();
             else showResults();
         };
 
         function showResults() {
-            isQuizActive = false;
-            hideAllViews();
-            quizHeader.style.display = 'none';
-            quizFooter.style.display = 'none';
+            isQuizActive = false; hideAllViews(); quizHeader.style.display = 'none'; quizFooter.style.display = 'none';
             views.results.classList.remove('hidden');
-
             document.getElementById('final-score').innerText = score;
             document.getElementById('score-text').innerText = `You scored ${score} out of ${sessionQuestions.length}`;
-
-            const list = document.getElementById('review-list');
-            list.innerHTML = "";
+            
+            const list = document.getElementById('review-list'); list.innerHTML = "<strong>Review:</strong>";
             userReview.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.style.padding = "10px";
-                div.style.borderBottom = "1px solid #eee";
+                const div = document.createElement('div'); div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee";
                 div.style.borderLeft = item.correct ? "4px solid var(--correct)" : "4px solid var(--wrong)";
                 div.innerHTML = `<div>Q${i+1}: ${item.q}</div><div style="font-size:0.85em; color:#666;">You: ${item.yourAns} | Correct: <b>${item.correctAns}</b></div>`;
                 list.appendChild(div);
             });
         }
+
+        // --- CANVAS LOGIC ---
+        function initCanvas() {
+            canvas = document.getElementById('drawing-canvas'); ctx = canvas.getContext('2d');
+            resizeCanvas(); ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = '#00008b';
+            canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('mouseout', stopDraw);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, {passive: false});
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
+            canvas.addEventListener('touchend', stopDraw);
+            window.addEventListener('resize', resizeCanvas);
+        }
+        function resizeCanvas() { if(!canvas || boardContainer.style.display === 'none') return; const rect = boardContainer.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = '#00008b'; }
+        function startDraw(e) { isDrawing = true; const rect = canvas.getBoundingClientRect(); lastX = e.clientX - rect.left; lastY = e.clientY - rect.top; if (!boardIsDirty) { boardIsDirty = true; updateSmartBtn(); } }
+        function draw(e) { if (!isDrawing) return; const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); lastX = x; lastY = y; }
+        function stopDraw() { isDrawing = false; }
+        window.handleBoardBtn = () => { if (boardIsDirty) { if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height); boardIsDirty = false; updateSmartBtn(); } };
+        function updateSmartBtn() { if (boardIsDirty) { smartBtn.innerHTML = "🗑️"; smartBtn.classList.remove('is-pen'); smartBtn.classList.add('is-delete'); } else { smartBtn.innerHTML = "✏️"; smartBtn.classList.remove('is-delete'); smartBtn.classList.add('is-pen'); } }
     </script>
 </body>
 </html>

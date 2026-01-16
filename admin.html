@@ -21,6 +21,7 @@
         .app-logo { height: 50px; width: 50px; border-radius: 50%; object-fit: cover; }
         h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
 
+        /* Toolbar */
         .toolbar { display: flex; gap: 20px; background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 25px; flex-wrap: wrap; border: 1px solid #e0e0e0; align-items: center; }
         .filter-group { display: flex; flex-direction: column; }
         .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
@@ -28,49 +29,39 @@
         
         .btn-dl { background: var(--primary); color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto;}
         
+        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
         th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; vertical-align: top; }
         th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
         tr:nth-child(even) { background-color: #f8f9fa; }
         
-        .thumb { max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; }
-        
+        .thumb { max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; display: block; margin-top: 5px;}
+        .ans-thumb { border-color: #2e7d32; } /* Green border for answer images */
+
         /* Edit Box */
         .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
-        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; display:block; margin-bottom: 10px; }
+        .edit-box label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #d84315; }
+        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; display:block; margin-bottom: 10px; box-sizing: border-box; padding: 8px; }
         .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
 
-        /* --- ACTION BUTTONS --- */
+        /* Action Buttons */
         .action-container { display: flex; flex-direction: column; gap: 8px; }
-        
-        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center; }
-        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
-        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
-        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; text-align: center; }
+        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
+        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
+        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
 
         .badge-verified {
-            display: inline-block;
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border: 1px solid #c8e6c9;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 8px;
+            display: inline-block; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;
+            padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;
+        }
+        .badge-type {
+            display: inline-block; background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb;
+            padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: bold; margin-bottom: 5px;
         }
 
         /* Loading Spinner */
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: auto;
-        }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -108,18 +99,13 @@
             <thead>
                 <tr>
                     <th style="width:20%">Info</th>
-                    <th style="width:40%">Question</th>
-                    <th style="width:25%">Answer</th>
+                    <th style="width:35%">Question</th>
+                    <th style="width:30%">Answer / Options</th>
                     <th style="width:15%">Actions</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr>
-                    <td colspan="4" style="text-align:center; padding:40px;">
-                        <div class="loader"></div>
-                        <p style="margin-top:10px; color:#666;">Loading questions...</p>
-                    </td>
-                </tr>
+                <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#666;">Loading data...</p></td></tr>
             </tbody>
         </table>
     </div>
@@ -129,16 +115,10 @@
         import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Enable Fast Loading (Cache)
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.log("Persistence suppressed (Likely multiple tabs open).");
-        });
+        enableIndexedDbPersistence(db).catch((err) => console.log("Persistence suppressed."));
 
         const pass = prompt("Enter Admin Password:");
-        if(pass !== "admin123") { 
-            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; 
-            throw new Error("Stop"); 
-        }
+        if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
 
         let allData = [];
         const examSelect = document.getElementById('filterExam');
@@ -146,12 +126,14 @@
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
 
+        // --- FETCH DATA ---
         onSnapshot(query(collection(db, "questions"), orderBy("timestamp", "desc")), (snapshot) => {
             allData = [];
             snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
             updateDropdowns();
         });
 
+        // --- DROPDOWNS ---
         function updateDropdowns() {
             const currentExam = examSelect.value;
             const currentTeacher = teacherSelect.value;
@@ -173,42 +155,85 @@
             el.innerHTML = `<option value="all">${defaultText}</option>`;
             items.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = item; 
-                opt.innerText = item;
+                opt.value = item; opt.innerText = item;
                 if(item === selectedValue) opt.selected = true;
                 el.appendChild(opt);
             });
         }
 
+        // --- FILTER ---
         window.applyFilters = () => {
             const e = examSelect.value;
             const t = teacherSelect.value;
             const s = subjectSelect.value;
-            
             const filtered = allData.filter(item => {
-                return (e === "all" || item.exam === e) &&
-                       (t === "all" || item.teacher === t) && 
-                       (s === "all" || item.subject === s);
+                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s);
             });
             renderTable(filtered);
         }
 
+        // --- RENDER TABLE ---
         function renderTable(data) {
             tableBody.innerHTML = "";
-            
-            if(data.length === 0) { 
-                tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; 
-                return; 
-            }
+            if(data.length === 0) { tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found.</td></tr>"; return; }
             
             data.forEach(item => {
                 const isVerified = item.verified === true;
                 const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
+                const verifyBtn = isVerified ? `<button class="btn-unverify" onclick="window.toggleVerify('${item.id}', false)">↩ Undo</button>` : `<button class="btn-verify" onclick="window.toggleVerify('${item.id}', true)">✅ Verify</button>`;
                 
-                const verifyBtn = isVerified 
-                    ? `<button class="btn-unverify" onclick="window.toggleVerify('${item.id}', false)">↩ Undo</button>`
-                    : `<button class="btn-verify" onclick="window.toggleVerify('${item.id}', true)">✅ Verify</button>`;
+                // Determine Mode (MCQ vs Subjective)
+                const isSubjective = item.type === "SUBJECTIVE";
 
+                // 1. Build Answer Column HTML
+                let answerDisplay = "";
+                if (isSubjective) {
+                    answerDisplay = `
+                        <div style="font-size:0.9em;">
+                            <span style="color:#d32f2f; font-weight:bold; font-size:0.8em; border:1px solid #d32f2f; padding:2px 4px; border-radius:4px;">${item.category || 'Subjective'}</span><br>
+                            <div style="margin-top:5px; white-space: pre-wrap;">${item.answerText || '<i>No text answer</i>'}</div>
+                            ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb ans-thumb" title="Answer Image"></a>` : ''}
+                        </div>`;
+                } else {
+                    answerDisplay = `
+                        <div style="font-size:0.85em;">
+                            A: ${item.options?.A || ''}<br>B: ${item.options?.B || ''}<br>
+                            C: ${item.options?.C || ''}<br>D: ${item.options?.D || ''}<br>
+                            <strong style="color:#d32f2f; display:block; margin-top:5px;">Ans: ${item.answer}</strong>
+                        </div>`;
+                }
+
+                // 2. Build Edit Form HTML (Conditionals)
+                let editFields = "";
+                if (isSubjective) {
+                    editFields = `
+                        <label>Category:</label>
+                        <select id="cat-${item.id}">
+                            <option value="Very Short" ${item.category === 'Very Short' ? 'selected' : ''}>Very Short</option>
+                            <option value="Short" ${item.category === 'Short' ? 'selected' : ''}>Short</option>
+                            <option value="Long" ${item.category === 'Long' ? 'selected' : ''}>Long</option>
+                        </select>
+                        <label>Answer Text:</label> <textarea id="ansTxt-${item.id}" rows="3">${item.answerText || ''}</textarea>
+                        <label>New Answer Image:</label> <input type="file" id="ansFile-${item.id}">
+                    `;
+                } else {
+                    editFields = `
+                        <label>Options:</label>
+                        <input type="text" id="opA-${item.id}" value="${item.options?.A || ''}" placeholder="A">
+                        <input type="text" id="opB-${item.id}" value="${item.options?.B || ''}" placeholder="B">
+                        <input type="text" id="opC-${item.id}" value="${item.options?.C || ''}" placeholder="C">
+                        <input type="text" id="opD-${item.id}" value="${item.options?.D || ''}" placeholder="D">
+                        <label>Correct Ans:</label>
+                        <select id="ansMCQ-${item.id}">
+                            <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
+                            <option value="B" ${item.answer === 'B' ? 'selected' : ''}>B</option>
+                            <option value="C" ${item.answer === 'C' ? 'selected' : ''}>C</option>
+                            <option value="D" ${item.answer === 'D' ? 'selected' : ''}>D</option>
+                        </select>
+                    `;
+                }
+
+                // 3. Render Row
                 tableBody.innerHTML += `
                     <tr>
                         <td>
@@ -222,33 +247,19 @@
                                 ${item.question}
                                 ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
                             </div>
+                            
                             <div id="edit-${item.id}" class="edit-box">
                                 <label>Question:</label> <textarea id="txt-${item.id}" rows="2">${item.question}</textarea>
-                                <label>New Image:</label> <input type="file" id="file-${item.id}">
-                                <label>Options:</label>
-                                <input type="text" id="opA-${item.id}" value="${item.options.A}" placeholder="A">
-                                <input type="text" id="opB-${item.id}" value="${item.options.B}" placeholder="B">
-                                <input type="text" id="opC-${item.id}" value="${item.options.C}" placeholder="C">
-                                <input type="text" id="opD-${item.id}" value="${item.options.D}" placeholder="D">
-                                <label>Ans:</label>
-                                <select id="ans-${item.id}">
-                                    <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
-                                    <option value="B" ${item.answer === 'B' ? 'selected' : ''}>B</option>
-                                    <option value="C" ${item.answer === 'C' ? 'selected' : ''}>C</option>
-                                    <option value="D" ${item.answer === 'D' ? 'selected' : ''}>D</option>
-                                </select>
-                                <div class="edit-btns">
-                                    <button onclick="window.saveAdminEdit('${item.id}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
+                                <label>New Question Image:</label> <input type="file" id="file-${item.id}">
+                                
+                                ${editFields} <div class="edit-btns">
+                                    <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
                                     <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div id="disp-ops-${item.id}">
-                                A: ${item.options.A}<br>B: ${item.options.B}<br>
-                                C: ${item.options.C}<br>D: ${item.options.D}<br>
-                                <strong style="color:#d32f2f;">Ans: ${item.answer}</strong>
-                            </div>
+                            ${answerDisplay}
                         </td>
                         <td>
                             <div class="action-container">
@@ -262,104 +273,86 @@
             });
         }
 
-        window.toggleVerify = async (id, status) => {
-            try { await updateDoc(doc(db, "questions", id), { verified: status }); } 
-            catch (e) { alert("Error: " + e.message); }
-        }
-
-        // --- CONFIRMATION DIALOG ENSURED ---
-        window.deleteQ = async (id) => {
-            if(confirm("Are you sure you want to permanently delete this question?")) {
-                await deleteDoc(doc(db, "questions", id));
-            }
-        }
+        // --- GLOBAL ACTIONS ---
+        window.toggleVerify = async (id, status) => { try { await updateDoc(doc(db, "questions", id), { verified: status }); } catch (e) { alert("Error: " + e.message); } }
+        window.deleteQ = async (id) => { if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id)); }
 
         window.toggleEdit = (id) => {
             const box = document.getElementById(`edit-${id}`);
             const dispQ = document.getElementById(`disp-q-${id}`);
-            const dispOps = document.getElementById(`disp-ops-${id}`);
-            if (box.style.display === "block") {
-                box.style.display = "none";
-                dispQ.style.display = "block";
-                dispOps.style.visibility = "visible";
-            } else {
-                box.style.display = "block";
-                dispQ.style.display = "none";
-                dispOps.style.visibility = "hidden";
-            }
+            if (box.style.display === "block") { box.style.display = "none"; dispQ.style.display = "block"; } 
+            else { box.style.display = "block"; dispQ.style.display = "none"; }
         }
 
-        window.saveAdminEdit = async (id) => {
-            const btn = document.querySelector(`#edit-${id} button`);
-            btn.innerText = "Saving...";
+        // IMAGE HELPER
+        const compressImage = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image(); img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const maxWidth = 800; const scaleSize = maxWidth / img.width;
+                        canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
+                        canvas.height = (img.width > maxWidth) ? (img.height * scaleSize) : img.height;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    };
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        };
+
+        // --- SAVE EDIT ---
+        window.saveAdminEdit = async (id, type) => {
+            const btn = document.querySelector(`#edit-${id} button`); btn.innerText = "Saving...";
             try {
-                const file = document.getElementById(`file-${id}`).files[0];
-                const updates = {
-                    question: document.getElementById(`txt-${id}`).value,
-                    options: {
+                const qFile = document.getElementById(`file-${id}`).files[0];
+                let updates = { question: document.getElementById(`txt-${id}`).value };
+
+                // Process Question Image
+                if (qFile) {
+                    if(qFile.size > 5*1024*1024) throw new Error("Image too large");
+                    updates.imageUrl = await compressImage(qFile);
+                }
+
+                // Process Type Specific Fields
+                if (type === "SUBJECTIVE") {
+                    updates.category = document.getElementById(`cat-${id}`).value;
+                    updates.answerText = document.getElementById(`ansTxt-${id}`).value;
+                    const aFile = document.getElementById(`ansFile-${id}`).files[0];
+                    if (aFile) {
+                        if(aFile.size > 5*1024*1024) throw new Error("Image too large");
+                        updates.answerImage = await compressImage(aFile);
+                    }
+                } else {
+                    updates.options = {
                         A: document.getElementById(`opA-${id}`).value,
                         B: document.getElementById(`opB-${id}`).value,
                         C: document.getElementById(`opC-${id}`).value,
                         D: document.getElementById(`opD-${id}`).value,
-                    },
-                    answer: document.getElementById(`ans-${id}`).value
-                };
-                if (file) {
-                    if(file.size > 5 * 1024 * 1024) throw new Error("File too large");
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = async (e) => {
-                        const img = new Image();
-                        img.src = e.target.result;
-                        img.onload = async () => {
-                            const canvas = document.createElement('canvas');
-                            const scale = 600 / img.width;
-                            canvas.width = 600;
-                            canvas.height = img.height * scale;
-                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                            updates.imageUrl = canvas.toDataURL('image/jpeg', 0.6);
-                            await updateDoc(doc(db, "questions", id), updates);
-                            alert("Updated!");
-                        }
-                    }
-                } else {
-                    await updateDoc(doc(db, "questions", id), updates);
-                    alert("Updated!");
+                    };
+                    updates.answer = document.getElementById(`ansMCQ-${id}`).value;
                 }
+
+                await updateDoc(doc(db, "questions", id), updates);
+                alert("Updated!");
             } catch (e) {
-                alert("Error: " + e.message);
-                btn.innerText = "Save";
+                alert("Error: " + e.message); btn.innerText = "Save";
             }
-        }
+        };
 
         window.downloadJSON = () => {
-            const e = examSelect.value;
-            const t = teacherSelect.value;
-            const s = subjectSelect.value;
-            
-            // FILTER ONLY VERIFIED QUESTIONS
+            const e = examSelect.value; const t = teacherSelect.value; const s = subjectSelect.value;
             const dataToDownload = allData.filter(item => {
-                const matchesFilters = (e === "all" || item.exam === e) &&
-                                       (t === "all" || item.teacher === t) && 
-                                       (s === "all" || item.subject === s);
-                return matchesFilters && item.verified === true; 
+                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s) && item.verified === true;
             });
-
-            if (dataToDownload.length === 0) {
-                return alert("No VERIFIED questions found matching your filters.");
-            }
-
-            const fTeacher = t === "all" ? "AllTeachers" : t;
-            const fSubject = s === "all" ? "AllSubjects" : s;
-            const filename = `${fTeacher}_${fSubject}_${Date.now()}.json`;
-
+            if (dataToDownload.length === 0) return alert("No VERIFIED questions found.");
+            
+            const filename = `Questions_${Date.now()}.json`;
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
-            const dl = document.createElement('a');
-            dl.setAttribute("href", dataStr);
-            dl.setAttribute("download", filename);
-            document.body.appendChild(dl);
-            dl.click();
-            dl.remove();
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", filename);
+            document.body.appendChild(dl); dl.click(); dl.remove();
         }
     </script>
 </body>

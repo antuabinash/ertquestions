@@ -5,88 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eRT Odisha - Teacher Portal</title>
     <style>
-        /* --- MODERN DARK BLUE & RED THEME --- */
+        /* --- MODERN THEME --- */
         :root {
             --primary: #0d47a1; 
             --primary-hover: #002171;
             --accent: #d32f2f; 
-            --accent-hover: #9a0007;
             --bg-color: #f4f6f8;
             --text-dark: #333;
-            --success-bg: #e8f5e9;
-            --success-text: #2e7d32;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: var(--bg-color); color: var(--text-dark); }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: var(--bg-color); color: var(--text-dark); }
         
         .top-bar { 
-            background: var(--primary); 
-            padding: 10px 20px; 
-            border-radius: 8px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 25px; 
-            box-shadow: var(--card-shadow);
-            color: white;
+            background: var(--primary); padding: 15px 20px; border-radius: 8px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 25px; box-shadow: var(--card-shadow); color: white;
         }
-        
         .brand-wrapper { display: flex; align-items: center; gap: 15px; }
-        .app-logo { height: 50px; width: 50px; border-radius: 50%; border: 2px solid white; object-fit: cover; background: white; }
-        .top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 600; line-height: 1.2; }
+        .app-logo { height: 50px; width: 50px; border-radius: 50%; border: 2px solid white; background: white; object-fit: cover; }
+        .top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
         
-        .logout-btn { 
-            background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; 
-            cursor: pointer; font-size: 0.9rem; font-weight: bold; display: none; transition: background 0.2s;
-        }
-        .logout-btn:hover { background: var(--accent-hover); }
+        .logout-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
 
-        .card { 
-            background: white; padding: 25px; border-radius: 12px; 
-            box-shadow: var(--card-shadow); margin-bottom: 20px; border-top: 4px solid var(--primary); 
-        }
-
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 20px; border-top: 4px solid var(--primary); }
         h3 { margin-top: 0; color: var(--primary); }
 
         input, select, textarea { 
             width: 100%; margin: 10px 0; padding: 12px; box-sizing: border-box; 
-            border: 1px solid #ccc; border-radius: 6px; font-size: 16px; transition: border 0.3s;
+            border: 1px solid #ccc; border-radius: 6px; font-size: 16px; 
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
-
-        .section-label { font-weight: 600; font-size: 0.9em; margin-top: 15px; display: block; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-label { font-weight: 600; font-size: 0.9em; margin-top: 15px; display: block; color: #555; text-transform: uppercase; }
 
         button#saveBtn, button#authBtn { 
             width: 100%; background: var(--primary); color: white; border: none; font-weight: bold; 
-            cursor: pointer; font-size: 16px; margin-top: 15px; border-radius: 6px; padding: 14px; transition: background 0.2s;
+            cursor: pointer; font-size: 16px; margin-top: 15px; border-radius: 6px; padding: 14px; 
         }
-        button#saveBtn:hover, button#authBtn:hover { background: var(--primary-hover); }
-
-        button.secondary { background: #546e7a; color: white; border: none; border-radius: 4px; }
-        button.delete { background: var(--accent); color: white; border: none; border-radius: 4px; }
-        button.secondary:hover { background: #37474f; }
-        button.delete:hover { background: var(--accent-hover); }
+        button.secondary { background: #546e7a; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        button.delete { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
 
         .hidden { display: none !important; }
-        .q-item { border-bottom: 1px solid #eee; padding: 15px 0; position: relative; }
-        .q-img-preview { max-width: 150px; display: block; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .q-item { border-bottom: 1px solid #eee; padding: 15px 0; }
+        .q-img-preview { max-width: 100px; display: block; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; }
         
-        /* --- VERIFIED BADGE STYLE --- */
-        .verified-badge {
-            background-color: var(--success-bg);
-            color: var(--success-text);
-            border: 1px solid #c8e6c9;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 800;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-left: 8px;
-            vertical-align: middle;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
+        .verified-badge { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:2px 8px; border-radius:12px; font-size:0.7em; font-weight:bold; vertical-align:middle; margin-left:5px; }
     </style>
 </head>
 <body>
@@ -94,40 +56,35 @@
     <div class="top-bar">
         <div class="brand-wrapper">
             <img src="logo.jpg" alt="Logo" class="app-logo">
-            <h2>eRT Odisha<br><span style="font-size:0.8em; font-weight:400;">Question Maker</span></h2>
+            <h2>eRT Odisha<br><span style="font-size:0.8em; font-weight:400;">Teacher Portal</span></h2>
         </div>
-        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout ➡</button>
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
     <div id="auth-section" class="card">
         <h3 id="auth-title">Teacher Login</h3>
-        <p style="color:#666; margin-bottom:15px;">Please sign in to continue.</p>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
-        
-        <div id="signup-fields" class="hidden">
-            <input type="text" id="tName" placeholder="Your Full Name">
-        </div>
-        
+        <div id="signup-fields" class="hidden"><input type="text" id="tName" placeholder="Your Full Name"></div>
         <button onclick="handleAuth()" id="authBtn">Login</button>
-        <p style="text-align:center; font-size:0.9em; cursor:pointer; color:var(--primary); margin-top:15px; font-weight:bold;" onclick="toggleAuthMode()">
-            Switch to Signup / Login
-        </p>
+        <p style="text-align:center; cursor:pointer; color:var(--primary); margin-top:15px;" onclick="toggleAuthMode()">Switch to Signup / Login</p>
     </div>
 
     <div id="dashboard-section" class="hidden">
         <div class="card">
-            <h3>Add New Question</h3>
+            <h3>Add Question</h3>
             <input type="hidden" id="editId">
             
             <label class="section-label">1. Select Exam:</label>
-            <select id="qExam" onchange="updateSubjects()">
+            <select id="qExam" onchange="handleExamChange()">
                 <option value="" disabled selected>-- Choose Exam --</option>
-                <option value="OAV">OAV</option>
-                <option value="NAVODAYA">NAVODAYA</option>
-                <option value="EKALABYA">EKALABYA</option>
+                <option value="OAV">OAV (Entrance)</option>
+                <option value="NAVODAYA">NAVODAYA (Entrance)</option>
+                <option value="EKALABYA">EKALABYA (Entrance)</option>
                 <option value="PATHANI SAMANTA">PATHANI SAMANTA</option>
                 <option value="NMMS">NMMS</option>
+                <option value="5TH BOARD">5th Board Exam</option>
+                <option value="8TH BOARD">8th Board Exam</option>
             </select>
 
             <label class="section-label">2. Select Subject:</label>
@@ -135,25 +92,43 @@
                 <option value="" disabled selected>-- Select Exam First --</option>
             </select>
 
-            <label class="section-label">3. Question Details:</label>
+            <div id="cat-wrapper" class="hidden">
+                <label class="section-label">Question Category:</label>
+                <select id="qCategory">
+                    <option value="Very Short">Very Short Answer</option>
+                    <option value="Short">Short Answer</option>
+                    <option value="Long">Long Answer</option>
+                </select>
+            </div>
+
+            <label class="section-label">3. Question:</label>
             <textarea id="qText" placeholder="Type Question Here..." rows="3"></textarea>
-            
-            <label class="section-label">Image (Optional):</label>
+            <label style="font-size:0.8em; color:#666;">Question Image (Optional):</label>
             <input type="file" id="qImage" accept="image/*">
-            <div id="currentImgPreview" style="display:none; font-size:0.8em; color:var(--primary); margin-top:5px;">(Current image hidden, upload new one to replace)</div>
             
-            <input type="text" id="opA" placeholder="Option A">
-            <input type="text" id="opB" placeholder="Option B">
-            <input type="text" id="opC" placeholder="Option C">
-            <input type="text" id="opD" placeholder="Option D">
-            
-            <label class="section-label">4. Correct Answer:</label>
-            <select id="correctAns">
-                <option value="A">Option A</option>
-                <option value="B">Option B</option>
-                <option value="C">Option C</option>
-                <option value="D">Option D</option>
-            </select>
+            <div id="mcq-inputs">
+                <label class="section-label">Options:</label>
+                <input type="text" id="opA" placeholder="Option A">
+                <input type="text" id="opB" placeholder="Option B">
+                <input type="text" id="opC" placeholder="Option C">
+                <input type="text" id="opD" placeholder="Option D">
+                
+                <label class="section-label">Correct Answer:</label>
+                <select id="correctAns">
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                </select>
+            </div>
+
+            <div id="subjective-inputs" class="hidden">
+                <label class="section-label">Answer:</label>
+                <textarea id="ansText" placeholder="Type the Answer here..." rows="4"></textarea>
+                
+                <label style="font-size:0.8em; color:#666;">Answer Image (Optional - e.g. Diagram):</label>
+                <input type="file" id="ansImage" accept="image/*">
+            </div>
             
             <button onclick="saveQuestion()" id="saveBtn">Submit Question</button>
             <button onclick="cancelEdit()" id="cancelBtn" class="secondary hidden" style="width:100%; margin-top:10px; padding:12px;">Cancel Edit</button>
@@ -172,39 +147,72 @@
         import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Enable Offline Persistence
-        enableIndexedDbPersistence(db).catch(err => console.log("Persistence error:", err.code));
+        enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed."));
 
         let isSignup = false;
         let currentUser = null;
+        let currentMode = "MCQ"; // "MCQ" or "SUBJECTIVE"
 
-        const examSubjects = {
-            "OAV": ["English", "Math", "Science", "Social Science"],
-            "NAVODAYA": ["Mental Ability", "Math", "Language"],
-            "EKALABYA": ["Mental Ability", "Math", "English"],
-            "PATHANI SAMANTA": ["Math"],
-            "NMMS": ["Mental Ability", "Math", "Science", "Social Science"]
+        // --- EXAM CONFIGURATION ---
+        const examConfig = {
+            "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"] },
+            "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
+            "EKALABYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "English"] },
+            "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] },
+            "NMMS": { type: "MCQ", subjects: ["Mental Ability", "Math", "Science", "Social Science"] },
+            
+            // NEW BOARD EXAMS
+            "5TH BOARD": { 
+                type: "SUBJECTIVE", 
+                subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] 
+            },
+            "8TH BOARD": { 
+                type: "SUBJECTIVE", 
+                subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] 
+            }
         };
 
-        // --- GLOBAL FUNCTIONS ---
-        window.updateSubjects = () => {
+        // --- HANDLE EXAM CHANGE ---
+        window.handleExamChange = () => {
             const examSelect = document.getElementById("qExam");
-            const subjectSelect = document.getElementById("qSubject");
             const selectedExam = examSelect.value;
-            
+            const config = examConfig[selectedExam];
+
             localStorage.setItem('prefExam', selectedExam);
 
+            // 1. Populate Subjects
+            const subjectSelect = document.getElementById("qSubject");
             subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
-            
-            if (selectedExam && examSubjects[selectedExam]) {
-                examSubjects[selectedExam].forEach(sub => {
+            if (config) {
+                config.subjects.forEach(sub => {
                     const opt = document.createElement("option");
-                    opt.value = sub;
-                    opt.innerText = sub;
+                    opt.value = sub; opt.innerText = sub;
                     subjectSelect.appendChild(opt);
                 });
             }
+
+            // 2. Toggle Input Mode (MCQ vs Subjective)
+            if (config) {
+                currentMode = config.type;
+                toggleFormMode(config.type);
+            }
         };
+
+        function toggleFormMode(mode) {
+            const mcqDiv = document.getElementById("mcq-inputs");
+            const subDiv = document.getElementById("subjective-inputs");
+            const catWrapper = document.getElementById("cat-wrapper");
+
+            if (mode === "SUBJECTIVE") {
+                mcqDiv.classList.add("hidden");
+                subDiv.classList.remove("hidden");
+                catWrapper.classList.remove("hidden");
+            } else {
+                mcqDiv.classList.remove("hidden");
+                subDiv.classList.add("hidden");
+                catWrapper.classList.add("hidden");
+            }
+        }
 
         window.saveSubjectPreference = () => {
             const sub = document.getElementById("qSubject").value;
@@ -230,138 +238,12 @@
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
-            } catch (e) {
-                alert("Error: " + e.message);
-            }
+            } catch (e) { alert("Error: " + e.message); }
         };
 
         window.logout = () => signOut(auth);
 
-        window.saveQuestion = async () => {
-            const editId = document.getElementById('editId').value;
-            const qExam = document.getElementById('qExam').value;
-            const qSubject = document.getElementById('qSubject').value;
-            const qText = document.getElementById('qText').value;
-            const file = document.getElementById('qImage').files[0];
-            const btn = document.getElementById('saveBtn');
-            
-            if(!qExam) return alert("Please select an Exam.");
-            if(!qSubject) return alert("Please select a Subject.");
-            if(!qText) return alert("Question text is required.");
-
-            btn.innerText = "Processing...";
-            btn.disabled = true;
-
-            try {
-                let imageString = "";
-                if (file) {
-                    if(file.size > 5 * 1024 * 1024) throw new Error("File too large. Max 5MB");
-                    imageString = await compressImage(file);
-                }
-
-                const data = {
-                    exam: qExam,
-                    subject: qSubject,
-                    question: qText,
-                    options: {
-                        A: document.getElementById('opA').value,
-                        B: document.getElementById('opB').value,
-                        C: document.getElementById('opC').value,
-                        D: document.getElementById('opD').value,
-                    },
-                    answer: document.getElementById('correctAns').value,
-                    timestamp: Date.now(),
-                    imageUrl: imageString || (editId ? undefined : "")
-                };
-
-                if(editId && !file) delete data.imageUrl; 
-
-                if (editId) {
-                    await updateDoc(doc(db, "questions", editId), data);
-                    alert("Updated Successfully!");
-                    cancelEdit();
-                } else {
-                    data.teacher = currentUser.displayName;
-                    data.uid = currentUser.uid;
-                    await addDoc(collection(db, "questions"), data);
-                    alert("Added Successfully!");
-                    resetForm();
-                }
-
-            } catch (e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            } finally {
-                btn.innerText = "Submit Question";
-                btn.disabled = false;
-            }
-        };
-
-        window.deleteQ = async (id) => {
-            if(confirm("Are you sure you want to delete this question? This cannot be undone.")) {
-                await deleteDoc(doc(db, "questions", id));
-            }
-        };
-
-        window.editQ = (id) => {
-            const el = document.querySelector(`div[data-id="${id}"]`);
-            const data = JSON.parse(el.dataset.json);
-
-            document.getElementById('editId').value = id;
-            document.getElementById('qExam').value = data.exam;
-            
-            const subjectSelect = document.getElementById("qSubject");
-            subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
-            if (data.exam && examSubjects[data.exam]) {
-                examSubjects[data.exam].forEach(sub => {
-                    const opt = document.createElement("option");
-                    opt.value = sub;
-                    opt.innerText = sub;
-                    subjectSelect.appendChild(opt);
-                });
-            }
-            
-            document.getElementById('qSubject').value = data.subject;
-            document.getElementById('qText').value = data.question;
-            document.getElementById('opA').value = data.options.A;
-            document.getElementById('opB').value = data.options.B;
-            document.getElementById('opC').value = data.options.C;
-            document.getElementById('opD').value = data.options.D;
-            document.getElementById('correctAns').value = data.answer;
-            
-            if(data.imageUrl) {
-                document.getElementById('currentImgPreview').style.display = 'block';
-                document.getElementById('currentImgPreview').innerHTML = `<img src="${data.imageUrl}" style="height:50px;"> <br> Upload new to replace`;
-            }
-
-            document.getElementById('saveBtn').innerText = "Update Question";
-            document.getElementById('cancelBtn').classList.remove('hidden');
-            document.querySelector('.card').scrollIntoView({behavior: 'smooth'});
-        };
-
-        window.cancelEdit = () => {
-            resetForm(); 
-            document.getElementById('editId').value = "";
-            document.getElementById('saveBtn').innerText = "Submit Question";
-            document.getElementById('cancelBtn').classList.add('hidden');
-            document.getElementById('currentImgPreview').style.display = 'none';
-        };
-
-        // --- INTERNAL HELPERS ---
-        function loadPreferences() {
-            const savedExam = localStorage.getItem('prefExam');
-            const savedSubject = localStorage.getItem('prefSubject');
-
-            if (savedExam) {
-                const examSelect = document.getElementById("qExam");
-                examSelect.value = savedExam;
-                window.updateSubjects();
-                if (savedSubject) {
-                    document.getElementById("qSubject").value = savedSubject;
-                }
-            }
-        }
-
+        // --- IMAGE COMPRESSION ---
         const compressImage = (file) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -371,37 +253,221 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const maxWidth = 600;
+                        const maxWidth = 800; // Increased slightly for answer sheets
                         const scaleSize = maxWidth / img.width;
                         canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
                         canvas.height = (img.width > maxWidth) ? (img.height * scaleSize) : img.height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                     };
                 };
                 reader.onerror = (error) => reject(error);
             });
         };
 
+        // --- SAVE QUESTION ---
+        window.saveQuestion = async () => {
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Processing..."; btn.disabled = true;
+
+            try {
+                const editId = document.getElementById('editId').value;
+                const qExam = document.getElementById('qExam').value;
+                const qSubject = document.getElementById('qSubject').value;
+                const qText = document.getElementById('qText').value;
+                const qFile = document.getElementById('qImage').files[0];
+
+                if(!qExam || !qSubject || !qText) throw new Error("Please fill all required fields.");
+
+                // 1. Base Data
+                let data = {
+                    exam: qExam,
+                    subject: qSubject,
+                    question: qText,
+                    type: currentMode, // Store if it's MCQ or SUBJECTIVE
+                    timestamp: Date.now(),
+                    teacher: currentUser.displayName,
+                    uid: currentUser.uid,
+                    verified: false // Defaults to unverified
+                };
+
+                // 2. Handle Question Image
+                if (qFile) {
+                    if(qFile.size > 5 * 1024 * 1024) throw new Error("Question Image too large.");
+                    data.imageUrl = await compressImage(qFile);
+                } else if(editId) {
+                    // Keep existing image if not replaced
+                    // (Logic handled by simple merge in updateDoc usually, but for addDoc we leave it undefined)
+                }
+
+                // 3. Handle Mode Specific Data
+                if (currentMode === "SUBJECTIVE") {
+                    data.category = document.getElementById('qCategory').value; // Long/Short/Very Short
+                    data.answerText = document.getElementById('ansText').value;
+                    
+                    const ansFile = document.getElementById('ansImage').files[0];
+                    if (ansFile) {
+                         if(ansFile.size > 5 * 1024 * 1024) throw new Error("Answer Image too large.");
+                         data.answerImage = await compressImage(ansFile);
+                    }
+                    // Clear MCQ fields to save space
+                    data.options = null; 
+                    data.answer = null; 
+
+                } else {
+                    // MCQ Mode
+                    data.options = {
+                        A: document.getElementById('opA').value,
+                        B: document.getElementById('opB').value,
+                        C: document.getElementById('opC').value,
+                        D: document.getElementById('opD').value,
+                    };
+                    data.answer = document.getElementById('correctAns').value;
+                    data.category = "MCQ";
+                    data.answerText = null;
+                }
+
+                // 4. Save to Firestore
+                if (editId) {
+                    // Note: Ideally retrieve old doc to preserve existing images if not overwritten
+                    // For simplicity, we assume re-upload if editing image
+                    await updateDoc(doc(db, "questions", editId), data);
+                    alert("Updated Successfully!");
+                    cancelEdit();
+                } else {
+                    await addDoc(collection(db, "questions"), data);
+                    alert("Added Successfully!");
+                    resetForm();
+                }
+
+            } catch (e) {
+                alert("Error: " + e.message);
+            } finally {
+                btn.innerText = "Submit Question"; btn.disabled = false;
+            }
+        };
+
+        // --- LOAD MY QUESTIONS ---
+        function loadMyQuestions(uid) {
+            const qList = document.getElementById('my-questions-list');
+            const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
+                qList.innerHTML = "";
+                if(snapshot.empty) { qList.innerHTML = "<p style='text-align:center; color:#777;'>No questions added.</p>"; return; }
+                
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const badge = data.verified ? `<span class="verified-badge">✅ Verified</span>` : '';
+                    
+                    // Display differently based on type
+                    let detailsHTML = "";
+                    if (data.type === "SUBJECTIVE") {
+                        detailsHTML = `<small style="color:#d32f2f;">${data.category}</small><br>
+                                       <strong>Ans:</strong> ${data.answerText || 'See Image'}
+                                       ${data.answerImage ? '<br>[Has Answer Image]' : ''}`;
+                    } else {
+                        detailsHTML = `<strong>Ans:</strong> ${data.answer}`;
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = "q-item";
+                    div.innerHTML = `
+                        <div style="font-size:0.85em; color:var(--primary); font-weight:bold;">${data.exam} • ${data.subject} ${badge}</div>
+                        <div style="margin:5px 0;">${data.question}</div>
+                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
+                        <div style="margin-top:5px; font-size:0.9em; color:#555;">${detailsHTML}</div>
+                        <div style="margin-top:10px;">
+                            <button class="secondary" onclick="editQ('${docSnap.id}')">Edit</button>
+                            <button class="delete" onclick="deleteQ('${docSnap.id}')">Delete</button>
+                        </div>
+                    `;
+                    // Store data for edit
+                    div.dataset.json = JSON.stringify(data);
+                    div.dataset.id = docSnap.id;
+                    qList.appendChild(div);
+                });
+            });
+        }
+
+        window.deleteQ = async (id) => { if(confirm("Delete this question?")) await deleteDoc(doc(db, "questions", id)); };
+
+        // --- EDIT FUNCTIONALITY ---
+        window.editQ = (id) => {
+            const el = document.querySelector(`div[data-id="${id}"]`);
+            const data = JSON.parse(el.dataset.json);
+
+            document.getElementById('editId').value = id;
+            document.getElementById('qExam').value = data.exam;
+            handleExamChange(); // Refresh subjects & mode
+            
+            // Wait slight tick for dropdown to populate
+            setTimeout(() => {
+                document.getElementById('qSubject').value = data.subject;
+            }, 50);
+
+            document.getElementById('qText').value = data.question;
+
+            if (data.type === "SUBJECTIVE") {
+                document.getElementById('qCategory').value = data.category;
+                document.getElementById('ansText').value = data.answerText || "";
+            } else {
+                document.getElementById('opA').value = data.options?.A || "";
+                document.getElementById('opB').value = data.options?.B || "";
+                document.getElementById('opC').value = data.options?.C || "";
+                document.getElementById('opD').value = data.options?.D || "";
+                document.getElementById('correctAns').value = data.answer;
+            }
+
+            document.getElementById('saveBtn').innerText = "Update Question";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+            document.querySelector('.card').scrollIntoView({behavior: 'smooth'});
+        };
+
+        window.cancelEdit = () => {
+            resetForm();
+            document.getElementById('editId').value = "";
+            document.getElementById('saveBtn').innerText = "Submit Question";
+            document.getElementById('cancelBtn').classList.add('hidden');
+        };
+
         function resetForm() {
-            loadPreferences();
             document.getElementById('qText').value = "";
             document.getElementById('qImage').value = "";
+            document.getElementById('ansText').value = "";
+            document.getElementById('ansImage').value = "";
             document.getElementById('opA').value = "";
             document.getElementById('opB').value = "";
             document.getElementById('opC').value = "";
             document.getElementById('opD').value = "";
+            
+            // Restore prefs
+            const savedExam = localStorage.getItem('prefExam');
+            if (savedExam) {
+                document.getElementById("qExam").value = savedExam;
+                handleExamChange();
+                const savedSub = localStorage.getItem('prefSubject');
+                if(savedSub) setTimeout(() => document.getElementById("qSubject").value = savedSub, 50);
+            }
         }
 
-        // --- AUTH STATE LISTENER ---
+        // --- AUTH ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
                 document.getElementById('logoutBtn').style.display = 'block';
-                loadPreferences();
+                
+                // Load Prefs
+                const savedExam = localStorage.getItem('prefExam');
+                if (savedExam) {
+                    document.getElementById("qExam").value = savedExam;
+                    handleExamChange();
+                    const savedSub = localStorage.getItem('prefSubject');
+                    if(savedSub) setTimeout(() => document.getElementById("qSubject").value = savedSub, 50);
+                }
                 loadMyQuestions(user.uid);
             } else {
                 currentUser = null;
@@ -410,44 +476,6 @@
                 document.getElementById('logoutBtn').style.display = 'none';
             }
         });
-
-        // --- LOAD DATA ---
-        function loadMyQuestions(uid) {
-            const qList = document.getElementById('my-questions-list');
-            const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
-            
-            onSnapshot(q, (snapshot) => {
-                qList.innerHTML = "";
-                if(snapshot.empty) { qList.innerHTML = "<p style='text-align:center; color:#777;'>No questions added yet.</p>"; return; }
-                
-                snapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    
-                    // --- VERIFIED BADGE LOGIC IS HERE ---
-                    const verifiedBadge = data.verified === true 
-                        ? `<span class="verified-badge">✅ Verified</span>` 
-                        : '';
-
-                    const div = document.createElement('div');
-                    div.className = "q-item";
-                    div.innerHTML = `
-                        <div style="font-size:0.85em; color:var(--primary); font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
-                            ${data.exam} &bull; ${data.subject} 
-                            ${verifiedBadge}
-                        </div>
-                        <div style="margin-bottom:8px; font-size:1.05em;">${data.question}</div>
-                        ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
-                        <div style="margin-top:12px;">
-                            <button class="secondary" style="padding:6px 12px; cursor:pointer;" onclick="editQ('${docSnap.id}')">✏ Edit</button>
-                            <button class="delete" style="padding:6px 12px; cursor:pointer; margin-left:5px;" onclick="deleteQ('${docSnap.id}')">🗑 Delete</button>
-                        </div>
-                    `;
-                    div.dataset.json = JSON.stringify(data);
-                    div.dataset.id = docSnap.id;
-                    qList.appendChild(div);
-                });
-            });
-        }
     </script>
 </body>
 </html>
