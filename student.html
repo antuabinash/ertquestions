@@ -267,10 +267,10 @@
         let currentExam = "", currentSubject = "", currentCategory = "";
         let isBoardMode = false;
         
-        // GLOBAL POOLS (To persist across rounds)
-        let allFetchedQuestions = [];  // The master list of 30 questions
-        let questionBag = [];          // The "Bag" we draw from (20 left, 10 left, etc.)
-        let sessionQuestions = [];     // The current 10 being shown
+        // GLOBAL POOLS
+        let allFetchedQuestions = [];  
+        let questionBag = [];          
+        let sessionQuestions = [];     
         let currentIndex = 0, score = 0, userReview = [], isQuizActive = false;
 
         // CANVAS
@@ -356,9 +356,7 @@
                 
                 snapshot.forEach(doc => allFetchedQuestions.push({ id: doc.id, ...doc.data() }));
                 
-                // --- RESET QUESTION BAG ON NEW FETCH ---
-                // For MCQ: Fill the bag with shuffled questions
-                // For Board: Bag isn't used as we show all
+                // RESET QUESTION BAG ON NEW FETCH
                 questionBag = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
                 
                 startNewSession();
@@ -373,25 +371,22 @@
             history.pushState(null, null, window.location.href); 
             isQuizActive = true;
             
-            // --- UPDATED LOGIC FOR MCQ CYCLING ---
             if (isBoardMode) {
-                // Board Mode: Shuffle and show all (Subjective questions are usually fewer)
+                // Board Mode: Shuffle and show all
                 sessionQuestions = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
             } else {
-                // MCQ Mode: "Draw from Bag" Logic
+                // MCQ Mode: Silent Refill Logic
                 if (questionBag.length === 0) {
-                    // Bag Empty? Refill & Shuffle (Restart Cycle)
-                    alert("All questions seen! Restarting cycle.");
+                    // SILENT REFILL AND SHUFFLE
                     questionBag = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
                 }
-                // Take 10 (or whatever is left)
+                // Take 10
                 sessionQuestions = questionBag.splice(0, 10);
             }
 
             resetAndStart();
         };
         
-        // For "Play Again" (same set) we just re-run resetAndStart without modifying the Bag
         window.restartCurrentSet = () => { history.pushState(null, null, window.location.href); isQuizActive = true; resetAndStart(); };
 
         function resetAndStart() {
