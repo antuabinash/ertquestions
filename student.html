@@ -99,18 +99,10 @@
             white-space: pre-wrap; /* KEEPS LINE BREAKS */
         }
         
-        /* NEW: TEACHER DETAILS STYLE */
         .q-author {
-            font-size: 0.85em;
-            color: #000;
-            opacity: 0.5; /* 50% Opacity */
-            font-style: italic; /* Italic Style */
-            margin-bottom: 12px;
-            margin-top: 5px;
-            display: block;
-            width: 100%;
-            overflow-wrap: break-word; /* Wraps long text to fit area */
-            word-wrap: break-word;
+            font-size: 0.85em; color: #000; opacity: 0.5; font-style: italic;
+            margin-bottom: 12px; margin-top: 5px; display: block; width: 100%;
+            overflow-wrap: break-word; word-wrap: break-word;
         }
 
         .q-img { max-width: 100%; border-radius: 8px; margin: 0 auto 0.5em auto; border: 1px solid #eee; display: block; max-height: 180px; object-fit: contain; }
@@ -134,7 +126,7 @@
         .board-answer-box {
             margin-top: 15px; padding: 15px; background: #e8f5e9; border-left: 4px solid #2e7d32;
             border-radius: 4px; display: none; animation: fadeIn 0.3s; font-size: 0.95em; line-height: 1.5;
-            white-space: pre-wrap; /* KEEPS LINE BREAKS IN ANSWER */
+            white-space: pre-wrap;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -142,7 +134,7 @@
         #calc-board-container {
             flex-grow: 1; background-color: var(--board-bg); position: relative;
             min-height: 150px; touch-action: none; overflow: hidden; cursor: crosshair;
-            display: block; /* Default visible */
+            display: block; 
         }
         canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
@@ -262,7 +254,6 @@
             `;
         }
 
-        // --- EXAM CONFIGURATION ---
         const examConfig = {
             "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"] },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
@@ -275,7 +266,11 @@
 
         let currentExam = "", currentSubject = "", currentCategory = "";
         let isBoardMode = false;
-        let allFetchedQuestions = [], sessionQuestions = [];    
+        
+        // GLOBAL POOLS (To persist across rounds)
+        let allFetchedQuestions = [];  // The master list of 30 questions
+        let questionBag = [];          // The "Bag" we draw from (20 left, 10 left, etc.)
+        let sessionQuestions = [];     // The current 10 being shown
         let currentIndex = 0, score = 0, userReview = [], isQuizActive = false;
 
         // CANVAS
@@ -297,7 +292,6 @@
         const nextBtn = document.getElementById('next-btn');
         const quizContent = document.getElementById('quiz-card-content');
 
-        // --- NAVIGATION ---
         window.onpopstate = function(event) { if (isQuizActive && confirm("Quit Quiz?")) exitQuiz(); else history.pushState(null, null, window.location.href); };
         
         function exitQuiz() { isQuizActive = false; hideAllViews(); quizHeader.style.display = 'none'; quizFooter.style.display = 'none'; views.subjects.classList.remove('hidden'); }
@@ -361,6 +355,12 @@
                 if(snapshot.empty) { views.loading.innerHTML = "<p>No questions found.</p><button class='retry-btn' onclick='goHome()'>Back</button>"; return; }
                 
                 snapshot.forEach(doc => allFetchedQuestions.push({ id: doc.id, ...doc.data() }));
+                
+                // --- RESET QUESTION BAG ON NEW FETCH ---
+                // For MCQ: Fill the bag with shuffled questions
+                // For Board: Bag isn't used as we show all
+                questionBag = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
+                
                 startNewSession();
             } catch (error) {
                 let msg = error.message;
@@ -370,35 +370,44 @@
         }
 
         window.startNewSession = () => {
-            history.pushState(null, null, window.location.href); isQuizActive = true;
-            const shuffled = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
-            sessionQuestions = isBoardMode ? shuffled : shuffled.slice(0, 10);
+            history.pushState(null, null, window.location.href); 
+            isQuizActive = true;
+            
+            // --- UPDATED LOGIC FOR MCQ CYCLING ---
+            if (isBoardMode) {
+                // Board Mode: Shuffle and show all (Subjective questions are usually fewer)
+                sessionQuestions = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
+            } else {
+                // MCQ Mode: "Draw from Bag" Logic
+                if (questionBag.length === 0) {
+                    // Bag Empty? Refill & Shuffle (Restart Cycle)
+                    alert("All questions seen! Restarting cycle.");
+                    questionBag = [...allFetchedQuestions].sort(() => 0.5 - Math.random());
+                }
+                // Take 10 (or whatever is left)
+                sessionQuestions = questionBag.splice(0, 10);
+            }
+
             resetAndStart();
         };
         
+        // For "Play Again" (same set) we just re-run resetAndStart without modifying the Bag
         window.restartCurrentSet = () => { history.pushState(null, null, window.location.href); isQuizActive = true; resetAndStart(); };
 
         function resetAndStart() {
             currentIndex = 0; score = 0; userReview = [];
             hideAllViews(); views.quiz.classList.remove('hidden');
             
-            // --- DYNAMIC LAYOUT SWITCHER ---
             if (isBoardMode) {
-                // Board Mode: No Header, No Canvas, Full Height Text
                 quizHeader.style.display = 'none';
-                boardContainer.style.display = 'none'; // HIDE CANVAS
-                qArea.style.maxHeight = '100%'; 
-                qArea.style.flexGrow = '1';
+                boardContainer.style.display = 'none'; 
+                qArea.style.maxHeight = '100%'; qArea.style.flexGrow = '1';
             } else {
-                // Entrance Mode: Header, Canvas, Split Screen
                 quizHeader.style.display = 'flex';
-                boardContainer.style.display = 'block'; // SHOW CANVAS
-                qArea.style.maxHeight = '55%'; 
-                qArea.style.flexGrow = '0';
+                boardContainer.style.display = 'block'; 
+                qArea.style.maxHeight = '55%'; qArea.style.flexGrow = '0';
             }
             quizFooter.style.display = 'block';
-            
-            // Delay resize to let DOM update
             if(!isBoardMode) setTimeout(resizeCanvas, 50);
             renderSlide();
         }
@@ -408,54 +417,42 @@
             const total = sessionQuestions.length;
 
             if(!isBoardMode) {
-                // Clear board only in Entrance Mode
                 if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
                 boardIsDirty = false; updateSmartBtn();
                 document.getElementById('q-counter').innerText = `Q ${currentIndex + 1}/${total}`;
                 document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
             }
 
-            // BUTTON LOGIC
             if (isBoardMode) {
-                nextBtn.disabled = false;
-                nextBtn.style.opacity = "1";
-                if (currentIndex === total - 1) {
-                    nextBtn.innerText = "🏠 Back to Menu";
-                    nextBtn.style.background = "#555";
-                } else {
-                    nextBtn.innerText = "Next ➡";
-                    nextBtn.style.background = "var(--primary)";
-                }
+                nextBtn.disabled = false; nextBtn.style.opacity = "1";
+                if (currentIndex === total - 1) { nextBtn.innerText = "🏠 Back to Menu"; nextBtn.style.background = "#555"; } 
+                else { nextBtn.innerText = "Next ➡"; nextBtn.style.background = "var(--primary)"; }
             } else {
                 nextBtn.disabled = true; 
                 nextBtn.innerText = (currentIndex === total - 1) ? "Finish 🏁" : "Next ➡";
-                nextBtn.style.opacity = "0.5";
-                nextBtn.style.background = "var(--primary)";
+                nextBtn.style.opacity = "0.5"; nextBtn.style.background = "var(--primary)";
             }
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
-
-            // TEACHER DETAILS FOOTER STRING
             const authorHTML = `<div class="q-author">Question by- ${data.teacher || 'Unknown'}</div>`;
 
             if (isBoardMode) {
-                // BOARD LAYOUT
                 quizContent.innerHTML = `
                     ${imgHTML}
                     <div class="q-text">${data.question}</div>
-                    ${authorHTML} <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">👁️ Show Answer</button>
+                    ${authorHTML}
+                    <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">👁️ Show Answer</button>
                     <div class="board-answer-box">
-                        <strong>Answer:</strong><br>
-                        ${data.answerText || ''}
+                        <strong>Answer:</strong><br>${data.answerText || ''}
                         ${data.answerImage ? `<br><img src="${data.answerImage}" class="q-img" style="margin-top:10px;">` : ''}
                     </div>
                 `;
             } else {
-                // ENTRANCE LAYOUT
                 quizContent.innerHTML = `
                     ${imgHTML}
                     <div class="q-text">${data.question}</div>
-                    ${authorHTML} <div id="options-area">
+                    ${authorHTML}
+                    <div id="options-area">
                         <button class="opt-btn" onclick="selectAnswer(this, 'A', '${data.answer}')">A) ${data.options.A}</button>
                         <button class="opt-btn" onclick="selectAnswer(this, 'B', '${data.answer}')">B) ${data.options.B}</button>
                         <button class="opt-btn" onclick="selectAnswer(this, 'C', '${data.answer}')">C) ${data.options.C}</button>
@@ -480,9 +477,7 @@
         };
 
         window.nextQuestion = () => {
-            if (isBoardMode && currentIndex === sessionQuestions.length - 1) {
-                goHome(); return;
-            }
+            if (isBoardMode && currentIndex === sessionQuestions.length - 1) { goHome(); return; }
             currentIndex++;
             if(currentIndex < sessionQuestions.length) renderSlide();
             else showResults();
