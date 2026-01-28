@@ -98,6 +98,21 @@
             color: #222; 
             white-space: pre-wrap; /* KEEPS LINE BREAKS */
         }
+        
+        /* NEW: TEACHER DETAILS STYLE */
+        .q-author {
+            font-size: 0.85em;
+            color: #000;
+            opacity: 0.5; /* 50% Opacity */
+            font-style: italic; /* Italic Style */
+            margin-bottom: 12px;
+            margin-top: 5px;
+            display: block;
+            width: 100%;
+            overflow-wrap: break-word; /* Wraps long text to fit area */
+            word-wrap: break-word;
+        }
+
         .q-img { max-width: 100%; border-radius: 8px; margin: 0 auto 0.5em auto; border: 1px solid #eee; display: block; max-height: 180px; object-fit: contain; }
         
         /* Options (Entrance) */
@@ -420,12 +435,15 @@
 
             const imgHTML = data.imageUrl ? `<img src="${data.imageUrl}" class="q-img">` : '';
 
+            // TEACHER DETAILS FOOTER STRING
+            const authorHTML = `<div class="q-author">Question by- ${data.teacher || 'Unknown'}</div>`;
+
             if (isBoardMode) {
                 // BOARD LAYOUT
                 quizContent.innerHTML = `
                     ${imgHTML}
                     <div class="q-text">${data.question}</div>
-                    <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">👁️ Show Answer</button>
+                    ${authorHTML} <button class="btn-show-ans" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">👁️ Show Answer</button>
                     <div class="board-answer-box">
                         <strong>Answer:</strong><br>
                         ${data.answerText || ''}
@@ -437,7 +455,7 @@
                 quizContent.innerHTML = `
                     ${imgHTML}
                     <div class="q-text">${data.question}</div>
-                    <div id="options-area">
+                    ${authorHTML} <div id="options-area">
                         <button class="opt-btn" onclick="selectAnswer(this, 'A', '${data.answer}')">A) ${data.options.A}</button>
                         <button class="opt-btn" onclick="selectAnswer(this, 'B', '${data.answer}')">B) ${data.options.B}</button>
                         <button class="opt-btn" onclick="selectAnswer(this, 'C', '${data.answer}')">C) ${data.options.C}</button>
