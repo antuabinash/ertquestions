@@ -35,7 +35,7 @@
             width: 100%; margin: 10px 0; padding: 12px; box-sizing: border-box; 
             border: 1px solid #ccc; border-radius: 6px; font-size: 16px; 
         }
-        .section-label { font-weight: 600; font-size: 0.9em; margin-top: 15px; display: block; color: #555; text-transform: uppercase; }
+        .section-label { font-weight: 600; font-size: 0.9em; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; color: #555; text-transform: uppercase; }
 
         button#saveBtn, button#authBtn { 
             width: 100%; background: var(--primary); color: white; border: none; font-weight: bold; 
@@ -49,9 +49,40 @@
         .q-img-preview { max-width: 100px; display: block; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; }
         
         .verified-badge { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; padding:2px 8px; border-radius:12px; font-size:0.7em; font-weight:bold; vertical-align:middle; margin-left:5px; }
+
+        /* --- FULLSCREEN EDITOR STYLES --- */
+        #fullscreen-editor {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 2000; display: none; flex-direction: column;
+        }
+        .editor-toolbar {
+            background: #eee; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px;
+            border-bottom: 1px solid #ccc; align-items: center;
+        }
+        .editor-toolbar button { padding: 8px 12px; border: 1px solid #bbb; background: white; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .editor-toolbar select, .editor-toolbar input[type="color"] { padding: 5px; cursor: pointer; }
+        .editor-content { flex-grow: 1; padding: 20px; font-size: 1.2rem; outline: none; overflow-y: auto; }
+        .fs-toggle-btn { background: #e3f2fd; color: #0d47a1; border: 1px dashed #0d47a1; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
+
+    <div id="fullscreen-editor">
+        <div class="editor-toolbar">
+            <button onclick="execCmd('bold')">B</button>
+            <button onclick="execCmd('italic')">I</button>
+            <button onclick="execCmd('underline')">U</button>
+            <input type="color" onchange="execCmd('foreColor', this.value)" title="Text Color">
+            <select onchange="execCmd('fontSize', this.value)">
+                <option value="3">Size: Normal</option>
+                <option value="5">Size: Large</option>
+                <option value="7">Size: Extra Large</option>
+            </select>
+            <div style="flex-grow: 1;"></div>
+            <button onclick="closeEditor()" style="background:var(--primary); color:white; border:none;">Done & Save</button>
+        </div>
+        <div id="rich-content" class="editor-content" contenteditable="true"></div>
+    </div>
 
     <div class="top-bar">
         <div class="brand-wrapper">
@@ -101,8 +132,12 @@
                 </select>
             </div>
 
-            <label class="section-label">3. Question:</label>
+            <label class="section-label">
+                3. Question: 
+                <span class="fs-toggle-btn" onclick="openEditor('qText')">⛶ Full Screen</span>
+            </label>
             <textarea id="qText" placeholder="Type Question Here..." rows="3"></textarea>
+            
             <label style="font-size:0.8em; color:#666;">Question Image (Optional):</label>
             <input type="file" id="qImage" accept="image/*">
             
@@ -123,10 +158,13 @@
             </div>
 
             <div id="subjective-inputs" class="hidden">
-                <label class="section-label">Answer:</label>
+                <label class="section-label">
+                    Answer: 
+                    <span class="fs-toggle-btn" onclick="openEditor('ansText')">⛶ Full Screen</span>
+                </label>
                 <textarea id="ansText" placeholder="Type the Answer here..." rows="4"></textarea>
                 
-                <label style="font-size:0.8em; color:#666;">Answer Image (Optional - e.g. Diagram):</label>
+                <label style="font-size:0.8em; color:#666;">Answer Image (Optional):</label>
                 <input type="file" id="ansImage" accept="image/*">
             </div>
             
@@ -151,7 +189,27 @@
 
         let isSignup = false;
         let currentUser = null;
-        let currentMode = "MCQ"; // "MCQ" or "SUBJECTIVE"
+        let currentMode = "MCQ";
+        let activeEditorTarget = '';
+
+        // --- FULL SCREEN EDITOR FUNCTIONS ---
+        window.openEditor = (targetId) => {
+            activeEditorTarget = targetId;
+            const content = document.getElementById(targetId).value;
+            // Convert plain text newlines to <br> for the visual editor
+            document.getElementById('rich-content').innerHTML = content.replace(/\n/g, '<br>');
+            document.getElementById('fullscreen-editor').style.display = 'flex';
+        };
+
+        window.closeEditor = () => {
+            const richHtml = document.getElementById('rich-content').innerHTML;
+            document.getElementById(activeEditorTarget).value = richHtml;
+            document.getElementById('fullscreen-editor').style.display = 'none';
+        };
+
+        window.execCmd = (cmd, val = null) => {
+            document.execCommand(cmd, false, val);
+        };
 
         // --- EXAM CONFIGURATION ---
         const examConfig = {
@@ -160,27 +218,16 @@
             "EKALABYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "English"] },
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] },
             "NMMS": { type: "MCQ", subjects: ["Mental Ability", "Math", "Science", "Social Science"] },
-            
-            // NEW BOARD EXAMS
-            "5TH BOARD": { 
-                type: "SUBJECTIVE", 
-                subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] 
-            },
-            "8TH BOARD": { 
-                type: "SUBJECTIVE", 
-                subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] 
-            }
+            "5TH BOARD": { type: "SUBJECTIVE", subjects: ["Odia", "English", "Paribesa Bigyan", "Math"] },
+            "8TH BOARD": { type: "SUBJECTIVE", subjects: ["Odia", "English", "Science", "History", "Geography", "Math"] }
         };
 
-        // --- HANDLE EXAM CHANGE ---
         window.handleExamChange = () => {
             const examSelect = document.getElementById("qExam");
             const selectedExam = examSelect.value;
             const config = examConfig[selectedExam];
-
             localStorage.setItem('prefExam', selectedExam);
 
-            // 1. Populate Subjects
             const subjectSelect = document.getElementById("qSubject");
             subjectSelect.innerHTML = '<option value="" disabled selected>-- Choose Subject --</option>';
             if (config) {
@@ -189,36 +236,18 @@
                     opt.value = sub; opt.innerText = sub;
                     subjectSelect.appendChild(opt);
                 });
-            }
-
-            // 2. Toggle Input Mode (MCQ vs Subjective)
-            if (config) {
                 currentMode = config.type;
                 toggleFormMode(config.type);
             }
         };
 
         function toggleFormMode(mode) {
-            const mcqDiv = document.getElementById("mcq-inputs");
-            const subDiv = document.getElementById("subjective-inputs");
-            const catWrapper = document.getElementById("cat-wrapper");
-
-            if (mode === "SUBJECTIVE") {
-                mcqDiv.classList.add("hidden");
-                subDiv.classList.remove("hidden");
-                catWrapper.classList.remove("hidden");
-            } else {
-                mcqDiv.classList.remove("hidden");
-                subDiv.classList.add("hidden");
-                catWrapper.classList.add("hidden");
-            }
+            document.getElementById("mcq-inputs").classList.toggle("hidden", mode === "SUBJECTIVE");
+            document.getElementById("subjective-inputs").classList.toggle("hidden", mode !== "SUBJECTIVE");
+            document.getElementById("cat-wrapper").classList.toggle("hidden", mode !== "SUBJECTIVE");
         }
 
-        window.saveSubjectPreference = () => {
-            const sub = document.getElementById("qSubject").value;
-            localStorage.setItem('prefSubject', sub);
-        }
-
+        window.saveSubjectPreference = () => localStorage.setItem('prefSubject', document.getElementById("qSubject").value);
         window.toggleAuthMode = () => {
             isSignup = !isSignup;
             document.getElementById('auth-title').innerText = isSignup ? "Teacher Signup" : "Teacher Login";
@@ -232,158 +261,98 @@
             try {
                 if (isSignup) {
                     const name = document.getElementById('tName').value;
-                    if(!name) throw new Error("Name is required.");
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
                     await updateProfile(cred.user, { displayName: name });
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
-            } catch (e) { alert("Error: " + e.message); }
+            } catch (e) { alert(e.message); }
         };
 
         window.logout = () => signOut(auth);
 
-        // --- IMAGE COMPRESSION ---
         const compressImage = (file) => {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = (event) => {
+                reader.onload = (e) => {
                     const img = new Image();
-                    img.src = event.target.result;
+                    img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const maxWidth = 800; // Increased slightly for answer sheets
-                        const scaleSize = maxWidth / img.width;
-                        canvas.width = (img.width > maxWidth) ? maxWidth : img.width;
-                        canvas.height = (img.width > maxWidth) ? (img.height * scaleSize) : img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                        const scale = 800 / img.width;
+                        canvas.width = Math.min(img.width, 800);
+                        canvas.height = img.height * (canvas.width / img.width);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
                     };
                 };
-                reader.onerror = (error) => reject(error);
             });
         };
 
-        // --- SAVE QUESTION ---
         window.saveQuestion = async () => {
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Processing..."; btn.disabled = true;
-
             try {
                 const editId = document.getElementById('editId').value;
-                const qExam = document.getElementById('qExam').value;
-                const qSubject = document.getElementById('qSubject').value;
-                const qText = document.getElementById('qText').value;
-                const qFile = document.getElementById('qImage').files[0];
-
-                if(!qExam || !qSubject || !qText) throw new Error("Please fill all required fields.");
-
-                // 1. Base Data
-                let data = {
-                    exam: qExam,
-                    subject: qSubject,
-                    question: qText,
-                    type: currentMode, // Store if it's MCQ or SUBJECTIVE
+                const data = {
+                    exam: document.getElementById('qExam').value,
+                    subject: document.getElementById('qSubject').value,
+                    question: document.getElementById('qText').value, // This contains HTML now
+                    type: currentMode,
                     timestamp: Date.now(),
                     teacher: currentUser.displayName,
                     uid: currentUser.uid,
-                    verified: false // Defaults to unverified
+                    verified: false
                 };
 
-                // 2. Handle Question Image
-                if (qFile) {
-                    if(qFile.size > 5 * 1024 * 1024) throw new Error("Question Image too large.");
-                    data.imageUrl = await compressImage(qFile);
-                } else if(editId) {
-                    // Keep existing image if not replaced
-                    // (Logic handled by simple merge in updateDoc usually, but for addDoc we leave it undefined)
-                }
+                const qFile = document.getElementById('qImage').files[0];
+                if (qFile) data.imageUrl = await compressImage(qFile);
 
-                // 3. Handle Mode Specific Data
                 if (currentMode === "SUBJECTIVE") {
-                    data.category = document.getElementById('qCategory').value; // Long/Short/Very Short
-                    data.answerText = document.getElementById('ansText').value;
-                    
+                    data.category = document.getElementById('qCategory').value;
+                    data.answerText = document.getElementById('ansText').value; // Also HTML
                     const ansFile = document.getElementById('ansImage').files[0];
-                    if (ansFile) {
-                         if(ansFile.size > 5 * 1024 * 1024) throw new Error("Answer Image too large.");
-                         data.answerImage = await compressImage(ansFile);
-                    }
-                    // Clear MCQ fields to save space
-                    data.options = null; 
-                    data.answer = null; 
-
+                    if (ansFile) data.answerImage = await compressImage(ansFile);
                 } else {
-                    // MCQ Mode
                     data.options = {
-                        A: document.getElementById('opA').value,
-                        B: document.getElementById('opB').value,
-                        C: document.getElementById('opC').value,
-                        D: document.getElementById('opD').value,
+                        A: document.getElementById('opA').value, B: document.getElementById('opB').value,
+                        C: document.getElementById('opC').value, D: document.getElementById('opD').value
                     };
                     data.answer = document.getElementById('correctAns').value;
-                    data.category = "MCQ";
-                    data.answerText = null;
                 }
 
-                // 4. Save to Firestore
-                if (editId) {
-                    // Note: Ideally retrieve old doc to preserve existing images if not overwritten
-                    // For simplicity, we assume re-upload if editing image
-                    await updateDoc(doc(db, "questions", editId), data);
-                    alert("Updated Successfully!");
-                    cancelEdit();
-                } else {
-                    await addDoc(collection(db, "questions"), data);
-                    alert("Added Successfully!");
-                    resetForm();
-                }
-
-            } catch (e) {
-                alert("Error: " + e.message);
-            } finally {
-                btn.innerText = "Submit Question"; btn.disabled = false;
-            }
+                if (editId) await updateDoc(doc(db, "questions", editId), data);
+                else await addDoc(collection(db, "questions"), data);
+                
+                alert("Success!");
+                cancelEdit();
+            } catch (e) { alert(e.message); }
+            finally { btn.innerText = "Submit Question"; btn.disabled = false; }
         };
 
-        // --- LOAD MY QUESTIONS ---
         function loadMyQuestions(uid) {
             const qList = document.getElementById('my-questions-list');
             const q = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
-            
-            onSnapshot(q, (snapshot) => {
-                qList.innerHTML = "";
-                if(snapshot.empty) { qList.innerHTML = "<p style='text-align:center; color:#777;'>No questions added.</p>"; return; }
-                
-                snapshot.forEach((docSnap) => {
+            onSnapshot(q, (snap) => {
+                qList.innerHTML = snap.empty ? "<p>No questions.</p>" : "";
+                snap.forEach(docSnap => {
                     const data = docSnap.data();
-                    const badge = data.verified ? `<span class="verified-badge">✅ Verified</span>` : '';
-                    
-                    // Display differently based on type
-                    let detailsHTML = "";
-                    if (data.type === "SUBJECTIVE") {
-                        detailsHTML = `<small style="color:#d32f2f;">${data.category}</small><br>
-                                       <strong>Ans:</strong> <span style="white-space: pre-wrap;">${data.answerText || 'See Image'}</span>
-                                       ${data.answerImage ? '<br>[Has Answer Image]' : ''}`;
-                    } else {
-                        detailsHTML = `<strong>Ans:</strong> ${data.answer}`;
-                    }
-
                     const div = document.createElement('div');
                     div.className = "q-item";
+                    // Using innerHTML for data.question and answerText to support the Rich Text
                     div.innerHTML = `
-                        <div style="font-size:0.85em; color:var(--primary); font-weight:bold;">${data.exam} • ${data.subject} ${badge}</div>
-                        <div style="margin:5px 0; white-space: pre-wrap;">${data.question}</div>
+                        <div style="font-size:0.8em; color:var(--primary);"><b>${data.exam}</b> • ${data.subject}</div>
+                        <div style="margin:8px 0;">${data.question}</div>
                         ${data.imageUrl ? `<img src="${data.imageUrl}" class="q-img-preview">` : ''}
-                        <div style="margin-top:5px; font-size:0.9em; color:#555;">${detailsHTML}</div>
+                        <div style="font-size:0.9em; background:#f9f9f9; padding:5px;">
+                            ${data.type==='MCQ' ? `Ans: ${data.answer}` : `<b>Ans (${data.category}):</b> ${data.answerText}`}
+                        </div>
                         <div style="margin-top:10px;">
                             <button class="secondary" onclick="editQ('${docSnap.id}')">Edit</button>
                             <button class="delete" onclick="deleteQ('${docSnap.id}')">Delete</button>
                         </div>
                     `;
-                    // Store data for edit
                     div.dataset.json = JSON.stringify(data);
                     div.dataset.id = docSnap.id;
                     qList.appendChild(div);
@@ -391,86 +360,49 @@
             });
         }
 
-        window.deleteQ = async (id) => { if(confirm("Delete this question?")) await deleteDoc(doc(db, "questions", id)); };
+        window.deleteQ = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "questions", id)); };
 
-        // --- EDIT FUNCTIONALITY ---
         window.editQ = (id) => {
             const el = document.querySelector(`div[data-id="${id}"]`);
             const data = JSON.parse(el.dataset.json);
-
             document.getElementById('editId').value = id;
             document.getElementById('qExam').value = data.exam;
-            handleExamChange(); // Refresh subjects & mode
-            
-            // Wait slight tick for dropdown to populate
+            handleExamChange();
             setTimeout(() => {
                 document.getElementById('qSubject').value = data.subject;
-            }, 50);
-
-            document.getElementById('qText').value = data.question;
-
-            if (data.type === "SUBJECTIVE") {
-                document.getElementById('qCategory').value = data.category;
-                document.getElementById('ansText').value = data.answerText || "";
-            } else {
-                document.getElementById('opA').value = data.options?.A || "";
-                document.getElementById('opB').value = data.options?.B || "";
-                document.getElementById('opC').value = data.options?.C || "";
-                document.getElementById('opD').value = data.options?.D || "";
-                document.getElementById('correctAns').value = data.answer;
-            }
-
-            document.getElementById('saveBtn').innerText = "Update Question";
-            document.getElementById('cancelBtn').classList.remove('hidden');
-            document.querySelector('.card').scrollIntoView({behavior: 'smooth'});
+                document.getElementById('qText').value = data.question;
+                if(data.type === "SUBJECTIVE") {
+                    document.getElementById('qCategory').value = data.category;
+                    document.getElementById('ansText').value = data.answerText;
+                } else {
+                    document.getElementById('opA').value = data.options.A;
+                    document.getElementById('opB').value = data.options.B;
+                    document.getElementById('opC').value = data.options.C;
+                    document.getElementById('opD').value = data.options.D;
+                    document.getElementById('correctAns').value = data.answer;
+                }
+                document.getElementById('saveBtn').innerText = "Update Question";
+                document.getElementById('cancelBtn').classList.remove('hidden');
+                window.scrollTo(0,0);
+            }, 100);
         };
 
         window.cancelEdit = () => {
-            resetForm();
             document.getElementById('editId').value = "";
+            document.getElementById('qText').value = "";
+            document.getElementById('ansText').value = "";
             document.getElementById('saveBtn').innerText = "Submit Question";
             document.getElementById('cancelBtn').classList.add('hidden');
         };
 
-        function resetForm() {
-            document.getElementById('qText').value = "";
-            document.getElementById('qImage').value = "";
-            document.getElementById('ansText').value = "";
-            document.getElementById('ansImage').value = "";
-            document.getElementById('opA').value = "";
-            document.getElementById('opB').value = "";
-            document.getElementById('opC').value = "";
-            document.getElementById('opD').value = "";
-            
-            // Restore prefs
-            const savedExam = localStorage.getItem('prefExam');
-            if (savedExam) {
-                document.getElementById("qExam").value = savedExam;
-                handleExamChange();
-                const savedSub = localStorage.getItem('prefSubject');
-                if(savedSub) setTimeout(() => document.getElementById("qSubject").value = savedSub, 50);
-            }
-        }
-
-        // --- AUTH ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
                 document.getElementById('logoutBtn').style.display = 'block';
-                
-                // Load Prefs
-                const savedExam = localStorage.getItem('prefExam');
-                if (savedExam) {
-                    document.getElementById("qExam").value = savedExam;
-                    handleExamChange();
-                    const savedSub = localStorage.getItem('prefSubject');
-                    if(savedSub) setTimeout(() => document.getElementById("qSubject").value = savedSub, 50);
-                }
                 loadMyQuestions(user.uid);
             } else {
-                currentUser = null;
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('hidden');
                 document.getElementById('logoutBtn').style.display = 'none';
