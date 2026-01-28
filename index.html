@@ -10,6 +10,7 @@
             --primary: #0d47a1; 
             --primary-hover: #002171;
             --accent: #d32f2f; 
+            --whatsapp: #25D366; /* WhatsApp Green */
             --bg-color: #f4f6f8;
             --text-dark: #333;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -24,9 +25,25 @@
         }
         .brand-wrapper { display: flex; align-items: center; gap: 15px; }
         .app-logo { height: 50px; width: 50px; border-radius: 50%; border: 2px solid white; background: white; object-fit: cover; }
-        .top-bar h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
         
-        .logout-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none; }
+        /* Header Text Styles */
+        .header-text { display: flex; flex-direction: column; }
+        .header-text h2 { margin: 0; font-size: 1.2rem; font-weight: 600; line-height: 1.2; }
+        .user-details { font-size: 0.8em; font-weight: 400; opacity: 0.9; margin-top: 2px; }
+
+        /* HEADER BUTTONS CONTAINER */
+        .header-actions { display: none; align-items: center; gap: 10px; }
+        
+        /* Logout Button */
+        .logout-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
+
+        /* WhatsApp Button */
+        .whatsapp-btn { 
+            background: var(--whatsapp); color: white; text-decoration: none; 
+            padding: 8px 16px; border-radius: 4px; font-weight: bold; font-size: 0.9em; 
+            border: 1px solid #1ebe57; cursor: pointer; display: flex; align-items: center; 
+        }
+        .whatsapp-btn:hover { background: #1ebe57; }
 
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); margin-bottom: 20px; border-top: 4px solid var(--primary); }
         h3 { margin-top: 0; color: var(--primary); }
@@ -87,16 +104,31 @@
     <div class="top-bar">
         <div class="brand-wrapper">
             <img src="logo.jpg" alt="Logo" class="app-logo">
-            <h2>eRT Odisha<br><span style="font-size:0.8em; font-weight:400;">Teacher Portal</span></h2>
+            <div class="header-text">
+                <h2>eRT Odisha</h2>
+                <span id="header-details" class="user-details">Teacher Portal</span>
+            </div>
         </div>
-        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout</button>
+        
+        <div id="header-actions" class="header-actions">
+            <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK_HERE" target="_blank" class="whatsapp-btn">
+                Join Group
+            </a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
     </div>
 
     <div id="auth-section" class="card">
         <h3 id="auth-title">Teacher Login</h3>
         <input type="email" id="email" placeholder="Email Address">
         <input type="password" id="password" placeholder="Password">
-        <div id="signup-fields" class="hidden"><input type="text" id="tName" placeholder="Your Full Name"></div>
+        
+        <div id="signup-fields" class="hidden">
+            <input type="text" id="tName" placeholder="Your Full Name">
+            <input type="text" id="tDistrict" placeholder="District Name">
+            <input type="text" id="tBlock" placeholder="Block Name">
+        </div>
+
         <button onclick="handleAuth()" id="authBtn">Login</button>
         <p style="text-align:center; cursor:pointer; color:var(--primary); margin-top:15px;" onclick="toggleAuthMode()">Switch to Signup / Login</p>
     </div>
@@ -192,11 +224,10 @@
         let currentMode = "MCQ";
         let activeEditorTarget = '';
 
-        // --- FULL SCREEN EDITOR FUNCTIONS ---
+        // --- VISUAL EDITOR ---
         window.openEditor = (targetId) => {
             activeEditorTarget = targetId;
             const content = document.getElementById(targetId).value;
-            // Convert plain text newlines to <br> for the visual editor
             document.getElementById('rich-content').innerHTML = content.replace(/\n/g, '<br>');
             document.getElementById('fullscreen-editor').style.display = 'flex';
         };
@@ -207,11 +238,9 @@
             document.getElementById('fullscreen-editor').style.display = 'none';
         };
 
-        window.execCmd = (cmd, val = null) => {
-            document.execCommand(cmd, false, val);
-        };
+        window.execCmd = (cmd, val = null) => { document.execCommand(cmd, false, val); };
 
-        // --- EXAM CONFIGURATION ---
+        // --- EXAM CONFIG ---
         const examConfig = {
             "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"] },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
@@ -255,29 +284,44 @@
             document.getElementById('signup-fields').classList.toggle('hidden', !isSignup);
         };
 
+        // --- AUTH HANDLER ---
         window.handleAuth = async () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
+            const btn = document.getElementById('authBtn');
+            btn.innerText = "Please wait..."; btn.disabled = true;
+
             try {
                 if (isSignup) {
                     const name = document.getElementById('tName').value;
+                    const district = document.getElementById('tDistrict').value;
+                    const block = document.getElementById('tBlock').value;
+
+                    if(!name || !district || !block) throw new Error("Name, District and Block are required.");
+
+                    // Combine: "Name | District | Block"
+                    let combinedDisplayName = `${name} | ${district} | ${block}`;
+
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                    await updateProfile(cred.user, { displayName: name });
+                    await updateProfile(cred.user, { displayName: combinedDisplayName });
+
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
                 }
-            } catch (e) { alert(e.message); }
+            } catch (e) { 
+                alert(e.message); 
+                btn.innerText = isSignup ? "Create Account" : "Login";
+                btn.disabled = false;
+            }
         };
 
         window.logout = () => signOut(auth);
 
         const compressImage = (file) => {
             return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
+                const reader = new FileReader(); reader.readAsDataURL(file);
                 reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
+                    const img = new Image(); img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const scale = 800 / img.width;
@@ -298,10 +342,10 @@
                 const data = {
                     exam: document.getElementById('qExam').value,
                     subject: document.getElementById('qSubject').value,
-                    question: document.getElementById('qText').value, // This contains HTML now
+                    question: document.getElementById('qText').value,
                     type: currentMode,
                     timestamp: Date.now(),
-                    teacher: currentUser.displayName,
+                    teacher: currentUser.displayName, 
                     uid: currentUser.uid,
                     verified: false
                 };
@@ -311,7 +355,7 @@
 
                 if (currentMode === "SUBJECTIVE") {
                     data.category = document.getElementById('qCategory').value;
-                    data.answerText = document.getElementById('ansText').value; // Also HTML
+                    data.answerText = document.getElementById('ansText').value;
                     const ansFile = document.getElementById('ansImage').files[0];
                     if (ansFile) data.answerImage = await compressImage(ansFile);
                 } else {
@@ -324,9 +368,7 @@
 
                 if (editId) await updateDoc(doc(db, "questions", editId), data);
                 else await addDoc(collection(db, "questions"), data);
-                
-                alert("Success!");
-                cancelEdit();
+                alert("Success!"); cancelEdit();
             } catch (e) { alert(e.message); }
             finally { btn.innerText = "Submit Question"; btn.disabled = false; }
         };
@@ -340,7 +382,6 @@
                     const data = docSnap.data();
                     const div = document.createElement('div');
                     div.className = "q-item";
-                    // Using innerHTML for data.question and answerText to support the Rich Text
                     div.innerHTML = `
                         <div style="font-size:0.8em; color:var(--primary);"><b>${data.exam}</b> • ${data.subject}</div>
                         <div style="margin:8px 0;">${data.question}</div>
@@ -395,17 +436,39 @@
             document.getElementById('cancelBtn').classList.add('hidden');
         };
 
+        // --- AUTH STATE ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
-                document.getElementById('logoutBtn').style.display = 'block';
+                
+                // SHOW BUTTONS
+                document.getElementById('header-actions').style.display = 'flex';
+
+                // PARSE "Name | District | Block"
+                const rawName = user.displayName || "";
+                const parts = rawName.split('|').map(s => s.trim());
+                
+                const tName = parts[0] || "Teacher";
+                const tLoc = parts.length > 1 ? parts.slice(1).join(', ') : ""; 
+
+                document.getElementById('header-details').innerHTML = `
+                    <strong>${tName}</strong><br>
+                    ${tLoc ? tLoc : "Teacher Portal"}
+                `;
+
                 loadMyQuestions(user.uid);
             } else {
                 document.getElementById('auth-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('hidden');
-                document.getElementById('logoutBtn').style.display = 'none';
+                
+                // HIDE BUTTONS
+                document.getElementById('header-actions').style.display = 'none';
+                
+                document.getElementById('header-details').innerText = "Teacher Portal";
+                document.getElementById('authBtn').innerText = "Login";
+                document.getElementById('authBtn').disabled = false;
             }
         });
     </script>
