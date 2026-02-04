@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>eRT Odisha - Admin (Fast Mode)</title>
+    <title>eRT Odisha - Admin Pro</title>
     <style>
         /* --- ADMIN THEME --- */
         :root {
@@ -14,62 +14,56 @@
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); border-top: 5px solid var(--primary); }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 0; border-radius: 12px; box-shadow: var(--card-shadow); overflow: hidden; }
         
-        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .app-logo { height: 50px; width: 50px; border-radius: 50%; object-fit: cover; }
-        h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
+        .header { background: var(--primary); padding: 20px 25px; color: white; display: flex; align-items: center; gap: 15px; }
+        .app-logo { height: 40px; width: 40px; border-radius: 50%; border: 2px solid white; background: white; }
+        h1 { margin: 0; font-size: 1.5rem; color: white; }
+
+        /* --- TABS --- */
+        .tabs { display: flex; background: #e3f2fd; border-bottom: 1px solid #bbdefb; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #555; transition: 0.2s; border-bottom: 3px solid transparent; }
+        .tab-btn:hover { background: #bbdefb; }
+        .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .count-badge { background: #ef5350; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 8px; }
 
         /* Toolbar */
-        .toolbar { display: flex; gap: 20px; background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 25px; flex-wrap: wrap; border: 1px solid #e0e0e0; align-items: center; }
+        .toolbar { display: flex; gap: 15px; padding: 20px; background: #fff; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid #eee; }
         .filter-group { display: flex; flex-direction: column; }
-        .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
-        select { padding: 10px; min-width: 180px; border-radius: 6px; border: 1px solid #ccc; }
+        .filter-group label { font-size: 0.8em; font-weight: bold; color: #777; margin-bottom: 5px; text-transform: uppercase; }
+        select { padding: 8px; min-width: 160px; border-radius: 4px; border: 1px solid #ccc; background: #fafafa; }
         
-        .btn-dl { background: var(--primary); color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto;}
-        .btn-load { background: #607d8b; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-right: 10px; }
-        .btn-load:hover { background: #546e7a; }
+        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-left: auto; display: flex; align-items: center; gap: 5px;}
+        .btn-load { background: #546e7a; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-right: 10px; }
 
         /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; vertical-align: top; }
-        th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
+        .table-wrap { padding: 0 20px 20px 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #eee; padding: 15px 10px; text-align: left; vertical-align: top; }
+        th { color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+        tr:hover { background-color: #f9f9f9; }
         
-        /* PRESERVE HTML FORMATTING IN TABLE */
-        .content-text { word-wrap: break-word; }
-
-        .thumb { max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; display: block; margin-top: 5px;}
-        .ans-thumb { border-color: #2e7d32; } 
-
+        .content-text { word-wrap: break-word; color: #222; font-size: 0.95rem; line-height: 1.5; }
+        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 2px; background: white; border-radius: 4px; display: block; margin-top: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        
         /* Edit Box */
-        .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
-        .edit-box label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #d84315; }
-        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; display:block; margin-bottom: 10px; box-sizing: border-box; padding: 8px; }
-        .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
+        .edit-box { display: none; margin-top: 15px; background: #fffde7; padding: 15px; border: 1px solid #fff59d; border-radius: 6px; }
+        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #fbc02d; padding: 8px; box-sizing: border-box; }
+        
+        /* Buttons */
+        .action-col { display: flex; flex-direction: column; gap: 6px; }
+        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;}
+        .btn-unverify { background: #fb8c00; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
+        .btn-delete { background: #d32f2f; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
 
-        /* Action Buttons */
-        .action-container { display: flex; flex-direction: column; gap: 8px; }
-        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
-        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
-        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
-        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
-
-        .badge-verified {
-            display: inline-block; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;
-            padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;
-        }
-
-        /* --- RICH EDITOR STYLES --- */
-        #fs-editor {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 5000; display: none; flex-direction: column;
-        }
+        /* Rich Editor */
+        #fs-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; display: none; flex-direction: column; }
         .ed-toolbar { background: #eee; padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid #ccc; align-items: center; }
-        .ed-content { flex-grow: 1; padding: 30px; outline: none; overflow-y: auto; font-size: 1.2rem; }
-        .visual-edit-btn { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px;}
+        .ed-content { flex-grow: 1; padding: 30px; outline: none; overflow-y: auto; font-size: 1.2rem; max-width: 900px; margin: auto; }
+        .visual-edit-btn { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; padding: 3px 6px; font-size: 10px; cursor: pointer; border-radius: 3px; font-weight: bold; vertical-align: middle; margin-left: 5px;}
 
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -81,13 +75,8 @@
             <button onclick="execCmd('italic')"><i>I</i></button>
             <button onclick="execCmd('underline')"><u>U</u></button>
             <input type="color" onchange="execCmd('foreColor', this.value)" title="Text Color">
-            <select onchange="execCmd('fontSize', this.value)">
-                <option value="3">Normal</option>
-                <option value="5">Large</option>
-                <option value="7">Extra Large</option>
-            </select>
             <div style="flex-grow: 1;"></div>
-            <button onclick="closeAdminEditor()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Close & Update Field</button>
+            <button onclick="closeAdminEditor()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Close & Save</button>
         </div>
         <div id="ed-body" class="ed-content" contenteditable="true"></div>
     </div>
@@ -95,99 +84,117 @@
     <div class="container">
         <div class="header">
             <img src="logo.jpg" alt="Logo" class="app-logo">
-            <h1>eRT Odisha - Admin Panel</h1>
+            <h1>eRT Odisha Admin</h1>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('unverified')" id="tab-unverified">🔴 Pending Review</button>
+            <button class="tab-btn" onclick="switchTab('verified')" id="tab-verified">✅ Approved Database</button>
         </div>
         
         <div class="toolbar">
             <div class="filter-group">
-                <label>1. Exam:</label>
-                <select id="filterExam" onchange="applyFilters()">
-                    <option value="all">All Exams</option>
-                </select>
+                <label>Exam</label>
+                <select id="filterExam" onchange="applyFilters()"><option value="all">All Exams</option></select>
             </div>
             <div class="filter-group">
-                <label>2. Teacher:</label>
-                <select id="filterTeacher" onchange="applyFilters()">
-                    <option value="all">All Teachers</option>
-                </select>
+                <label>Teacher</label>
+                <select id="filterTeacher" onchange="applyFilters()"><option value="all">All Teachers</option></select>
             </div>
             <div class="filter-group">
-                <label>3. Subject:</label>
-                <select id="filterSubject" onchange="applyFilters()">
-                    <option value="all">All Subjects</option>
-                </select>
+                <label>Subject</label>
+                <select id="filterSubject" onchange="applyFilters()"><option value="all">All Subjects</option></select>
             </div>
-            <div style="margin-left: auto; display: flex;">
-                <button class="btn-load" onclick="window.increaseLimit()">↻ Load More Data</button>
-                <button class="btn-dl" onclick="downloadJSON()">⬇ Download Verified JSON</button>
+            
+            <div style="margin-left: auto; display: flex; align-items: center;">
+                <button class="btn-load" onclick="window.increaseLimit()">↻ Load More</button>
+                <button class="btn-dl" onclick="downloadJSON()">⬇ JSON</button>
             </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:20%">Info</th>
-                    <th style="width:35%">Question</th>
-                    <th style="width:30%">Answer / Options</th>
-                    <th style="width:15%">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#666;">Loading data...</p></td></tr>
-            </tbody>
-        </table>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:20%">Metadata</th>
+                        <th style="width:40%">Question Content</th>
+                        <th style="width:25%">Answer Key</th>
+                        <th style="width:15%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#666;">Connecting to Firebase...</p></td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script type="module">
         import { db } from "./firebase-config.js";
-        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, enableIndexedDbPersistence } 
+        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Enable persistence to cache data locally
-        enableIndexedDbPersistence(db).catch((err) => {
-            console.log("Persistence suppressed:", err.code);
-        });
+        // Persistence helps load data instantly on refresh
+        enableIndexedDbPersistence(db).catch((err) => console.log("Persistence:", err.code));
 
-        // Auth
         const pass = prompt("Enter Admin Password:");
         if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
 
+        // --- STATE ---
         let allData = [];
         let activeEditId = '';
-        let queryLimit = 50; // Performance: Only load 50 initially
+        let queryLimit = 50; 
+        let currentTab = 'unverified'; // Default to pending
         let unsubscribe = null;
 
+        // Elements
         const examSelect = document.getElementById('filterExam');
         const teacherSelect = document.getElementById('filterTeacher');
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
 
-        // --- VISUAL EDITOR LOGIC ---
-        window.openAdminEditor = (targetId) => {
-            activeEditId = targetId;
-            const content = document.getElementById(targetId).value;
-            document.getElementById('ed-body').innerHTML = content;
-            document.getElementById('fs-editor').style.display = 'flex';
-        };
-
-        window.closeAdminEditor = () => {
-            const html = document.getElementById('ed-body').innerHTML;
-            document.getElementById(activeEditId).value = html;
-            document.getElementById('fs-editor').style.display = 'none';
-        };
-
-        window.execCmd = (cmd, val = null) => { document.execCommand(cmd, false, val); };
-
-        // --- FETCH DATA OPTIMIZED ---
-        function loadData() {
-            if (unsubscribe) unsubscribe(); // Stop listening to old query
+        // --- TABS LOGIC ---
+        window.switchTab = (tabName) => {
+            currentTab = tabName;
+            queryLimit = 50; // Reset limit when switching
             
-            const q = query(collection(db, "questions"), orderBy("timestamp", "desc"), limit(queryLimit));
+            // Update UI Tabs
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Clear table to show loading
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
+            
+            loadData();
+        };
+
+        // --- DATA LOADING ---
+        function loadData() {
+            if (unsubscribe) unsubscribe();
+
+            const collectionRef = collection(db, "questions");
+            let q;
+
+            // SMART QUERIES: Only fetch what we need
+            // NOTE: This might require a composite index in Firestore. Check Console logs if empty.
+            if (currentTab === 'unverified') {
+                // Fetch items where verified is false (or undefined)
+                // We assume default is unverified. 
+                q = query(collectionRef, where("verified", "==", false), orderBy("timestamp", "desc"), limit(queryLimit));
+            } else {
+                // Fetch items where verified is true
+                q = query(collectionRef, where("verified", "==", true), orderBy("timestamp", "desc"), limit(queryLimit));
+            }
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
                 snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
-                updateDropdowns(); // This calls applyFilters -> renderTable
+                updateDropdowns(); // Triggers render
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                if(error.message.includes("index")) {
+                    alert("⚠️ SYSTEM NOTICE: A Firestore Index is required for this new sorting mode.\n\nPlease open the browser console (F12) and click the link provided by Firebase to create it.");
+                }
             });
         }
 
@@ -196,18 +203,15 @@
             const btn = document.querySelector('.btn-load');
             btn.innerText = "Loading...";
             loadData();
-            // Reset button text after short delay
-            setTimeout(() => btn.innerText = "↻ Load More Data", 1000);
+            setTimeout(() => btn.innerText = "↻ Load More", 1000);
         };
-
-        // Start Initial Load
-        loadData();
 
         function updateDropdowns() {
             const currentExam = examSelect.value;
             const currentTeacher = teacherSelect.value;
             const currentSubject = subjectSelect.value;
 
+            // Get unique values from CURRENT loaded data
             const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
             populateSelect(examSelect, exams, "All Exams", currentExam);
 
@@ -221,13 +225,12 @@
         }
 
         function populateSelect(el, items, defaultText, selectedValue) {
-            // Keep current selection if valid
-            const previousValue = el.value !== "" ? el.value : selectedValue;
+            const prevVal = el.value !== "" ? el.value : selectedValue;
             el.innerHTML = `<option value="all">${defaultText}</option>`;
             items.forEach(item => {
                 const opt = document.createElement('option');
                 opt.value = item; opt.innerText = item;
-                if(item === previousValue) opt.selected = true;
+                if(item === prevVal) opt.selected = true;
                 el.appendChild(opt);
             });
         }
@@ -244,33 +247,36 @@
 
         function renderTable(data) {
             tableBody.innerHTML = "";
-            if(data.length === 0) { tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found in current batch.</td></tr>"; return; }
+            if(data.length === 0) { 
+                const msg = currentTab === 'unverified' ? "🎉 No pending questions! All caught up." : "No verified questions found.";
+                tableBody.innerHTML = `<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>${msg}</td></tr>`; 
+                return; 
+            }
             
-            // Performance: Use Fragment to append only once
             const fragment = document.createDocumentFragment();
 
             data.forEach(item => {
                 const tr = document.createElement('tr');
-                const isVerified = item.verified === true;
-                const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
-                
-                // Pass 'this' to toggleVerify for UI feedback
-                const verifyBtn = isVerified 
-                    ? `<button class="btn-unverify" onclick="window.toggleVerify(this, '${item.id}', false)">↩ Undo</button>` 
-                    : `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Verify</button>`;
-                
                 const isSubjective = item.type === "SUBJECTIVE";
+
+                // Dynamic Button based on Tab
+                let actionBtn = "";
+                if(currentTab === 'unverified') {
+                    actionBtn = `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Approve</button>`;
+                } else {
+                    actionBtn = `<button class="btn-unverify" onclick="window.toggleVerify(this, '${item.id}', false)">↩ Un-Approve</button>`;
+                }
 
                 let answerDisplay = isSubjective ? `
                     <div style="font-size:0.9em;">
                         <span style="color:#d32f2f; font-weight:bold; font-size:0.8em; border:1px solid #d32f2f; padding:2px 4px; border-radius:4px;">${item.category || 'Subjective'}</span><br>
                         <div class="content-text" style="margin-top:5px;">${item.answerText || '<i>No text answer</i>'}</div>
-                        ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb ans-thumb"></a>` : ''}
+                        ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb"></a>` : ''}
                     </div>` : `
                     <div style="font-size:0.85em;">
                         A: ${item.options?.A || ''}<br>B: ${item.options?.B || ''}<br>
                         C: ${item.options?.C || ''}<br>D: ${item.options?.D || ''}<br>
-                        <strong style="color:#d32f2f; display:block; margin-top:5px;">Ans: ${item.answer}</strong>
+                        <strong style="color:#d32f2f; display:block; margin-top:8px; border-top:1px solid #eee; padding-top:4px;">Correct: ${item.answer}</strong>
                     </div>`;
 
                 let editFields = isSubjective ? `
@@ -280,15 +286,17 @@
                         <option value="Short" ${item.category === 'Short' ? 'selected' : ''}>Short</option>
                         <option value="Long" ${item.category === 'Long' ? 'selected' : ''}>Long</option>
                     </select>
-                    <label>Answer Text: <span class="visual-edit-btn" onclick="openAdminEditor('ansTxt-${item.id}')">✏ Edit Visual</span></label> 
+                    <label>Answer Text: <span class="visual-edit-btn" onclick="openAdminEditor('ansTxt-${item.id}')">✏ Editor</span></label> 
                     <textarea id="ansTxt-${item.id}" rows="3">${item.answerText || ''}</textarea>
-                    <label>New Answer Image:</label> <input type="file" id="ansFile-${item.id}">
+                    <label>New Answer Img:</label> <input type="file" id="ansFile-${item.id}">
                 ` : `
                     <label>Options:</label>
-                    <input type="text" id="opA-${item.id}" value="${item.options?.A || ''}" placeholder="A">
-                    <input type="text" id="opB-${item.id}" value="${item.options?.B || ''}" placeholder="B">
-                    <input type="text" id="opC-${item.id}" value="${item.options?.C || ''}" placeholder="C">
-                    <input type="text" id="opD-${item.id}" value="${item.options?.D || ''}" placeholder="D">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                        <input type="text" id="opA-${item.id}" value="${item.options?.A || ''}" placeholder="A">
+                        <input type="text" id="opB-${item.id}" value="${item.options?.B || ''}" placeholder="B">
+                        <input type="text" id="opC-${item.id}" value="${item.options?.C || ''}" placeholder="C">
+                        <input type="text" id="opD-${item.id}" value="${item.options?.D || ''}" placeholder="D">
+                    </div>
                     <label>Correct Ans:</label>
                     <select id="ansMCQ-${item.id}">
                         <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
@@ -300,32 +308,32 @@
 
                 tr.innerHTML = `
                         <td>
-                            <span style="color:#0d47a1; font-weight:bold; text-transform:uppercase;">${item.exam || 'No Exam'}</span><br>
-                            <b>${item.teacher}</b><br>
-                            <small style="color:gray">${item.subject}</small>
+                            <div style="background:#e3f2fd; color:#0d47a1; font-weight:bold; padding:4px 8px; border-radius:4px; font-size:0.8em; display:inline-block; margin-bottom:5px;">${item.exam || 'N/A'}</div>
+                            <div style="font-weight:bold;">${item.teacher}</div>
+                            <small style="color:gray">${item.subject}</small><br>
+                            <small style="color:#aaa; font-size:0.75em;">ID: ${item.id.substr(0,6)}...</small>
                         </td>
                         <td>
-                            ${verifiedBadge}
                             <div id="disp-q-${item.id}" class="content-text">
                                 ${item.question}
                                 ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
                             </div>
                             
                             <div id="edit-${item.id}" class="edit-box">
-                                <label>Question: <span class="visual-edit-btn" onclick="openAdminEditor('txt-${item.id}')">✏ Edit Visual</span></label> 
-                                <textarea id="txt-${item.id}" rows="3">${item.question}</textarea>
-                                <label>New Question Image:</label> <input type="file" id="file-${item.id}">
+                                <label>Question: <span class="visual-edit-btn" onclick="openAdminEditor('txt-${item.id}')">✏ Open Editor</span></label> 
+                                <textarea id="txt-${item.id}" rows="4">${item.question}</textarea>
+                                <label>New Question Img:</label> <input type="file" id="file-${item.id}">
                                 ${editFields}
                                 <div class="edit-btns">
-                                    <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
-                                    <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
+                                    <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#2e7d32; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Save Changes</button>
+                                    <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Cancel</button>
                                 </div>
                             </div>
                         </td>
                         <td>${answerDisplay}</td>
                         <td>
-                            <div class="action-container">
-                                ${verifyBtn}
+                            <div class="action-col">
+                                ${actionBtn}
                                 <button class="btn-edit" onclick="window.toggleEdit('${item.id}')">✏ Edit</button>
                                 <button class="btn-delete" onclick="window.deleteQ('${item.id}')">🗑 Delete</button>
                             </div>
@@ -336,17 +344,14 @@
             tableBody.appendChild(fragment);
         }
 
-        window.toggleVerify = async (btnElement, id, status) => { 
-            const originalText = btnElement.innerText;
-            btnElement.innerText = "...";
-            btnElement.disabled = true; 
+        // --- ACTIONS ---
+        window.toggleVerify = async (btn, id, status) => { 
+            btn.innerText = "⏳"; 
+            btn.disabled = true;
             try { 
-                await updateDoc(doc(db, "questions", id), { verified: status }); 
-            } catch (e) { 
-                alert(e.message);
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
-            } 
+                await updateDoc(doc(db, "questions", id), { verified: status });
+                // The Snapshot listener will remove this row automatically because it no longer fits the filter!
+            } catch (e) { alert(e.message); btn.innerText = "Error"; } 
         }
 
         window.deleteQ = async (id) => { if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id)); }
@@ -358,11 +363,23 @@
             dispQ.style.display = dispQ.style.display === "none" ? "block" : "none";
         }
 
+        // --- EDITING & SAVING ---
+        window.openAdminEditor = (targetId) => {
+            activeEditId = targetId;
+            document.getElementById('ed-body').innerHTML = document.getElementById(targetId).value;
+            document.getElementById('fs-editor').style.display = 'flex';
+        };
+        window.closeAdminEditor = () => {
+            document.getElementById(activeEditId).value = document.getElementById('ed-body').innerHTML;
+            document.getElementById('fs-editor').style.display = 'none';
+        };
+        window.execCmd = (cmd, val = null) => { document.execCommand(cmd, false, val); };
+
         const compressImage = (file) => {
             return new Promise((resolve) => {
                 const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image(); img.src = event.target.result;
+                reader.onload = (e) => {
+                    const img = new Image(); img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         canvas.width = Math.min(img.width, 800);
@@ -375,8 +392,8 @@
         };
 
         window.saveAdminEdit = async (id, type) => {
-            const btn = document.querySelector(`#edit-${id} button`); 
-            const originalText = btn.innerText;
+            const btn = document.querySelector(`#edit-${id} .edit-btns button`);
+            const prevText = btn.innerText;
             btn.innerText = "Saving..."; btn.disabled = true;
             try {
                 let updates = { question: document.getElementById(`txt-${id}`).value };
@@ -397,24 +414,23 @@
                     };
                     updates.answer = document.getElementById(`ansMCQ-${id}`).value;
                 }
-
                 await updateDoc(doc(db, "questions", id), updates);
-                alert("Updated!");
                 window.toggleEdit(id);
-            } catch (e) { alert(e.message); }
-            finally { btn.innerText = originalText; btn.disabled = false; }
+            } catch (e) { alert("Error: " + e.message); }
+            finally { btn.innerText = prevText; btn.disabled = false; }
         };
 
         window.downloadJSON = () => {
-            const e = examSelect.value; const t = teacherSelect.value; const s = subjectSelect.value;
-            const dataToDownload = allData.filter(item => {
-                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s) && item.verified === true;
-            });
-            if (dataToDownload.length === 0) return alert("No VERIFIED questions found in the CURRENTLY LOADED list.");
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Questions_${Date.now()}.json`);
+            if(currentTab !== 'verified') {
+                if(!confirm("You are currently in the PENDING list. Do you want to download only these pending questions?")) return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${currentTab}_${Date.now()}.json`);
             dl.click();
         }
+        
+        // Initial Load
+        loadData();
     </script>
 </body>
 </html>
