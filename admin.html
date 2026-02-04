@@ -2,82 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>eRT Admin Pro</title>
+    <title>eRT Odisha - Admin (Fast Mode)</title>
     <style>
+        /* --- ADMIN THEME --- */
         :root {
             --primary: #0d47a1;
-            --primary-light: #e3f2fd;
-            --bg-color: #f4f7fa;
+            --primary-hover: #002171;
+            --accent: #d32f2f;
+            --bg-color: #f4f6f8;
             --success: #2e7d32;
-            --text-dark: #37474f;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-dark); margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); border-top: 5px solid var(--primary); }
         
-        .main-wrapper { max-width: 1250px; margin: auto; }
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .app-logo { height: 50px; width: 50px; border-radius: 50%; object-fit: cover; }
+        h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
 
-        /* STATS CARDS */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
-        .stat-card.blue { border-left-color: var(--primary); }
-        .stat-card.green { border-left-color: var(--success); }
-        .stat-card.orange { border-left-color: #ff9800; }
-        .stat-num { font-size: 2rem; font-weight: bold; color: #333; margin-top: 5px; }
-        .stat-label { font-size: 0.85rem; text-transform: uppercase; color: #777; font-weight: 600; }
-
-        /* MAIN PANEL */
-        .container { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden; border-top: 5px solid var(--primary); }
+        /* Toolbar */
+        .toolbar { display: flex; gap: 20px; background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 25px; flex-wrap: wrap; border: 1px solid #e0e0e0; align-items: center; }
+        .filter-group { display: flex; flex-direction: column; }
+        .filter-group label { font-size: 0.85em; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
+        select { padding: 10px; min-width: 180px; border-radius: 6px; border: 1px solid #ccc; }
         
-        /* HEADER & TABS */
-        .header { display: flex; align-items: center; padding: 20px 25px; border-bottom: 1px solid #eee; background: white; }
-        .app-logo { height: 45px; width: 45px; border-radius: 50%; margin-right: 15px; border: 1px solid #eee; }
-        h1 { margin: 0; color: var(--primary); font-size: 1.6rem; }
+        .btn-dl { background: var(--primary); color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto;}
+        .btn-load { background: #607d8b; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-right: 10px; }
+        .btn-load:hover { background: #546e7a; }
 
-        .tabs { display: flex; background: var(--primary-light); border-bottom: 1px solid #bbdefb; }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: transparent; cursor: pointer; font-weight: 600; font-size: 1rem; color: #546e7a; border-bottom: 3px solid transparent; transition: 0.2s; }
-        .tab-btn:hover { background: #bbdefb; }
-        .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
-
-        /* TOOLBAR */
-        .toolbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
-        .filter-wrap { display: flex; flex-direction: column; gap: 4px; }
-        .filter-wrap label { font-size: 0.75rem; font-weight: bold; color: #90a4ae; text-transform: uppercase; }
-        select { padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; min-width: 180px; }
-
-        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-        /* TABLE */
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 16px 20px; border-bottom: 1px solid #eceff1; text-align: left; vertical-align: top; }
-        th { background: #f8f9fa; color: #546e7a; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; }
-        tr:hover { background-color: #fafafa; }
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #dee2e6; padding: 15px; text-align: left; vertical-align: top; }
+        th { background: var(--primary); color: white; font-weight: 600; text-transform: uppercase; font-size: 0.9em; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
         
-        .content-text { word-wrap: break-word; font-size: 0.95rem; line-height: 1.6; color: #263238; }
-        .thumb { max-width: 80px; max-height: 80px; border: 1px solid #eee; padding: 4px; background: white; margin-top: 8px; border-radius: 6px; }
+        /* PRESERVE HTML FORMATTING IN TABLE */
+        .content-text { word-wrap: break-word; }
 
-        /* BUTTONS */
-        .action-col { display: flex; flex-direction: column; gap: 8px; min-width: 110px; }
-        .btn-verify { background: var(--success); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn-unverify { background: #ff9800; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn-edit { background: #1976d2; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
-        .btn-del { background: #ef5350; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
-        .btn-verify:hover { background: #1b5e20; } .btn-unverify:hover { background: #ef6c00; }
+        .thumb { max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 3px; background: white; border-radius: 4px; display: block; margin-top: 5px;}
+        .ans-thumb { border-color: #2e7d32; } 
 
-        /* EDIT BOX */
-        .edit-box { display: none; margin-top: 15px; background: #fffde7; padding: 20px; border: 1px solid #fff59d; border-radius: 8px; }
-        .edit-box input, .edit-box textarea { width: 100%; margin-top: 5px; padding: 10px; border: 1px solid #ffe0b2; box-sizing: border-box; }
+        /* Edit Box */
+        .edit-box { display: none; margin-top: 15px; background: #fff8e1; padding: 20px; border: 1px solid #ffe0b2; border-radius: 8px; }
+        .edit-box label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.8em; color: #d84315; }
+        .edit-box input, .edit-box textarea, .edit-box select { width: 100%; margin-top: 5px; border: 1px solid #f9a825; display:block; margin-bottom: 10px; box-sizing: border-box; padding: 8px; }
+        .edit-btns { margin-top: 15px; display: flex; gap: 10px; }
 
-        /* FOOTER LOADER */
-        .footer-load { padding: 20px; text-align: center; border-top: 1px solid #eee; background: #fcfcfc; }
-        .btn-load-more { background: #455a64; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        .btn-load-more:hover { background: #37474f; }
+        /* Action Buttons */
+        .action-container { display: flex; flex-direction: column; gap: 8px; }
+        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-unverify { background: #607d8b; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
+        .btn-edit { background: #546e7a; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
+        .btn-delete { background: var(--accent); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; }
 
-        /* EDITOR */
-        #fs-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: none; flex-direction: column; }
-        .ed-toolbar { background: #eee; padding: 10px 20px; display: flex; gap: 15px; border-bottom: 1px solid #ccc; align-items: center; }
-        .ed-content { flex: 1; padding: 40px; outline: none; overflow-y: auto; font-size: 1.2rem; max-width: 900px; margin: auto; }
-        
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: auto; }
+        .badge-verified {
+            display: inline-block; background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9;
+            padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;
+        }
+
+        /* --- RICH EDITOR STYLES --- */
+        #fs-editor {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 5000; display: none; flex-direction: column;
+        }
+        .ed-toolbar { background: #eee; padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid #ccc; align-items: center; }
+        .ed-content { flex-grow: 1; padding: 30px; outline: none; overflow-y: auto; font-size: 1.2rem; }
+        .visual-edit-btn { background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px; font-weight: bold; display: inline-block; margin-bottom: 5px;}
+
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -85,364 +77,344 @@
 
     <div id="fs-editor">
         <div class="ed-toolbar">
-            <button onclick="document.execCommand('bold')"><b>B</b></button>
-            <button onclick="document.execCommand('italic')"><i>I</i></button>
-            <button onclick="document.execCommand('underline')"><u>U</u></button>
-            <div style="flex-grow:1"></div>
-            <button onclick="closeEditor()" style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">Save & Close</button>
+            <button onclick="execCmd('bold')"><b>B</b></button>
+            <button onclick="execCmd('italic')"><i>I</i></button>
+            <button onclick="execCmd('underline')"><u>U</u></button>
+            <input type="color" onchange="execCmd('foreColor', this.value)" title="Text Color">
+            <select onchange="execCmd('fontSize', this.value)">
+                <option value="3">Normal</option>
+                <option value="5">Large</option>
+                <option value="7">Extra Large</option>
+            </select>
+            <div style="flex-grow: 1;"></div>
+            <button onclick="closeAdminEditor()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Close & Update Field</button>
         </div>
         <div id="ed-body" class="ed-content" contenteditable="true"></div>
     </div>
 
-    <div class="main-wrapper">
+    <div class="container">
+        <div class="header">
+            <img src="logo.jpg" alt="Logo" class="app-logo">
+            <h1>eRT Odisha - Admin Panel</h1>
+        </div>
         
-        <div class="stats-container">
-            <div class="stat-card blue">
-                <span class="stat-label">Total Questions</span>
-                <div class="stat-num" id="stat-total">...</div>
+        <div class="toolbar">
+            <div class="filter-group">
+                <label>1. Exam:</label>
+                <select id="filterExam" onchange="applyFilters()">
+                    <option value="all">All Exams</option>
+                </select>
             </div>
-            <div class="stat-card green">
-                <span class="stat-label">Verified (Live)</span>
-                <div class="stat-num" id="stat-verified">...</div>
+            <div class="filter-group">
+                <label>2. Teacher:</label>
+                <select id="filterTeacher" onchange="applyFilters()">
+                    <option value="all">All Teachers</option>
+                </select>
             </div>
-            <div class="stat-card orange">
-                <span class="stat-label">Pending Review</span>
-                <div class="stat-num" id="stat-pending">...</div>
+            <div class="filter-group">
+                <label>3. Subject:</label>
+                <select id="filterSubject" onchange="applyFilters()">
+                    <option value="all">All Subjects</option>
+                </select>
             </div>
-        </div>
-
-        <div class="container">
-            <div class="header">
-                <img src="logo.jpg" alt="Logo" class="app-logo" onerror="this.style.display='none'">
-                <h1>eRT Odisha - Admin Panel</h1>
-            </div>
-
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('pending')" id="tab-pending">🔴 Pending Review</button>
-                <button class="tab-btn" onclick="switchTab('verified')" id="tab-verified">✅ Verified Database</button>
-            </div>
-
-            <div class="toolbar">
-                <div class="filter-wrap">
-                    <label>Exam</label>
-                    <select id="f-exam" onchange="render()"><option value="all">All Exams</option></select>
-                </div>
-                <div class="filter-wrap">
-                    <label>Teacher</label>
-                    <select id="f-teacher" onchange="render()"><option value="all">All Teachers</option></select>
-                </div>
-                <div class="filter-wrap">
-                    <label>Subject</label>
-                    <select id="f-subject" onchange="render()"><option value="all">All Subjects</option></select>
-                </div>
-                <button class="btn-dl" onclick="downloadJSON()">⬇ Download JSON</button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width:20%">Info</th>
-                            <th style="width:40%">Question</th>
-                            <th style="width:25%">Answer</th>
-                            <th style="width:15%">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#999;">Loading Data...</p></td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="footer-load">
-                <button class="btn-load-more" onclick="loadMore()">⇩ Load More Data</button>
+            <div style="margin-left: auto; display: flex;">
+                <button class="btn-load" onclick="window.increaseLimit()">↻ Load More Data</button>
+                <button class="btn-dl" onclick="downloadJSON()">⬇ Download Verified JSON</button>
             </div>
         </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:20%">Info</th>
+                    <th style="width:35%">Question</th>
+                    <th style="width:30%">Answer / Options</th>
+                    <th style="width:15%">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#666;">Loading data...</p></td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script type="module">
         import { db } from "./firebase-config.js";
-        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, getCountFromServer } 
+        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // 1. PASSWORD CHECK (Immediately on load)
-        const pass = prompt("Enter Admin Password:");
-        if(pass !== "admin123") { 
-            document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1><button style='display:block; margin:20px auto; padding:10px 20px;' onclick='location.reload()'>Try Again</button>"; 
-            throw new Error("Access Denied"); 
-        }
-
-        // STATE
-        let allData = [];
-        let currentTab = 'pending';
-        let queryLimit = 50;
-        let unsubscribe = null;
-        let activeEditId = null;
-
-        const tableBody = document.getElementById('tableBody');
-
-        // 2. STATS FETCH (Wrapped to not block table)
-        async function fetchStats() {
-            try {
-                const col = collection(db, "questions");
-                // Attempt to get counts. If aggregation index is missing, this might fail, 
-                // so we catch it and continue loading the table.
-                const totalSnap = await getCountFromServer(col);
-                const verSnap = await getCountFromServer(query(col, where("verified", "==", true)));
-                
-                const total = totalSnap.data().count;
-                const verified = verSnap.data().count;
-                const pending = total - verified;
-
-                document.getElementById('stat-total').innerText = total;
-                document.getElementById('stat-verified').innerText = verified;
-                document.getElementById('stat-pending').innerText = pending;
-            } catch (e) {
-                console.log("Stats skipped (likely missing index):", e);
-                document.getElementById('stat-total').innerText = "-";
-            }
-        }
-        
-        // 3. CORE LOGIC (From the working code)
-        window.switchTab = (tab) => {
-            currentTab = tab;
-            queryLimit = 50; // Reset limit
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px;"><div class="loader"></div></td></tr>`;
-            fetchData();
-        }
-
-        function fetchData() {
-            if(unsubscribe) unsubscribe();
-            const col = collection(db, "questions");
-            let q;
-
-            // SMART QUERY STRATEGY (The logic that worked)
-            if(currentTab === 'pending') {
-                // Get unverified. NO 'orderBy' prevents index errors.
-                // We will sort in Javascript instead.
-                q = query(col, where("verified", "==", false), limit(queryLimit));
-            } else {
-                // Get RECENT items (Verified or not)
-                // We sort by timestamp here, then filter verified==true in browser
-                q = query(col, orderBy("timestamp", "desc"), limit(queryLimit));
-            }
-
-            unsubscribe = onSnapshot(q, (snapshot) => {
-                allData = [];
-                snapshot.forEach(d => allData.push({ ...d.data(), id: d.id }));
-                
-                // CLIENT SIDE PROCESSING
-                if(currentTab === 'pending') {
-                    // Sort pending items by newness
-                    allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                } else {
-                    // For Verified Tab: Filter strictly for verified items
-                    allData = allData.filter(item => item.verified === true);
-                }
-
-                updateFilters();
-            }, (error) => {
-                console.error("Fetch Error:", error);
-                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding:20px;">Error: ${error.message}</td></tr>`;
-            });
-        }
-
-        function updateFilters() {
-            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
-            const teachers = [...new Set(allData.map(d => d.teacher))];
-            const subjects = [...new Set(allData.map(d => d.subject))];
-            
-            fillSelect('f-exam', exams);
-            fillSelect('f-teacher', teachers);
-            fillSelect('f-subject', subjects);
-            render();
-        }
-
-        function fillSelect(id, items) {
-            const el = document.getElementById(id);
-            const current = el.value;
-            el.innerHTML = `<option value="all">All</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
-            if(items.includes(current)) el.value = current;
-        }
-
-        window.render = () => {
-            const ex = document.getElementById('f-exam').value;
-            const te = document.getElementById('f-teacher').value;
-            const su = document.getElementById('f-subject').value;
-
-            const filtered = allData.filter(d => 
-                (ex === 'all' || d.exam === ex) && 
-                (te === 'all' || d.teacher === te) && 
-                (su === 'all' || d.subject === su)
-            );
-
-            if(filtered.length === 0) {
-                const msg = currentTab === 'pending' ? "🎉 No pending reviews!" : "No verified questions found.";
-                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888; padding:30px;">${msg}</td></tr>`;
-                return;
-            }
-
-            const frag = document.createDocumentFragment();
-            filtered.forEach(item => {
-                const tr = document.createElement('tr');
-                const isSub = item.type === "SUBJECTIVE";
-                
-                // Professional: Use Confirm Actions
-                const btnAction = currentTab === 'pending' 
-                    ? `<button class="btn-verify" onclick="confirmVerify('${item.id}', true)">✅ Approve</button>`
-                    : `<button class="btn-unverify" onclick="confirmVerify('${item.id}', false)">↩ Reject</button>`;
-
-                tr.innerHTML = `
-                    <td>
-                        <span style="background:#e3f2fd; color:#0d47a1; padding:3px 6px; border-radius:4px; font-weight:bold; font-size:0.8em">${item.exam || '-'}</span><br>
-                        <b>${item.teacher}</b><br>
-                        <small style="color:gray">${item.subject}</small>
-                    </td>
-                    <td>
-                        <div id="view-${item.id}" class="content-text">
-                            ${item.question}
-                            ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
-                        </div>
-                        <div id="edit-${item.id}" class="edit-box">
-                            <label>Question: <span onclick="openEditor('q-${item.id}')" style="cursor:pointer; color:#1976d2; font-size:12px"> (Edit Visual)</span></label>
-                            <textarea id="q-${item.id}" rows="3">${item.question}</textarea>
-                            <label>New Image:</label><input type="file" id="img-${item.id}">
-                            ${isSub ? `
-                                <label>Answer:</label> <span onclick="openEditor('ans-${item.id}')" style="cursor:pointer; color:#1976d2; font-size:12px"> (Edit Visual)</span>
-                                <textarea id="ans-${item.id}" rows="3">${item.answerText || ''}</textarea>
-                            ` : `
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px">
-                                    <input id="opA-${item.id}" value="${item.options?.A||''}" placeholder="A">
-                                    <input id="opB-${item.id}" value="${item.options?.B||''}" placeholder="B">
-                                    <input id="opC-${item.id}" value="${item.options?.C||''}" placeholder="C">
-                                    <input id="opD-${item.id}" value="${item.options?.D||''}" placeholder="D">
-                                </div>
-                                <label>Correct:</label>
-                                <select id="cor-${item.id}">
-                                    <option value="A" ${item.answer==='A'?'selected':''}>A</option>
-                                    <option value="B" ${item.answer==='B'?'selected':''}>B</option>
-                                    <option value="C" ${item.answer==='C'?'selected':''}>C</option>
-                                    <option value="D" ${item.answer==='D'?'selected':''}>D</option>
-                                </select>
-                            `}
-                            <div style="margin-top:10px; display:flex; gap:10px;">
-                                <button class="btn-edit" onclick="saveEdit('${item.id}', '${item.type}')">Save Changes</button>
-                                <button style="padding:8px; cursor:pointer;" onclick="toggleEdit('${item.id}')">Cancel</button>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        ${isSub ? 
-                            `<div class="content-text">${item.answerText||'-'}</div>` : 
-                            `<b>Ans: ${item.answer}</b><br><small>A:${item.options?.A||'-'} B:${item.options?.B||'-'}</small>`
-                        }
-                    </td>
-                    <td>
-                        <div class="action-col">
-                            ${btnAction}
-                            <button class="btn-edit" onclick="toggleEdit('${item.id}')">✏ Edit</button>
-                            <button class="btn-del" onclick="del('${item.id}')">🗑</button>
-                        </div>
-                    </td>
-                `;
-                frag.appendChild(tr);
-            });
-            tableBody.innerHTML = "";
-            tableBody.appendChild(frag);
-        }
-
-        // --- ACTIONS ---
-        window.loadMore = () => { 
-            queryLimit += 50; 
-            const btn = document.querySelector('.btn-load-more');
-            btn.innerText = "Loading...";
-            fetchData(); 
-            // Reset text logic is handled by the snapshot update implicitly or we can just leave it
-        }
-        
-        // Professional Confirm Dialogs
-        window.confirmVerify = async (id, status) => {
-            const action = status ? "APPROVE" : "REJECT";
-            const target = status ? "Verified" : "Pending";
-            if(confirm(`Are you sure you want to ${action} this question?\nIt will move to the ${target} list.`)) {
-                try { 
-                    await updateDoc(doc(db, "questions", id), { verified: status }); 
-                    // No manual refresh needed, onSnapshot handles it!
-                } catch(e) { alert(e); }
-            }
-        }
-
-        window.del = async (id) => { if(confirm("Permanently Delete? This cannot be undone.")) await deleteDoc(doc(db, "questions", id)); }
-        
-        window.toggleEdit = (id) => {
-            const v = document.getElementById(`view-${id}`);
-            const e = document.getElementById(`edit-${id}`);
-            v.style.display = v.style.display === 'none' ? 'block' : 'none';
-            e.style.display = e.style.display === 'block' ? 'none' : 'block';
-        }
-
-        // --- EDITOR & SAVING ---
-        window.openEditor = (id) => {
-            activeEditId = id;
-            document.getElementById('ed-body').innerHTML = document.getElementById(id).value;
-            document.getElementById('fs-editor').style.display = 'flex';
-        }
-        window.closeEditor = () => {
-            document.getElementById(activeEditId).value = document.getElementById('ed-body').innerHTML;
-            document.getElementById('fs-editor').style.display = 'none';
-        }
-
-        const compress = (file) => new Promise(resolve => {
-            const r = new FileReader(); r.readAsDataURL(file);
-            r.onload = e => {
-                const i = new Image(); i.src = e.target.result;
-                i.onload = () => {
-                    const c = document.createElement('canvas');
-                    c.width = Math.min(i.width, 800);
-                    c.height = i.height*(c.width/i.width);
-                    c.getContext('2d').drawImage(i,0,0,c.width,c.height);
-                    resolve(c.toDataURL('image/jpeg',0.7));
-                }
-            }
+        // Enable persistence to cache data locally
+        enableIndexedDbPersistence(db).catch((err) => {
+            console.log("Persistence suppressed:", err.code);
         });
 
-        window.saveEdit = async (id, type) => {
-            const btn = document.querySelector(`#edit-${id} .btn-edit`);
+        // Auth
+        const pass = prompt("Enter Admin Password:");
+        if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
+
+        let allData = [];
+        let activeEditId = '';
+        let queryLimit = 50; // Performance: Only load 50 initially
+        let unsubscribe = null;
+
+        const examSelect = document.getElementById('filterExam');
+        const teacherSelect = document.getElementById('filterTeacher');
+        const subjectSelect = document.getElementById('filterSubject');
+        const tableBody = document.getElementById('tableBody');
+
+        // --- VISUAL EDITOR LOGIC ---
+        window.openAdminEditor = (targetId) => {
+            activeEditId = targetId;
+            const content = document.getElementById(targetId).value;
+            document.getElementById('ed-body').innerHTML = content;
+            document.getElementById('fs-editor').style.display = 'flex';
+        };
+
+        window.closeAdminEditor = () => {
+            const html = document.getElementById('ed-body').innerHTML;
+            document.getElementById(activeEditId).value = html;
+            document.getElementById('fs-editor').style.display = 'none';
+        };
+
+        window.execCmd = (cmd, val = null) => { document.execCommand(cmd, false, val); };
+
+        // --- FETCH DATA OPTIMIZED ---
+        function loadData() {
+            if (unsubscribe) unsubscribe(); // Stop listening to old query
+            
+            const q = query(collection(db, "questions"), orderBy("timestamp", "desc"), limit(queryLimit));
+            
+            unsubscribe = onSnapshot(q, (snapshot) => {
+                allData = [];
+                snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
+                updateDropdowns(); // This calls applyFilters -> renderTable
+            });
+        }
+
+        window.increaseLimit = () => {
+            queryLimit += 50;
+            const btn = document.querySelector('.btn-load');
+            btn.innerText = "Loading...";
+            loadData();
+            // Reset button text after short delay
+            setTimeout(() => btn.innerText = "↻ Load More Data", 1000);
+        };
+
+        // Start Initial Load
+        loadData();
+
+        function updateDropdowns() {
+            const currentExam = examSelect.value;
+            const currentTeacher = teacherSelect.value;
+            const currentSubject = subjectSelect.value;
+
+            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
+            populateSelect(examSelect, exams, "All Exams", currentExam);
+
+            const teachers = [...new Set(allData.map(d => d.teacher))];
+            populateSelect(teacherSelect, teachers, "All Teachers", currentTeacher);
+
+            const subjects = [...new Set(allData.map(d => d.subject))];
+            populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
+            
+            applyFilters();
+        }
+
+        function populateSelect(el, items, defaultText, selectedValue) {
+            // Keep current selection if valid
+            const previousValue = el.value !== "" ? el.value : selectedValue;
+            el.innerHTML = `<option value="all">${defaultText}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item; opt.innerText = item;
+                if(item === previousValue) opt.selected = true;
+                el.appendChild(opt);
+            });
+        }
+
+        window.applyFilters = () => {
+            const e = examSelect.value;
+            const t = teacherSelect.value;
+            const s = subjectSelect.value;
+            const filtered = allData.filter(item => {
+                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s);
+            });
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            tableBody.innerHTML = "";
+            if(data.length === 0) { tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No questions found in current batch.</td></tr>"; return; }
+            
+            // Performance: Use Fragment to append only once
+            const fragment = document.createDocumentFragment();
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                const isVerified = item.verified === true;
+                const verifiedBadge = isVerified ? `<div class="badge-verified">✅ Verified</div>` : '';
+                
+                // Pass 'this' to toggleVerify for UI feedback
+                const verifyBtn = isVerified 
+                    ? `<button class="btn-unverify" onclick="window.toggleVerify(this, '${item.id}', false)">↩ Undo</button>` 
+                    : `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Verify</button>`;
+                
+                const isSubjective = item.type === "SUBJECTIVE";
+
+                let answerDisplay = isSubjective ? `
+                    <div style="font-size:0.9em;">
+                        <span style="color:#d32f2f; font-weight:bold; font-size:0.8em; border:1px solid #d32f2f; padding:2px 4px; border-radius:4px;">${item.category || 'Subjective'}</span><br>
+                        <div class="content-text" style="margin-top:5px;">${item.answerText || '<i>No text answer</i>'}</div>
+                        ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb ans-thumb"></a>` : ''}
+                    </div>` : `
+                    <div style="font-size:0.85em;">
+                        A: ${item.options?.A || ''}<br>B: ${item.options?.B || ''}<br>
+                        C: ${item.options?.C || ''}<br>D: ${item.options?.D || ''}<br>
+                        <strong style="color:#d32f2f; display:block; margin-top:5px;">Ans: ${item.answer}</strong>
+                    </div>`;
+
+                let editFields = isSubjective ? `
+                    <label>Category:</label>
+                    <select id="cat-${item.id}">
+                        <option value="Very Short" ${item.category === 'Very Short' ? 'selected' : ''}>Very Short</option>
+                        <option value="Short" ${item.category === 'Short' ? 'selected' : ''}>Short</option>
+                        <option value="Long" ${item.category === 'Long' ? 'selected' : ''}>Long</option>
+                    </select>
+                    <label>Answer Text: <span class="visual-edit-btn" onclick="openAdminEditor('ansTxt-${item.id}')">✏ Edit Visual</span></label> 
+                    <textarea id="ansTxt-${item.id}" rows="3">${item.answerText || ''}</textarea>
+                    <label>New Answer Image:</label> <input type="file" id="ansFile-${item.id}">
+                ` : `
+                    <label>Options:</label>
+                    <input type="text" id="opA-${item.id}" value="${item.options?.A || ''}" placeholder="A">
+                    <input type="text" id="opB-${item.id}" value="${item.options?.B || ''}" placeholder="B">
+                    <input type="text" id="opC-${item.id}" value="${item.options?.C || ''}" placeholder="C">
+                    <input type="text" id="opD-${item.id}" value="${item.options?.D || ''}" placeholder="D">
+                    <label>Correct Ans:</label>
+                    <select id="ansMCQ-${item.id}">
+                        <option value="A" ${item.answer === 'A' ? 'selected' : ''}>A</option>
+                        <option value="B" ${item.answer === 'B' ? 'selected' : ''}>B</option>
+                        <option value="C" ${item.answer === 'C' ? 'selected' : ''}>C</option>
+                        <option value="D" ${item.answer === 'D' ? 'selected' : ''}>D</option>
+                    </select>
+                `;
+
+                tr.innerHTML = `
+                        <td>
+                            <span style="color:#0d47a1; font-weight:bold; text-transform:uppercase;">${item.exam || 'No Exam'}</span><br>
+                            <b>${item.teacher}</b><br>
+                            <small style="color:gray">${item.subject}</small>
+                        </td>
+                        <td>
+                            ${verifiedBadge}
+                            <div id="disp-q-${item.id}" class="content-text">
+                                ${item.question}
+                                ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
+                            </div>
+                            
+                            <div id="edit-${item.id}" class="edit-box">
+                                <label>Question: <span class="visual-edit-btn" onclick="openAdminEditor('txt-${item.id}')">✏ Edit Visual</span></label> 
+                                <textarea id="txt-${item.id}" rows="3">${item.question}</textarea>
+                                <label>New Question Image:</label> <input type="file" id="file-${item.id}">
+                                ${editFields}
+                                <div class="edit-btns">
+                                    <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#0d47a1; color:white; border:none; padding:8px 16px; border-radius:4px;">Save</button>
+                                    <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px;">Cancel</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${answerDisplay}</td>
+                        <td>
+                            <div class="action-container">
+                                ${verifyBtn}
+                                <button class="btn-edit" onclick="window.toggleEdit('${item.id}')">✏ Edit</button>
+                                <button class="btn-delete" onclick="window.deleteQ('${item.id}')">🗑 Delete</button>
+                            </div>
+                        </td>
+                `;
+                fragment.appendChild(tr);
+            });
+            tableBody.appendChild(fragment);
+        }
+
+        window.toggleVerify = async (btnElement, id, status) => { 
+            const originalText = btnElement.innerText;
+            btnElement.innerText = "...";
+            btnElement.disabled = true; 
+            try { 
+                await updateDoc(doc(db, "questions", id), { verified: status }); 
+            } catch (e) { 
+                alert(e.message);
+                btnElement.innerText = originalText;
+                btnElement.disabled = false;
+            } 
+        }
+
+        window.deleteQ = async (id) => { if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id)); }
+        
+        window.toggleEdit = (id) => {
+            const box = document.getElementById(`edit-${id}`);
+            const dispQ = document.getElementById(`disp-q-${id}`);
+            box.style.display = box.style.display === "block" ? "none" : "block";
+            dispQ.style.display = dispQ.style.display === "none" ? "block" : "none";
+        }
+
+        const compressImage = (file) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image(); img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.min(img.width, 800);
+                        canvas.height = img.height * (canvas.width / img.width);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    };
+                };
+            });
+        };
+
+        window.saveAdminEdit = async (id, type) => {
+            const btn = document.querySelector(`#edit-${id} button`); 
+            const originalText = btn.innerText;
             btn.innerText = "Saving..."; btn.disabled = true;
             try {
-                let up = { question: document.getElementById(`q-${id}`).value };
-                const f = document.getElementById(`img-${id}`).files[0];
-                if(f) up.imageUrl = await compress(f);
+                let updates = { question: document.getElementById(`txt-${id}`).value };
+                const qFile = document.getElementById(`file-${id}`).files[0];
+                if (qFile) updates.imageUrl = await compressImage(qFile);
 
-                if(type === 'SUBJECTIVE') {
-                    up.answerText = document.getElementById(`ans-${id}`).value;
+                if (type === "SUBJECTIVE") {
+                    updates.category = document.getElementById(`cat-${id}`).value;
+                    updates.answerText = document.getElementById(`ansTxt-${id}`).value;
+                    const aFile = document.getElementById(`ansFile-${id}`).files[0];
+                    if (aFile) updates.answerImage = await compressImage(aFile);
                 } else {
-                    up.options = {
+                    updates.options = {
                         A: document.getElementById(`opA-${id}`).value,
                         B: document.getElementById(`opB-${id}`).value,
                         C: document.getElementById(`opC-${id}`).value,
-                        D: document.getElementById(`opD-${id}`).value
+                        D: document.getElementById('opD-' + id).value,
                     };
-                    up.answer = document.getElementById(`cor-${id}`).value;
+                    updates.answer = document.getElementById(`ansMCQ-${id}`).value;
                 }
-                await updateDoc(doc(db, "questions", id), up);
-                toggleEdit(id);
-                alert("Saved Successfully!");
-            } catch(e) { alert(e); }
-            btn.innerText = "Save Changes"; btn.disabled = false;
-        }
+
+                await updateDoc(doc(db, "questions", id), updates);
+                alert("Updated!");
+                window.toggleEdit(id);
+            } catch (e) { alert(e.message); }
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        };
 
         window.downloadJSON = () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${currentTab}_${Date.now()}.json`);
+            const e = examSelect.value; const t = teacherSelect.value; const s = subjectSelect.value;
+            const dataToDownload = allData.filter(item => {
+                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s) && item.verified === true;
+            });
+            if (dataToDownload.length === 0) return alert("No VERIFIED questions found in the CURRENTLY LOADED list.");
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToDownload, null, 2));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Questions_${Date.now()}.json`);
             dl.click();
         }
-
-        // STARTUP
-        fetchData();
-        fetchStats();
     </script>
 </body>
 </html>
