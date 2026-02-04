@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>eRT Odisha - Admin Pro</title>
+    <title>eRT Odisha - Admin Pro Dashboard</title>
     <style>
         /* --- ADMIN THEME --- */
         :root {
@@ -11,6 +11,7 @@
             --accent: #d32f2f;
             --bg-color: #f4f6f8;
             --success: #2e7d32;
+            --warning: #fb8c00;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
@@ -20,12 +21,22 @@
         .app-logo { height: 40px; width: 40px; border-radius: 50%; border: 2px solid white; background: white; }
         h1 { margin: 0; font-size: 1.5rem; color: white; }
 
+        /* --- STATS DASHBOARD --- */
+        .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; border-bottom: 1px solid #ddd; }
+        .stat-card { background: white; padding: 20px; text-align: center; cursor: default; transition: 0.2s; }
+        .stat-card:hover { background: #fcfcfc; }
+        .stat-card h3 { margin: 0; font-size: 0.85em; text-transform: uppercase; color: #777; letter-spacing: 1px; }
+        .stat-card .count { font-size: 2rem; font-weight: 800; margin-top: 5px; color: #333; }
+        
+        .c-total { color: var(--primary) !important; }
+        .c-pending { color: var(--accent) !important; }
+        .c-verified { color: var(--success) !important; }
+
         /* --- TABS --- */
-        .tabs { display: flex; background: #e3f2fd; border-bottom: 1px solid #bbdefb; }
+        .tabs { display: flex; background: #e3f2fd; border-bottom: 1px solid #bbdefb; border-top: 5px solid #e0e0e0;}
         .tab-btn { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #555; transition: 0.2s; border-bottom: 3px solid transparent; }
         .tab-btn:hover { background: #bbdefb; }
         .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
-        .count-badge { background: #ef5350; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 8px; }
 
         /* Toolbar */
         .toolbar { display: flex; gap: 15px; padding: 20px; background: #fff; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid #eee; }
@@ -34,10 +45,9 @@
         select { padding: 8px; min-width: 160px; border-radius: 4px; border: 1px solid #ccc; background: #fafafa; }
         
         .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-left: auto; display: flex; align-items: center; gap: 5px;}
-        .btn-load { background: #546e7a; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-right: 10px; }
 
         /* Table */
-        .table-wrap { padding: 0 20px 20px 20px; overflow-x: auto; }
+        .table-wrap { padding: 0 20px 0 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 15px 10px; text-align: left; vertical-align: top; }
         th { color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
@@ -56,6 +66,11 @@
         .btn-unverify { background: #fb8c00; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
         .btn-delete { background: #d32f2f; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
+
+        /* Bottom Load More Section */
+        .load-more-section { padding: 30px; text-align: center; background: #f9f9f9; border-top: 1px solid #eee; }
+        .btn-load { background: #546e7a; color: white; border: none; padding: 12px 30px; cursor: pointer; border-radius: 30px; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;}
+        .btn-load:hover { background: #37474f; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
 
         /* Rich Editor */
         #fs-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; display: none; flex-direction: column; }
@@ -87,9 +102,24 @@
             <h1>eRT Odisha Admin</h1>
         </div>
 
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3>Total Questions</h3>
+                <div class="count c-total" id="stat-total">...</div>
+            </div>
+            <div class="stat-card">
+                <h3>🔴 Non-Verified</h3>
+                <div class="count c-pending" id="stat-pending">...</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Verified</h3>
+                <div class="count c-verified" id="stat-verified">...</div>
+            </div>
+        </div>
+
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('unverified')" id="tab-unverified">🔴 Pending Review</button>
-            <button class="tab-btn" onclick="switchTab('verified')" id="tab-verified">✅ Approved Database</button>
+            <button class="tab-btn active" onclick="switchTab('unverified')" id="tab-unverified">Pending Review</button>
+            <button class="tab-btn" onclick="switchTab('verified')" id="tab-verified">Approved Database</button>
         </div>
         
         <div class="toolbar">
@@ -107,7 +137,6 @@
             </div>
             
             <div style="margin-left: auto; display: flex; align-items: center;">
-                <button class="btn-load" onclick="window.increaseLimit()">↻ Load More</button>
                 <button class="btn-dl" onclick="downloadJSON()">⬇ JSON</button>
             </div>
         </div>
@@ -127,14 +156,19 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="load-more-section">
+            <button class="btn-load" onclick="window.increaseLimit()">↻ Load More Questions</button>
+            <p style="margin-top: 10px; color: #888; font-size: 0.8em;">Shows more questions at the bottom of the list</p>
+        </div>
     </div>
 
     <script type="module">
         import { db } from "./firebase-config.js";
-        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence } 
+        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Persistence helps load data instantly on refresh
+        // Persistence
         enableIndexedDbPersistence(db).catch((err) => console.log("Persistence:", err.code));
 
         const pass = prompt("Enter Admin Password:");
@@ -144,7 +178,7 @@
         let allData = [];
         let activeEditId = '';
         let queryLimit = 50; 
-        let currentTab = 'unverified'; // Default to pending
+        let currentTab = 'unverified'; 
         let unsubscribe = null;
 
         // Elements
@@ -153,18 +187,38 @@
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
 
+        // --- STATS LOGIC (New) ---
+        // This calculates the real numbers from the server
+        async function updateStats() {
+            try {
+                const coll = collection(db, "questions");
+                
+                // Get Counts
+                const snapVerified = await getCountFromServer(query(coll, where("verified", "==", true)));
+                const countVerified = snapVerified.data().count;
+
+                const snapUnverified = await getCountFromServer(query(coll, where("verified", "==", false)));
+                const countUnverified = snapUnverified.data().count;
+
+                // Update DOM
+                document.getElementById('stat-verified').innerText = countVerified;
+                document.getElementById('stat-pending').innerText = countUnverified;
+                document.getElementById('stat-total').innerText = countVerified + countUnverified;
+            } catch (e) {
+                console.error("Stats error", e);
+            }
+        }
+        updateStats(); // Run immediately
+
         // --- TABS LOGIC ---
         window.switchTab = (tabName) => {
             currentTab = tabName;
-            queryLimit = 50; // Reset limit when switching
+            queryLimit = 50; 
             
-            // Update UI Tabs
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
-            // Clear table to show loading
             tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
-            
             loadData();
         };
 
@@ -175,25 +229,22 @@
             const collectionRef = collection(db, "questions");
             let q;
 
-            // SMART QUERIES: Only fetch what we need
-            // NOTE: This might require a composite index in Firestore. Check Console logs if empty.
             if (currentTab === 'unverified') {
-                // Fetch items where verified is false (or undefined)
-                // We assume default is unverified. 
                 q = query(collectionRef, where("verified", "==", false), orderBy("timestamp", "desc"), limit(queryLimit));
             } else {
-                // Fetch items where verified is true
                 q = query(collectionRef, where("verified", "==", true), orderBy("timestamp", "desc"), limit(queryLimit));
             }
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
                 snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
-                updateDropdowns(); // Triggers render
+                updateDropdowns(); // Re-calculates filters based on loaded data
+                // Update stats live if something changes in view
+                updateStats();
             }, (error) => {
                 console.error("Firebase Error:", error);
                 if(error.message.includes("index")) {
-                    alert("⚠️ SYSTEM NOTICE: A Firestore Index is required for this new sorting mode.\n\nPlease open the browser console (F12) and click the link provided by Firebase to create it.");
+                    alert("⚠️ SYSTEM NOTICE: Index required. Check console.");
                 }
             });
         }
@@ -201,9 +252,18 @@
         window.increaseLimit = () => {
             queryLimit += 50;
             const btn = document.querySelector('.btn-load');
+            const prevText = btn.innerText;
             btn.innerText = "Loading...";
+            btn.disabled = true;
+            
+            // Reload with higher limit
             loadData();
-            setTimeout(() => btn.innerText = "↻ Load More", 1000);
+            
+            // Reset button visual
+            setTimeout(() => {
+                btn.innerText = prevText;
+                btn.disabled = false;
+            }, 1500);
         };
 
         function updateDropdowns() {
@@ -211,14 +271,14 @@
             const currentTeacher = teacherSelect.value;
             const currentSubject = subjectSelect.value;
 
-            // Get unique values from CURRENT loaded data
-            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
+            // Get unique values from ALL loaded data to ensure we don't skip any
+            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))].sort();
             populateSelect(examSelect, exams, "All Exams", currentExam);
 
-            const teachers = [...new Set(allData.map(d => d.teacher))];
+            const teachers = [...new Set(allData.map(d => d.teacher).filter(Boolean))].sort();
             populateSelect(teacherSelect, teachers, "All Teachers", currentTeacher);
 
-            const subjects = [...new Set(allData.map(d => d.subject))];
+            const subjects = [...new Set(allData.map(d => d.subject).filter(Boolean))].sort();
             populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
             
             applyFilters();
@@ -259,7 +319,6 @@
                 const tr = document.createElement('tr');
                 const isSubjective = item.type === "SUBJECTIVE";
 
-                // Dynamic Button based on Tab
                 let actionBtn = "";
                 if(currentTab === 'unverified') {
                     actionBtn = `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Approve</button>`;
@@ -350,7 +409,8 @@
             btn.disabled = true;
             try { 
                 await updateDoc(doc(db, "questions", id), { verified: status });
-                // The Snapshot listener will remove this row automatically because it no longer fits the filter!
+                // Note: The Snapshot listener automatically refreshes the table row
+                // and the updateStats() function triggers to update the counts.
             } catch (e) { alert(e.message); btn.innerText = "Error"; } 
         }
 
