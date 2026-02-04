@@ -165,8 +165,9 @@
 
     <script type="module">
         import { db } from "./firebase-config.js";
+        // ✅ UPDATED: Version changed from 9.6.1 to 9.23.0 to support 'getCountFromServer'
         import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
-        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Persistence
         enableIndexedDbPersistence(db).catch((err) => console.log("Persistence:", err.code));
