@@ -158,14 +158,13 @@
         </div>
 
         <div class="load-more-section">
-            <button class="btn-load" onclick="window.increaseLimit()">↻ Load More Questions</button>
-            <p style="margin-top: 10px; color: #888; font-size: 0.8em;">Shows more questions at the bottom of the list</p>
+            <button class="btn-load" onclick="window.showMoreLocal()">⬇ Show 50 More (Instant)</button>
+            <p style="margin-top: 10px; color: #888; font-size: 0.8em;" id="showing-count">Loading...</p>
         </div>
     </div>
 
     <script type="module">
         import { db } from "./firebase-config.js";
-        // ✅ UPDATED: Version 9.23.0 + 'getDocs' added to fetch users list
         import { collection, getDocs, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -177,13 +176,17 @@
 
         // --- STATE ---
         let allData = [];
-        let allTeachers = new Set(); // Stores teachers fetched from Users collection
+        let filteredData = []; // Store filtered result for pagination
+        let allTeachers = new Set(); 
         let activeEditId = '';
-        let queryLimit = 50; 
+        
+        // ⚡ KEY SETTINGS FOR SPEED ⚡
+        let queryLimit = 1500;  // Download LOTS of data (so filters work)
+        let visibleLimit = 50;  // But only RENDER 50 at a time (so it's fast)
+        
         let currentTab = 'unverified'; 
         let unsubscribe = null;
 
-        // Master list of exams to ensure none are skipped
         const masterExams = ["OAV", "NAVODAYA", "NMMS", "PATHANI SAMANTA", "5TH BOARD", "8TH BOARD", "EKALABYA"];
 
         // Elements
@@ -191,33 +194,29 @@
         const teacherSelect = document.getElementById('filterTeacher');
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
+        const countLabel = document.getElementById('showing-count');
+        const loadBtn = document.querySelector('.btn-load');
 
-        // --- FETCH USER METADATA (Teachers who haven't posted yet) ---
+        // --- FETCH USER METADATA ---
         async function fetchUserMetadata() {
             try {
-                // Fetch all users to populate the Teacher dropdown fully
                 const snapshot = await getDocs(collection(db, "users"));
                 snapshot.forEach(doc => {
                     const d = doc.data();
-                    // Prefer displayName, fallback to email if name missing
                     const name = d.displayName || d.name || d.email; 
                     if(name) allTeachers.add(name);
                 });
-                updateDropdowns(); // Refresh dropdowns with new teacher data
-            } catch (e) {
-                console.error("Error fetching users metadata:", e);
-            }
+                updateDropdowns(); 
+            } catch (e) { console.error("Error fetching users:", e); }
         }
-        fetchUserMetadata(); // Run on startup
+        fetchUserMetadata();
 
         // --- STATS LOGIC ---
         async function updateStats() {
             try {
                 const coll = collection(db, "questions");
-                
                 const snapVerified = await getCountFromServer(query(coll, where("verified", "==", true)));
                 const countVerified = snapVerified.data().count;
-
                 const snapUnverified = await getCountFromServer(query(coll, where("verified", "==", false)));
                 const countUnverified = snapUnverified.data().count;
 
@@ -231,44 +230,49 @@
         // --- TABS LOGIC ---
         window.switchTab = (tabName) => {
             currentTab = tabName;
-            queryLimit = 50; 
+            visibleLimit = 50; // Reset visual limit on tab switch
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
             tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
             loadData();
         };
 
-        // --- DATA LOADING ---
+        // --- DATA LOADING (FETCH 1000+, RENDER 50) ---
         function loadData() {
             if (unsubscribe) unsubscribe();
             const collectionRef = collection(db, "questions");
             let q;
 
+            // REMOVED orderBy("timestamp") to ensure all questions appear
             if (currentTab === 'unverified') {
-                q = query(collectionRef, where("verified", "==", false), orderBy("timestamp", "desc"), limit(queryLimit));
+                q = query(collectionRef, where("verified", "==", false), limit(queryLimit));
             } else {
-                q = query(collectionRef, where("verified", "==", true), orderBy("timestamp", "desc"), limit(queryLimit));
+                q = query(collectionRef, where("verified", "==", true), limit(queryLimit));
             }
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
                 snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
+                
+                // CLIENT SIDE SORT (Newest First)
+                allData.sort((a, b) => {
+                    const timeA = a.timestamp || 0;
+                    const timeB = b.timestamp || 0;
+                    return timeB - timeA;
+                });
+
+                console.log(`Downloaded ${allData.length} items. Rendering first ${visibleLimit}...`);
                 updateDropdowns(); 
                 updateStats();
             }, (error) => {
                 console.error("Firebase Error:", error);
-                if(error.message.includes("index")) alert("⚠️ SYSTEM NOTICE: Index required. Check console.");
             });
         }
 
-        window.increaseLimit = () => {
-            queryLimit += 50;
-            const btn = document.querySelector('.btn-load');
-            const prevText = btn.innerText;
-            btn.innerText = "Loading...";
-            btn.disabled = true;
-            loadData();
-            setTimeout(() => { btn.innerText = prevText; btn.disabled = false; }, 1500);
+        // --- INSTANT LOAD MORE (NO NETWORK) ---
+        window.showMoreLocal = () => {
+            visibleLimit += 50;
+            applyFilters(); // Re-render with higher limit
         };
 
         function updateDropdowns() {
@@ -276,19 +280,16 @@
             const currentTeacher = teacherSelect.value;
             const currentSubject = subjectSelect.value;
 
-            // 1. EXAMS: Combine Master List + exams found in loaded data
             const loadedExams = allData.map(d => d.exam).filter(Boolean);
             const combinedExams = new Set([...masterExams, ...loadedExams]);
             const sortedExams = [...combinedExams].sort();
             populateSelect(examSelect, sortedExams, "All Exams", currentExam);
 
-            // 2. TEACHERS: Combine Fetched Users + teachers found in loaded data
             const loadedTeachers = allData.map(d => d.teacher).filter(Boolean);
             const combinedTeachers = new Set([...allTeachers, ...loadedTeachers]);
             const sortedTeachers = [...combinedTeachers].sort();
             populateSelect(teacherSelect, sortedTeachers, "All Teachers", currentTeacher);
 
-            // 3. SUBJECTS: Only from loaded data (dynamic)
             const subjects = [...new Set(allData.map(d => d.subject).filter(Boolean))].sort();
             populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
             
@@ -306,20 +307,39 @@
             });
         }
 
+        // --- FILTER & RENDER LOGIC ---
         window.applyFilters = () => {
-            const e = examSelect.value;
+            const e = examSelect.value.toUpperCase();
             const t = teacherSelect.value;
             const s = subjectSelect.value;
-            const filtered = allData.filter(item => {
-                return (e === "all" || item.exam === e) && (t === "all" || item.teacher === t) && (s === "all" || item.subject === s);
+            
+            // 1. FILTER ALL DATA
+            filteredData = allData.filter(item => {
+                const itemExam = item.exam ? item.exam.toUpperCase() : "";
+                return (e === "ALL" || itemExam === e) && 
+                       (t === "all" || item.teacher === t) && 
+                       (s === "all" || item.subject === s);
             });
-            renderTable(filtered);
+
+            // 2. SLICE DATA FOR PERFORMANCE (Only render 'visibleLimit')
+            const dataToRender = filteredData.slice(0, visibleLimit);
+            
+            // 3. UPDATE UI COUNTS
+            countLabel.innerText = `Showing ${dataToRender.length} of ${filteredData.length} questions`;
+            if(dataToRender.length >= filteredData.length) {
+                loadBtn.style.display = "none";
+            } else {
+                loadBtn.style.display = "inline-block";
+                loadBtn.innerText = `⬇ Show next 50 (Instant)`;
+            }
+
+            renderTable(dataToRender);
         }
 
         function renderTable(data) {
             tableBody.innerHTML = "";
             if(data.length === 0) { 
-                const msg = currentTab === 'unverified' ? "🎉 No pending questions! All caught up." : "No verified questions found.";
+                const msg = currentTab === 'unverified' ? "🎉 No pending questions!" : "No verified questions found.";
                 tableBody.innerHTML = `<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>${msg}</td></tr>`; 
                 return; 
             }
