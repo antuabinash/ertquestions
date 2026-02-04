@@ -165,8 +165,8 @@
 
     <script type="module">
         import { db } from "./firebase-config.js";
-        // ✅ UPDATED: Version changed from 9.6.1 to 9.23.0 to support 'getCountFromServer'
-        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
+        // ✅ UPDATED: Version 9.23.0 + 'getDocs' added to fetch users list
+        import { collection, getDocs, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Persistence
@@ -177,10 +177,14 @@
 
         // --- STATE ---
         let allData = [];
+        let allTeachers = new Set(); // Stores teachers fetched from Users collection
         let activeEditId = '';
         let queryLimit = 50; 
         let currentTab = 'unverified'; 
         let unsubscribe = null;
+
+        // Master list of exams to ensure none are skipped
+        const masterExams = ["OAV", "NAVODAYA", "NMMS", "PATHANI SAMANTA", "5TH BOARD", "8TH BOARD", "EKALABYA"];
 
         // Elements
         const examSelect = document.getElementById('filterExam');
@@ -188,37 +192,48 @@
         const subjectSelect = document.getElementById('filterSubject');
         const tableBody = document.getElementById('tableBody');
 
-        // --- STATS LOGIC (New) ---
-        // This calculates the real numbers from the server
+        // --- FETCH USER METADATA (Teachers who haven't posted yet) ---
+        async function fetchUserMetadata() {
+            try {
+                // Fetch all users to populate the Teacher dropdown fully
+                const snapshot = await getDocs(collection(db, "users"));
+                snapshot.forEach(doc => {
+                    const d = doc.data();
+                    // Prefer displayName, fallback to email if name missing
+                    const name = d.displayName || d.name || d.email; 
+                    if(name) allTeachers.add(name);
+                });
+                updateDropdowns(); // Refresh dropdowns with new teacher data
+            } catch (e) {
+                console.error("Error fetching users metadata:", e);
+            }
+        }
+        fetchUserMetadata(); // Run on startup
+
+        // --- STATS LOGIC ---
         async function updateStats() {
             try {
                 const coll = collection(db, "questions");
                 
-                // Get Counts
                 const snapVerified = await getCountFromServer(query(coll, where("verified", "==", true)));
                 const countVerified = snapVerified.data().count;
 
                 const snapUnverified = await getCountFromServer(query(coll, where("verified", "==", false)));
                 const countUnverified = snapUnverified.data().count;
 
-                // Update DOM
                 document.getElementById('stat-verified').innerText = countVerified;
                 document.getElementById('stat-pending').innerText = countUnverified;
                 document.getElementById('stat-total').innerText = countVerified + countUnverified;
-            } catch (e) {
-                console.error("Stats error", e);
-            }
+            } catch (e) { console.error("Stats error", e); }
         }
-        updateStats(); // Run immediately
+        updateStats();
 
         // --- TABS LOGIC ---
         window.switchTab = (tabName) => {
             currentTab = tabName;
             queryLimit = 50; 
-            
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
-
             tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
             loadData();
         };
@@ -226,7 +241,6 @@
         // --- DATA LOADING ---
         function loadData() {
             if (unsubscribe) unsubscribe();
-
             const collectionRef = collection(db, "questions");
             let q;
 
@@ -239,14 +253,11 @@
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
                 snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
-                updateDropdowns(); // Re-calculates filters based on loaded data
-                // Update stats live if something changes in view
+                updateDropdowns(); 
                 updateStats();
             }, (error) => {
                 console.error("Firebase Error:", error);
-                if(error.message.includes("index")) {
-                    alert("⚠️ SYSTEM NOTICE: Index required. Check console.");
-                }
+                if(error.message.includes("index")) alert("⚠️ SYSTEM NOTICE: Index required. Check console.");
             });
         }
 
@@ -256,15 +267,8 @@
             const prevText = btn.innerText;
             btn.innerText = "Loading...";
             btn.disabled = true;
-            
-            // Reload with higher limit
             loadData();
-            
-            // Reset button visual
-            setTimeout(() => {
-                btn.innerText = prevText;
-                btn.disabled = false;
-            }, 1500);
+            setTimeout(() => { btn.innerText = prevText; btn.disabled = false; }, 1500);
         };
 
         function updateDropdowns() {
@@ -272,13 +276,19 @@
             const currentTeacher = teacherSelect.value;
             const currentSubject = subjectSelect.value;
 
-            // Get unique values from ALL loaded data to ensure we don't skip any
-            const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))].sort();
-            populateSelect(examSelect, exams, "All Exams", currentExam);
+            // 1. EXAMS: Combine Master List + exams found in loaded data
+            const loadedExams = allData.map(d => d.exam).filter(Boolean);
+            const combinedExams = new Set([...masterExams, ...loadedExams]);
+            const sortedExams = [...combinedExams].sort();
+            populateSelect(examSelect, sortedExams, "All Exams", currentExam);
 
-            const teachers = [...new Set(allData.map(d => d.teacher).filter(Boolean))].sort();
-            populateSelect(teacherSelect, teachers, "All Teachers", currentTeacher);
+            // 2. TEACHERS: Combine Fetched Users + teachers found in loaded data
+            const loadedTeachers = allData.map(d => d.teacher).filter(Boolean);
+            const combinedTeachers = new Set([...allTeachers, ...loadedTeachers]);
+            const sortedTeachers = [...combinedTeachers].sort();
+            populateSelect(teacherSelect, sortedTeachers, "All Teachers", currentTeacher);
 
+            // 3. SUBJECTS: Only from loaded data (dynamic)
             const subjects = [...new Set(allData.map(d => d.subject).filter(Boolean))].sort();
             populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
             
@@ -404,14 +414,10 @@
             tableBody.appendChild(fragment);
         }
 
-        // --- ACTIONS ---
         window.toggleVerify = async (btn, id, status) => { 
-            btn.innerText = "⏳"; 
-            btn.disabled = true;
+            btn.innerText = "⏳"; btn.disabled = true;
             try { 
                 await updateDoc(doc(db, "questions", id), { verified: status });
-                // Note: The Snapshot listener automatically refreshes the table row
-                // and the updateStats() function triggers to update the counts.
             } catch (e) { alert(e.message); btn.innerText = "Error"; } 
         }
 
@@ -424,7 +430,6 @@
             dispQ.style.display = dispQ.style.display === "none" ? "block" : "none";
         }
 
-        // --- EDITING & SAVING ---
         window.openAdminEditor = (targetId) => {
             activeEditId = targetId;
             document.getElementById('ed-body').innerHTML = document.getElementById(targetId).value;
