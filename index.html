@@ -282,12 +282,13 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script type="module">
-        // --- 1. IMPORTS ---
+        // --- 1. IMPORTS UPDATED TO 9.23.0 ---
         import { db, auth } from "./firebase-config.js"; 
         import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
-        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        
         import { collection, addDoc, updateDoc, setDoc, getDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
-        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Try offline persistence to make the app work faster
         try { enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed")); } catch(e){}
