@@ -283,8 +283,9 @@
 
     <script type="module">
         import { db } from "./firebase-config.js";
+        // ✅ UPDATED: Version changed from 9.6.1 to 9.23.0
         import { collection, query, where, getDocs, orderBy, enableIndexedDbPersistence } 
-        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed."));
 
