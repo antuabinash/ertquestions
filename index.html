@@ -82,7 +82,8 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
 
         /* --- ANALYTICS DASHBOARD --- */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        /* Changed to 2 columns since we removed one stat */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: var(--shadow-sm); }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
         .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
@@ -159,10 +160,6 @@
                 <div class="stat-card">
                     <div class="stat-label">Total Questions</div>
                     <div id="stat-total" class="stat-val">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Students Reached</div>
-                    <div id="stat-views" class="stat-val">0</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Live Status</div>
@@ -283,20 +280,17 @@
     </div>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
     <script type="module">
-        // --- 1. IMPORT FROM YOUR LOCAL CONFIG ---
-        // Importing auth and db directly from your existing firebase-config.js file
+        // --- 1. IMPORTS ---
         import { db, auth } from "./firebase-config.js"; 
-        
-        // Importing standard firebase functions needed for logic
         import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        
-        import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
+        import { collection, addDoc, updateDoc, setDoc, getDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Try offline persistence (Optional optimization)
-        try { enableIndexedDbPersistence(db).catch(err => console.log("Persistence error (harmless)", err)); } catch(e){}
+        // Try offline persistence to make the app work faster
+        try { enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed")); } catch(e){}
 
         // --- GLOBAL STATE ---
         let currentUser = null;
@@ -304,7 +298,7 @@
         let activeEditorTarget = "";
         let currentMode = "MCQ";
 
-        // --- EXAM DATA ---
+        // --- CONFIGURATION ---
         const examConfig = {
             "OAV": { type: "MCQ", subjects: ["Math", "Science", "Social", "English"] },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
@@ -312,6 +306,33 @@
             "5TH BOARD": { type: "SUBJECTIVE", subjects: ["Odia", "Math", "English"] },
             "8TH BOARD": { type: "SUBJECTIVE", subjects: ["Science", "History", "Math"] },
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] }
+        };
+
+        // --- HELPER: IMAGE COMPRESSOR ---
+        // Resizes and compresses image to save DB space
+        const compressImage = (file, maxWidth, quality) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        // Calculate new height to keep aspect ratio
+                        const scale = maxWidth / img.width;
+                        canvas.width = Math.min(img.width, maxWidth);
+                        canvas.height = img.height * (img.width > maxWidth ? scale : 1);
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // 'image/jpeg' format allows quality control (0.0 to 1.0)
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                };
+            });
         };
 
         // --- UI UTILS ---
@@ -330,7 +351,7 @@
             if(viewName === 'dashboard') document.getElementById('dashboard-section').classList.remove('hidden');
             if(viewName === 'profile') {
                 document.getElementById('profile-section').classList.remove('hidden');
-                loadProfileData();
+                loadProfileData(); 
             }
             if(viewName === 'auth') document.getElementById('auth-section').classList.remove('hidden');
         };
@@ -361,8 +382,17 @@
                     if(!name) throw new Error("Name is required");
 
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                    // Format: "Name | District | Block"
+                    
+                    // Set Auth Display Name
                     await updateProfile(cred.user, { displayName: `${name} | ${district} | ${block}` });
+                    
+                    // Create Database Entry (Image storage)
+                    await setDoc(doc(db, "users", cred.user.uid), {
+                        email: email,
+                        role: "teacher",
+                        base64Photo: "" 
+                    });
+
                     showToast("Account created! Welcome.");
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
@@ -377,10 +407,11 @@
 
         window.logout = () => signOut(auth);
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if(user) {
                 currentUser = user;
-                updateHeaderProfile(user);
+                await loadUserImage(user.uid); 
+                updateHeaderInfo(user);
                 toggleView('dashboard');
                 document.getElementById('auth-actions').classList.remove('hidden');
                 loadMyQuestions(user.uid);
@@ -391,11 +422,27 @@
             }
         });
 
-        // --- PROFILE LOGIC ---
-        function updateHeaderProfile(user) {
+        // --- PROFILE & IMAGE LOGIC ---
+        
+        // Load image from Firestore DB
+        async function loadUserImage(uid) {
+            try {
+                const docSnap = await getDoc(doc(db, "users", uid));
+                if (docSnap.exists() && docSnap.data().base64Photo) {
+                    window.currentUserPhoto = docSnap.data().base64Photo;
+                } else {
+                    window.currentUserPhoto = "https://via.placeholder.com/50";
+                }
+            } catch(e) {
+                console.log("Error loading pfp", e);
+                window.currentUserPhoto = "https://via.placeholder.com/50";
+            }
+        }
+
+        function updateHeaderInfo(user) {
             const parts = (user.displayName || "").split('|').map(s=>s.trim());
             document.getElementById('header-name').innerText = parts[0] || "Teacher";
-            document.getElementById('header-pfp').src = user.photoURL || "https://via.placeholder.com/50";
+            document.getElementById('header-pfp').src = window.currentUserPhoto;
         }
 
         function loadProfileData() {
@@ -404,30 +451,42 @@
             document.getElementById('editName').value = parts[0] || "";
             document.getElementById('editDistrict').value = parts[1] || "";
             document.getElementById('editBlock').value = parts[2] || "";
-            document.getElementById('pfp-preview').src = user.photoURL || "https://via.placeholder.com/150";
+            document.getElementById('pfp-preview').src = window.currentUserPhoto;
         }
 
+        // 1. PROFILE PICTURE COMPRESSION (Aggressive)
         window.previewPfp = async (input) => {
             if(input.files && input.files[0]) {
-                const url = await compressImage(input.files[0]);
+                // Width: 200px (Very small, perfect for icons)
+                // Quality: 0.5 (Low quality JPEG, saves massive space)
+                const url = await compressImage(input.files[0], 200, 0.5); 
                 document.getElementById('pfp-preview').src = url;
             }
         };
 
         window.saveProfileChanges = async () => {
             const btn = document.getElementById('saveProfileBtn');
-            btn.innerText = "Saving..."; btn.disabled = true;
+            btn.innerText = "Compressing & Saving..."; btn.disabled = true;
             try {
                 const name = document.getElementById('editName').value;
                 const dist = document.getElementById('editDistrict').value;
                 const block = document.getElementById('editBlock').value;
-                const pfp = document.getElementById('pfp-preview').src;
+                const pfpBase64 = document.getElementById('pfp-preview').src;
 
+                // Update Auth (Name)
                 await updateProfile(auth.currentUser, {
-                    displayName: `${name} | ${dist} | ${block}`,
-                    photoURL: pfp
+                    displayName: `${name} | ${dist} | ${block}`
                 });
-                updateHeaderProfile(auth.currentUser);
+
+                // Update DB (Image String)
+                // Using setDoc with merge to ensure we don't delete other fields
+                await setDoc(doc(db, "users", auth.currentUser.uid), {
+                    base64Photo: pfpBase64
+                }, { merge: true });
+
+                window.currentUserPhoto = pfpBase64;
+                updateHeaderInfo(auth.currentUser);
+                
                 showToast("Profile Updated!");
                 toggleView('dashboard');
             } catch(e) {
@@ -438,49 +497,25 @@
         };
 
         // --- QUESTION LOGIC ---
+
         window.handleExamChange = () => {
             const exam = document.getElementById('qExam').value;
             const subSelect = document.getElementById('qSubject');
             subSelect.innerHTML = '<option disabled selected>-- Select Subject --</option>';
-            
             if(examConfig[exam]) {
                 examConfig[exam].subjects.forEach(sub => {
                     subSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
                 });
                 currentMode = examConfig[exam].type;
-                
-                // Toggle Inputs
                 const isSub = currentMode === 'SUBJECTIVE';
                 document.getElementById('mcq-inputs').classList.toggle('hidden', isSub);
                 document.getElementById('subjective-inputs').classList.toggle('hidden', !isSub);
             }
         };
 
-        const compressImage = (file) => {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const scale = 800 / img.width;
-                        canvas.width = Math.min(img.width, 800);
-                        canvas.height = img.height * (img.width > 800 ? scale : 1);
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                    img.onerror = reject;
-                };
-            });
-        };
-
         window.saveQuestion = async () => {
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Publishing..."; btn.disabled = true;
-            
             try {
                 const editId = document.getElementById('editId').value;
                 const exam = document.getElementById('qExam').value;
@@ -492,14 +527,17 @@
                 const data = {
                     exam, subject, question: text, type: currentMode,
                     uid: currentUser.uid, teacher: currentUser.displayName,
-                    timestamp: Date.now(), verified: false, views: 0 // Init views
+                    timestamp: Date.now(), verified: false
                 };
 
-                // Handle Image
+                // 2. QUESTION IMAGE COMPRESSION (Moderate)
                 const file = document.getElementById('qImage').files[0];
-                if(file) data.imageUrl = await compressImage(file);
+                if(file) {
+                    // Width: 600px (Readable for text)
+                    // Quality: 0.6 (Good balance)
+                    data.imageUrl = await compressImage(file, 600, 0.6);
+                }
 
-                // Handle Answers
                 if(currentMode === 'MCQ') {
                     data.options = {
                         A: document.getElementById('opA').value, B: document.getElementById('opB').value,
@@ -519,7 +557,6 @@
                     showToast("Question Published Successfully!");
                 }
                 cancelEdit();
-
             } catch(e) {
                 showToast(e.message, "error");
             } finally {
@@ -531,9 +568,7 @@
             const qRef = query(collection(db, "questions"), where("uid", "==", uid), orderBy("timestamp", "desc"));
             onSnapshot(qRef, (snap) => {
                 const list = document.getElementById('my-questions-list');
-                
-                // Analytics Calc
-                let total = 0, verified = 0, views = 0;
+                let total = 0, verified = 0;
                 
                 if(snap.empty) {
                     list.innerHTML = "<p style='text-align:center; color:#888;'>No questions yet. Add one!</p>";
@@ -543,8 +578,7 @@
                         const d = docSnap.data();
                         total++;
                         if(d.verified) verified++;
-                        views += (d.views || 0);
-
+                        
                         const badge = d.verified 
                             ? `<span class="badge badge-live">● LIVE</span>` 
                             : `<span class="badge badge-pending">● PENDING</span>`;
@@ -562,39 +596,29 @@
                                 <button class="btn btn-sm btn-danger" onclick="deleteQ('${docSnap.id}')">Delete</button>
                             </div>
                         `;
-                        // Store full data for edit reference (simplifies editing logic)
                         item.dataset.json = JSON.stringify(d);
                         item.dataset.id = docSnap.id; 
                         list.appendChild(item);
                     });
                 }
-
-                // Update Stats UI
                 document.getElementById('stat-total').innerText = total;
-                document.getElementById('stat-views').innerText = views;
                 document.getElementById('stat-live').innerText = verified;
             });
         }
 
         window.deleteQ = async (id) => {
-            if(confirm("Are you sure you want to delete this?")) {
-                await deleteDoc(doc(db, "questions", id));
-                showToast("Deleted", "info");
-            }
+            if(confirm("Delete?")) { await deleteDoc(doc(db, "questions", id)); showToast("Deleted", "info"); }
         };
 
         window.editQ = (id) => {
-            // Retrieve data from the DOM dataset to populate the form
             const item = document.querySelector(`.q-item[data-id="${id}"]`);
             if(!item) return;
-            
             const data = JSON.parse(item.dataset.json);
             
             document.getElementById('editId').value = id;
             document.getElementById('qExam').value = data.exam;
-            handleExamChange(); // trigger subject loading
+            handleExamChange(); 
 
-            // Slight delay to allow subjects to populate before setting value
             setTimeout(() => {
                 document.getElementById('qSubject').value = data.subject;
                 document.getElementById('qText').value = data.question;
@@ -609,13 +633,9 @@
                     document.getElementById('qCategory').value = data.category;
                     document.getElementById('ansText').value = data.answerText;
                 }
-
                 document.getElementById('saveBtn').innerText = "Update Question";
                 document.getElementById('cancelBtn').classList.remove('hidden');
-                
-                // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                showToast("Editing Mode: " + data.question.substring(0,20) + "...", "info");
             }, 100);
         };
 
@@ -628,17 +648,13 @@
             document.getElementById('cancelBtn').classList.add('hidden');
         };
 
-        // --- VISUAL EDITOR ---
         window.openEditor = (target) => {
             activeEditorTarget = target;
-            const currentVal = document.getElementById(target).value;
-            document.getElementById('rich-content').innerText = currentVal;
+            document.getElementById('rich-content').innerText = document.getElementById(target).value;
             document.getElementById('fullscreen-editor').style.display = "flex";
         };
         window.closeEditor = () => {
-            if(activeEditorTarget) {
-                document.getElementById(activeEditorTarget).value = document.getElementById('rich-content').innerText;
-            }
+            if(activeEditorTarget) document.getElementById(activeEditorTarget).value = document.getElementById('rich-content').innerText;
             document.getElementById('fullscreen-editor').style.display = "none";
         };
 
