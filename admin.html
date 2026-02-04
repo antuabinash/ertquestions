@@ -2,88 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>eRT Admin Pro Dashboard</title>
+    <title>eRT Admin Dashboard</title>
     <style>
         :root {
             --primary: #0d47a1;
             --primary-light: #e3f2fd;
             --bg-color: #f4f7fa;
             --success: #2e7d32;
-            --danger: #c62828;
             --text-dark: #37474f;
         }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-dark); margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-dark); margin: 0; }
         
         .main-wrapper { max-width: 1250px; margin: auto; }
 
-        /* --- DASHBOARD STATS --- */
+        /* STATS CARDS */
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-left: 5px solid #ccc; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
         .stat-card.blue { border-left-color: var(--primary); }
         .stat-card.green { border-left-color: var(--success); }
         .stat-card.orange { border-left-color: #ff9800; }
         .stat-num { font-size: 2rem; font-weight: bold; color: #333; margin-top: 5px; }
-        .stat-label { font-size: 0.85rem; text-transform: uppercase; color: #777; font-weight: 600; letter-spacing: 0.5px; }
+        .stat-label { font-size: 0.85rem; text-transform: uppercase; color: #777; font-weight: 600; }
 
-        /* --- MAIN CONTAINER --- */
+        /* MAIN PANEL */
         .container { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden; }
         
-        /* HEADER */
-        .header { display: flex; align-items: center; padding: 20px 25px; border-bottom: 1px solid #eee; background: white; }
-        .app-logo { height: 45px; width: 45px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 1px solid #eee; }
+        .header { display: flex; align-items: center; padding: 20px 25px; border-bottom: 1px solid #eee; }
+        .app-logo { height: 45px; width: 45px; border-radius: 50%; margin-right: 15px; }
         h1 { margin: 0; color: var(--primary); font-size: 1.6rem; }
 
         /* TABS */
         .tabs { display: flex; background: var(--primary-light); border-bottom: 1px solid #bbdefb; }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: transparent; cursor: pointer; font-weight: 600; font-size: 1rem; color: #546e7a; transition: 0.2s; border-bottom: 3px solid transparent; }
-        .tab-btn:hover { background: #bbdefb; color: var(--primary); }
+        .tab-btn { flex: 1; padding: 18px; border: none; background: transparent; cursor: pointer; font-weight: 600; font-size: 1rem; color: #546e7a; border-bottom: 3px solid transparent; }
         .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
 
         /* TOOLBAR */
         .toolbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
         .filter-wrap { display: flex; flex-direction: column; gap: 4px; }
         .filter-wrap label { font-size: 0.75rem; font-weight: bold; color: #90a4ae; text-transform: uppercase; }
-        select { padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; min-width: 180px; background: #fafafa; outline: none; }
-        select:focus { border-color: var(--primary); background: white; }
-        
-        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn-dl:hover { background: #00796b; }
+        select { padding: 10px; border: 1px solid #cfd8dc; border-radius: 6px; min-width: 180px; }
+
+        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; margin-left: auto; }
 
         /* TABLE */
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 16px 20px; border-bottom: 1px solid #eceff1; text-align: left; vertical-align: top; }
-        th { background: #f8f9fa; color: #546e7a; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+        th { background: #f8f9fa; color: #546e7a; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; }
         tr:hover { background-color: #fafafa; }
         
-        .content-text { word-wrap: break-word; font-size: 0.95rem; line-height: 1.6; color: #263238; }
-        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #eee; padding: 4px; background: white; margin-top: 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .content-text { word-wrap: break-word; font-size: 0.95rem; line-height: 1.6; }
+        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #eee; padding: 4px; background: white; margin-top: 8px; border-radius: 6px; }
 
-        /* ACTION BUTTONS */
+        /* BUTTONS */
         .action-col { display: flex; flex-direction: column; gap: 8px; min-width: 110px; }
-        .btn-verify { background: var(--success); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn-verify:hover { background: #1b5e20; }
-        
-        .btn-unverify { background: #ff9800; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-        .btn-unverify:hover { background: #f57c00; }
-
-        .btn-edit { background: #1976d2; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-        .btn-del { background: #ef5350; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn-verify { background: var(--success); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-unverify { background: #ff9800; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn-edit { background: #1976d2; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
+        .btn-del { background: #ef5350; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
 
         /* EDIT BOX */
         .edit-box { display: none; margin-top: 15px; background: #fffde7; padding: 20px; border: 1px solid #fff59d; border-radius: 8px; }
-        .edit-box label { display: block; margin-top: 10px; font-size: 0.8rem; font-weight: bold; color: #e65100; }
-        .edit-box input, .edit-box textarea { width: 100%; margin-top: 5px; padding: 10px; border: 1px solid #ffe0b2; border-radius: 4px; box-sizing: border-box; }
-        .edit-actions { margin-top: 15px; display: flex; gap: 10px; }
+        .edit-box input, .edit-box textarea { width: 100%; margin-top: 5px; padding: 10px; border: 1px solid #ffe0b2; box-sizing: border-box; }
 
-        /* FOOTER LOADER */
+        /* FOOTER */
         .footer-load { padding: 20px; text-align: center; border-top: 1px solid #eee; background: #fcfcfc; }
-        .btn-load-more { background: #455a64; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 3px 6px rgba(0,0,0,0.15); transition: 0.3s; }
-        .btn-load-more:hover { background: #37474f; transform: translateY(-2px); }
+        .btn-load-more { background: #455a64; color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; }
 
-        /* RICH EDITOR OVERLAY */
+        /* EDITOR */
         #fs-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: none; flex-direction: column; }
-        .ed-toolbar { background: #eee; padding: 10px 20px; display: flex; gap: 15px; border-bottom: 1px solid #ccc; align-items: center; }
+        .ed-toolbar { background: #eee; padding: 10px 20px; display: flex; gap: 15px; border-bottom: 1px solid #ccc; }
         .ed-content { flex: 1; padding: 40px; outline: none; overflow-y: auto; font-size: 1.2rem; max-width: 900px; margin: auto; }
         
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: auto; }
@@ -94,11 +82,10 @@
 
     <div id="fs-editor">
         <div class="ed-toolbar">
-            <button onclick="document.execCommand('bold')" style="font-weight:bold">B</button>
-            <button onclick="document.execCommand('italic')" style="font-style:italic">I</button>
-            <button onclick="document.execCommand('underline')" style="text-decoration:underline">U</button>
+            <button onclick="document.execCommand('bold')"><b>B</b></button>
+            <button onclick="document.execCommand('italic')"><i>I</i></button>
             <div style="flex-grow:1"></div>
-            <button onclick="closeEditor()" style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">Save Changes & Close</button>
+            <button onclick="closeEditor()" style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:4px; cursor:pointer;">Save & Close</button>
         </div>
         <div id="ed-body" class="ed-content" contenteditable="true"></div>
     </div>
@@ -133,7 +120,7 @@
 
             <div class="toolbar">
                 <div class="filter-wrap">
-                    <label>Exam Name</label>
+                    <label>Exam</label>
                     <select id="f-exam" onchange="render()"><option value="all">All Exams</option></select>
                 </div>
                 <div class="filter-wrap">
@@ -144,44 +131,51 @@
                     <label>Subject</label>
                     <select id="f-subject" onchange="render()"><option value="all">All Subjects</option></select>
                 </div>
-                
-                <button class="btn-dl" onclick="downloadJSON()">
-                    <span>⬇ Download JSON</span>
-                </button>
+                <button class="btn-dl" onclick="downloadJSON()">⬇ Download JSON</button>
             </div>
 
             <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:20%">Exam Info</th>
-                            <th style="width:40%">Question Content</th>
-                            <th style="width:25%">Answer Key</th>
+                            <th style="width:20%">Info</th>
+                            <th style="width:40%">Question</th>
+                            <th style="width:25%">Answer</th>
                             <th style="width:15%">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="color:#999; margin-top:10px">Loading Data...</p></td></tr>
+                        <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#999;">Connecting to Firebase...</p></td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="footer-load">
-                <button class="btn-load-more" onclick="loadMore()">⇩ Load More Questions</button>
+                <button class="btn-load-more" onclick="loadMore()">⇩ Load More Data</button>
             </div>
         </div>
     </div>
 
     <script type="module">
+        // 1. IMPORT FIREBASE
         import { db } from "./firebase-config.js";
-        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, getCountFromServer } 
+        import { collection, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, getCountFromServer, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // AUTH CHECK
+        // 2. PASSWORD CHECK (Runs immediately)
+        // If this fails, the rest of the script is stopped.
         const pass = prompt("Enter Admin Password:");
-        if(pass !== "admin123") { document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px; color:red'>⛔ Access Denied</h2>"; throw "Stop"; }
+        if(pass !== "admin123") { 
+            document.body.innerHTML = "<div style='display:flex;height:100vh;justify-content:center;align-items:center;flex-direction:column;'><h1 style='color:red;font-size:3rem;'>⛔ Access Denied</h1><button onclick='location.reload()'>Try Again</button></div>"; 
+            throw new Error("Access Denied"); // Stops script execution
+        }
 
-        // STATE
+        // 3. ENABLE PERSISTENCE (Speeds up loading)
+        try {
+            enableIndexedDbPersistence(db).catch(err => console.log("Persistence:", err.code));
+        } catch(e) { console.log("Persistence setup error", e); }
+
+        // --- GLOBAL VARIABLES ---
         let allData = [];
         let currentTab = 'pending';
         let queryLimit = 50;
@@ -190,11 +184,10 @@
 
         const tableBody = document.getElementById('tableBody');
 
-        // --- STATS COUNT (Runs once on load) ---
+        // --- 4. FETCH STATS (Top Cards) ---
         async function fetchStats() {
             try {
                 const col = collection(db, "questions");
-                // Note: getCountFromServer is cheap and fast
                 const totalSnap = await getCountFromServer(col);
                 const verSnap = await getCountFromServer(query(col, where("verified", "==", true)));
                 
@@ -206,85 +199,78 @@
                 document.getElementById('stat-verified').innerText = verified;
                 document.getElementById('stat-pending').innerText = pending;
             } catch (e) {
-                console.log("Stats error:", e);
+                console.warn("Stats error:", e);
                 document.getElementById('stat-total').innerText = "-";
             }
         }
         fetchStats();
 
-        // --- TABS ---
+        // --- 5. TABS LOGIC ---
         window.switchTab = (tab) => {
             currentTab = tab;
-            queryLimit = 50; // Reset limit on tab switch
-            
-            // UI Toggle
+            queryLimit = 50; 
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
-            
-            // Show Loader
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:50px;"><div class="loader"></div></td></tr>`;
-            
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
             fetchData();
         }
 
-        // --- DATA FETCHING ---
+        // --- 6. CORE DATA FETCHING (SAFE MODE) ---
         function fetchData() {
-            if(unsubscribe) unsubscribe();
+            if(unsubscribe) unsubscribe(); // Kill old listener
             const col = collection(db, "questions");
             let q;
 
-            // SMART QUERYING:
+            // STRATEGY: Avoid Composite Indexes to prevent "No Data" errors.
+            
             if(currentTab === 'pending') {
-                // Fetch unverified. Sort client-side to avoid index issues.
+                // Get Unverified. Don't use orderBy here to be safe.
                 q = query(col, where("verified", "==", false), limit(queryLimit));
             } else {
-                // Verified tab: Fetch by time (newest first)
-                q = query(col, where("verified", "==", true), orderBy("timestamp", "desc"), limit(queryLimit));
-                // Note: If this Verified query fails, it means you need a composite index. 
-                // Check console. If needed, we can remove 'where' and filter in JS.
-                // Fallback for safety:
-                // q = query(col, orderBy("timestamp", "desc"), limit(queryLimit));
+                // Get Verified. 
+                // We use orderBy("timestamp", "desc") which is standard. 
+                // We will filter verified==true in Javascript to avoid index requirement.
+                q = query(col, orderBy("timestamp", "desc"), limit(queryLimit));
             }
 
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
-                snapshot.forEach(d => allData.push({ ...d.data(), id: d.id }));
+                snapshot.forEach(doc => {
+                    allData.push({ ...doc.data(), id: doc.id });
+                });
 
-                // Client-side Filter/Sort for Pending (since we didn't orderBy in query)
+                // CLIENT-SIDE FILTERING (The "Safety Net")
                 if(currentTab === 'pending') {
+                    // Sort by time manually since we didn't query it
                     allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                } else {
+                    // Filter for Verified only
+                    allData = allData.filter(item => item.verified === true);
                 }
-                
-                // If using Fallback query for Verified, filter here:
-                // if(currentTab === 'verified') allData = allData.filter(d => d.verified === true);
 
-                updateFilters();
+                updateDropdowns(); // Populate filters
+                render();          // Draw table
             }, (error) => {
-                console.error("Data Error:", error);
-                if(error.message.includes("index")) alert("⚠️ Firebase Index Missing. Please check Console (F12) for the link to create it.");
+                console.error("Firebase Error:", error);
+                alert("Error loading data: " + error.message + "\n\nCheck console for details.");
             });
         }
 
-        function updateFilters() {
-            // Dynamically extract all exams/teachers from the loaded batch
+        // --- 7. FILTERING & RENDERING ---
+        function updateDropdowns() {
             const exams = [...new Set(allData.map(d => d.exam).filter(Boolean))];
             const teachers = [...new Set(allData.map(d => d.teacher))];
             const subjects = [...new Set(allData.map(d => d.subject))];
             
-            populateSelect('f-exam', exams);
-            populateSelect('f-teacher', teachers);
-            populateSelect('f-subject', subjects);
-            render();
+            fillSelect('f-exam', exams);
+            fillSelect('f-teacher', teachers);
+            fillSelect('f-subject', subjects);
         }
 
-        function populateSelect(id, items) {
+        function fillSelect(id, items) {
             const el = document.getElementById(id);
             const current = el.value;
-            // Maintain "All" option
-            el.innerHTML = `<option value="all">All ${id.split('-')[1]}s</option>` + 
-                           items.map(i => `<option value="${i}">${i}</option>`).join('');
-            
-            // If the previously selected item still exists, keep it selected
+            el.innerHTML = `<option value="all">All</option>` + items.map(i => `<option value="${i}">${i}</option>`).join('');
             if(items.includes(current)) el.value = current;
         }
 
@@ -300,10 +286,8 @@
             );
 
             if(filtered.length === 0) {
-                const msg = currentTab === 'pending' 
-                    ? "🎉 Great job! No pending questions." 
-                    : "No verified questions found in this batch.";
-                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#78909c; padding:40px; font-weight:bold;">${msg}</td></tr>`;
+                const msg = currentTab === 'pending' ? "No pending questions found!" : "No verified questions in this batch.";
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px; color:#777;">${msg}</td></tr>`;
                 return;
             }
 
@@ -311,75 +295,53 @@
             filtered.forEach(item => {
                 const tr = document.createElement('tr');
                 const isSub = item.type === "SUBJECTIVE";
+                
+                // Determine Button (Approve vs Reject)
+                const actionBtn = currentTab === 'pending'
+                    ? `<button class="btn-verify" onclick="confirmVerify('${item.id}', true)">✅ Approve</button>`
+                    : `<button class="btn-unverify" onclick="confirmVerify('${item.id}', false)">↩ Reject</button>`;
 
-                // ACTION LOGIC
-                let actionBtn = "";
-                if(currentTab === 'pending') {
-                    // Approve Button
-                    actionBtn = `<button class="btn-verify" onclick="confirmAction('${item.id}', true)">✅ Approve</button>`;
-                } else {
-                    // Reject Button
-                    actionBtn = `<button class="btn-unverify" onclick="confirmAction('${item.id}', false)">↩ Reject</button>`;
-                }
-
-                // DATA ROWS
                 tr.innerHTML = `
                     <td>
-                        <span style="background:#e1f5fe; color:#0277bd; padding:4px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">${item.exam || 'N/A'}</span><br>
-                        <div style="margin-top:5px; font-weight:600;">${item.teacher}</div>
-                        <div style="color:#78909c; font-size:0.85rem;">${item.subject}</div>
+                        <span style="background:#e3f2fd; color:#0d47a1; padding:3px 6px; border-radius:4px; font-weight:bold; font-size:0.8em">${item.exam || 'N/A'}</span><br>
+                        <b>${item.teacher}</b><br>
+                        <small style="color:gray">${item.subject}</small>
                     </td>
                     <td>
                         <div id="view-${item.id}" class="content-text">
                             ${item.question}
                             ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
                         </div>
-                        
                         <div id="edit-${item.id}" class="edit-box">
-                            <label>Question <span onclick="openEditor('q-${item.id}')" style="cursor:pointer; font-size:11px; color:#1976d2">(Open Editor)</span></label>
+                            <label>Question <span onclick="openEditor('q-${item.id}')" style="cursor:pointer; color:blue; font-size:11px">(Edit Visual)</span></label>
                             <textarea id="q-${item.id}" rows="3">${item.question}</textarea>
-                            <label>New Image</label> <input type="file" id="img-${item.id}">
-                            
+                            <label>New Image</label><input type="file" id="img-${item.id}">
                             ${isSub ? `
-                                <label>Category</label>
-                                <select id="cat-${item.id}">
-                                    <option value="Very Short" ${item.category==='Very Short'?'selected':''}>Very Short</option>
-                                    <option value="Short" ${item.category==='Short'?'selected':''}>Short</option>
-                                    <option value="Long" ${item.category==='Long'?'selected':''}>Long</option>
-                                </select>
-                                <label>Answer <span onclick="openEditor('ans-${item.id}')" style="cursor:pointer; font-size:11px; color:#1976d2">(Open Editor)</span></label>
+                                <label>Answer Text</label>
                                 <textarea id="ans-${item.id}" rows="3">${item.answerText||''}</textarea>
                             ` : `
-                                <label>Options</label>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                                    <input id="opA-${item.id}" value="${item.options?.A||''}" placeholder="Option A">
-                                    <input id="opB-${item.id}" value="${item.options?.B||''}" placeholder="Option B">
-                                    <input id="opC-${item.id}" value="${item.options?.C||''}" placeholder="Option C">
-                                    <input id="opD-${item.id}" value="${item.options?.D||''}" placeholder="Option D">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px">
+                                    <input id="opA-${item.id}" value="${item.options?.A||''}" placeholder="A">
+                                    <input id="opB-${item.id}" value="${item.options?.B||''}" placeholder="B">
+                                    <input id="opC-${item.id}" value="${item.options?.C||''}" placeholder="C">
+                                    <input id="opD-${item.id}" value="${item.options?.D||''}" placeholder="D">
                                 </div>
                                 <label>Correct Answer</label>
                                 <select id="cor-${item.id}">
-                                    <option value="A" ${item.answer==='A'?'selected':''}>Option A</option>
-                                    <option value="B" ${item.answer==='B'?'selected':''}>Option B</option>
-                                    <option value="C" ${item.answer==='C'?'selected':''}>Option C</option>
-                                    <option value="D" ${item.answer==='D'?'selected':''}>Option D</option>
+                                    <option value="A" ${item.answer==='A'?'selected':''}>A</option>
+                                    <option value="B" ${item.answer==='B'?'selected':''}>B</option>
+                                    <option value="C" ${item.answer==='C'?'selected':''}>C</option>
+                                    <option value="D" ${item.answer==='D'?'selected':''}>D</option>
                                 </select>
                             `}
-
-                            <div class="edit-actions">
+                            <div style="margin-top:10px; display:flex; gap:10px;">
                                 <button class="btn-edit" onclick="saveEdit('${item.id}', '${item.type}')">Save Changes</button>
-                                <button style="padding:8px; border:1px solid #ccc; background:white; border-radius:6px; cursor:pointer;" onclick="toggleEdit('${item.id}')">Cancel</button>
+                                <button style="background:#ccc; border:none; padding:8px; border-radius:4px; cursor:pointer;" onclick="toggleEdit('${item.id}')">Cancel</button>
                             </div>
                         </div>
                     </td>
                     <td>
-                        ${isSub ? 
-                            `<div class="content-text">${item.answerText || '<i>No text</i>'}</div>` : 
-                            `<div style="font-weight:bold; color:#2e7d32;">Ans: ${item.answer}</div>
-                             <div style="font-size:0.85rem; color:#555; margin-top:4px;">
-                                A: ${item.options?.A}<br>B: ${item.options?.B}
-                             </div>`
-                        }
+                        ${isSub ? item.answerText || '-' : `<b>Ans: ${item.answer}</b><br><small>A:${item.options?.A}...</small>`}
                     </td>
                     <td>
                         <div class="action-col">
@@ -395,33 +357,28 @@
             tableBody.appendChild(frag);
         }
 
-        // --- INTERACTION LOGIC ---
+        // --- 8. ACTIONS ---
         window.loadMore = () => {
             queryLimit += 50;
             const btn = document.querySelector('.btn-load-more');
-            const oldText = btn.innerText;
             btn.innerText = "Loading...";
             fetchData();
-            setTimeout(() => btn.innerText = oldText, 1500);
+            setTimeout(() => btn.innerText = "⇩ Load More Data", 1500);
         }
 
-        window.confirmAction = async (id, newStatus) => {
-            const action = newStatus ? "APPROVE" : "REJECT";
-            const targetTab = newStatus ? "Verified Database" : "Pending Reviews";
-            
-            if(confirm(`Are you sure you want to ${action} this question?\n\nIt will disappear from here and move to the "${targetTab}" tab.`)) {
+        window.confirmVerify = async (id, status) => {
+            const action = status ? "APPROVE" : "REJECT";
+            const target = status ? "Verified Tab" : "Pending Tab";
+            if(confirm(`Are you sure you want to ${action} this question?\nIt will move to the ${target}.`)) {
                 try {
-                    await updateDoc(doc(db, "questions", id), { verified: newStatus });
-                    // Stats will update on refresh, or we could manually tweak them here.
-                    // UI auto-updates via onSnapshot
-                } catch(e) {
-                    alert("Error: " + e.message);
-                }
+                    await updateDoc(doc(db, "questions", id), { verified: status });
+                    // UI updates automatically via snapshot
+                } catch(e) { alert("Error: " + e.message); }
             }
         }
 
-        window.del = async (id) => { if(confirm("Delete this question permanently?")) await deleteDoc(doc(db, "questions", id)); }
-
+        window.del = async (id) => { if(confirm("Permanently delete?")) await deleteDoc(doc(db, "questions", id)); }
+        
         window.toggleEdit = (id) => {
             const v = document.getElementById(`view-${id}`);
             const e = document.getElementById(`edit-${id}`);
@@ -429,7 +386,7 @@
             e.style.display = e.style.display === 'block' ? 'none' : 'block';
         }
 
-        // --- EDITOR & IMAGE ---
+        // --- EDITOR & SAVING ---
         window.openEditor = (id) => {
             activeEditId = id;
             document.getElementById('ed-body').innerHTML = document.getElementById(id).value;
@@ -463,7 +420,6 @@
                 if(f) up.imageUrl = await compress(f);
 
                 if(type === 'SUBJECTIVE') {
-                    up.category = document.getElementById(`cat-${id}`).value;
                     up.answerText = document.getElementById(`ans-${id}`).value;
                 } else {
                     up.options = {
@@ -476,20 +432,19 @@
                 }
                 await updateDoc(doc(db, "questions", id), up);
                 toggleEdit(id);
-                alert("Saved successfully!");
+                alert("Saved!");
             } catch(e) { alert(e); }
             btn.innerText = "Save Changes"; btn.disabled = false;
         }
 
         window.downloadJSON = () => {
-            const exportData = allData; // Downloads currently filtered/visible data
-            if(exportData.length === 0) return alert("No data to download.");
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${currentTab}_${Date.now()}.json`);
+            if(allData.length === 0) return alert("No data loaded to download.");
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${Date.now()}.json`);
             dl.click();
         }
 
-        // INIT
+        // INIT LOAD
         fetchData();
     </script>
 </body>
