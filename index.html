@@ -82,7 +82,6 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
 
         /* --- ANALYTICS DASHBOARD --- */
-        /* Changed to 2 columns since we removed one stat */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: var(--shadow-sm); }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
@@ -222,7 +221,11 @@
                         <option value="Short">Short Answer</option>
                         <option value="Long">Long Answer</option>
                     </select>
-                    <label>Answer Key</label>
+                    
+                    <label style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                        Answer Key
+                        <button class="btn btn-sm btn-outline" onclick="openEditor('ansText')">⛶ Fullscreen Editor</button>
+                    </label>
                     <textarea id="ansText" rows="3"></textarea>
                 </div>
 
@@ -282,13 +285,12 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
     <script type="module">
-        // --- 1. IMPORTS UPDATED TO 9.23.0 ---
+        // --- 1. IMPORTS ---
         import { db, auth } from "./firebase-config.js"; 
         import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
-        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        
+        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { collection, addDoc, updateDoc, setDoc, getDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
-        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Try offline persistence to make the app work faster
         try { enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed")); } catch(e){}
@@ -299,18 +301,28 @@
         let activeEditorTarget = "";
         let currentMode = "MCQ";
 
-        // --- CONFIGURATION ---
+        // --- CONFIGURATION UPDATED (All Subjects Added) ---
         const examConfig = {
             "OAV": { type: "MCQ", subjects: ["Math", "Science", "Social", "English"] },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
             "NMMS": { type: "MCQ", subjects: ["MAT", "SAT"] },
-            "5TH BOARD": { type: "SUBJECTIVE", subjects: ["Odia", "Math", "English"] },
-            "8TH BOARD": { type: "SUBJECTIVE", subjects: ["Science", "History", "Math"] },
+            
+            // UPDATED: Class 5 Subjects
+            "5TH BOARD": { 
+                type: "SUBJECTIVE", 
+                subjects: ["Odia (Sahitya)", "English", "Hindi", "Mathematics", "Environmental Studies (EVS)"] 
+            },
+            
+            // UPDATED: Class 8 Subjects
+            "8TH BOARD": { 
+                type: "SUBJECTIVE", 
+                subjects: ["Odia (Sahitya)", "English", "Hindi", "Sanskrit", "Mathematics", "General Science", "History & Pol Sc", "Geography"] 
+            },
+            
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] }
         };
 
         // --- HELPER: IMAGE COMPRESSOR ---
-        // Resizes and compresses image to save DB space
         const compressImage = (file, maxWidth, quality) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -320,7 +332,6 @@
                     img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        // Calculate new height to keep aspect ratio
                         const scale = maxWidth / img.width;
                         canvas.width = Math.min(img.width, maxWidth);
                         canvas.height = img.height * (img.width > maxWidth ? scale : 1);
@@ -328,7 +339,6 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
-                        // 'image/jpeg' format allows quality control (0.0 to 1.0)
                         resolve(canvas.toDataURL('image/jpeg', quality));
                     };
                     img.onerror = reject;
@@ -425,7 +435,6 @@
 
         // --- PROFILE & IMAGE LOGIC ---
         
-        // Load image from Firestore DB
         async function loadUserImage(uid) {
             try {
                 const docSnap = await getDoc(doc(db, "users", uid));
@@ -455,11 +464,8 @@
             document.getElementById('pfp-preview').src = window.currentUserPhoto;
         }
 
-        // 1. PROFILE PICTURE COMPRESSION (Aggressive)
         window.previewPfp = async (input) => {
             if(input.files && input.files[0]) {
-                // Width: 200px (Very small, perfect for icons)
-                // Quality: 0.5 (Low quality JPEG, saves massive space)
                 const url = await compressImage(input.files[0], 200, 0.5); 
                 document.getElementById('pfp-preview').src = url;
             }
@@ -480,7 +486,6 @@
                 });
 
                 // Update DB (Image String)
-                // Using setDoc with merge to ensure we don't delete other fields
                 await setDoc(doc(db, "users", auth.currentUser.uid), {
                     base64Photo: pfpBase64
                 }, { merge: true });
@@ -531,11 +536,8 @@
                     timestamp: Date.now(), verified: false
                 };
 
-                // 2. QUESTION IMAGE COMPRESSION (Moderate)
                 const file = document.getElementById('qImage').files[0];
                 if(file) {
-                    // Width: 600px (Readable for text)
-                    // Quality: 0.6 (Good balance)
                     data.imageUrl = await compressImage(file, 600, 0.6);
                 }
 
