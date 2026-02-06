@@ -85,6 +85,7 @@
 
         /* --- TILES --- */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; padding: 20px; }
+        
         .tile {
             background: white; padding: 30px 15px; border-radius: 20px; text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.02); cursor: pointer; border: 1px solid #f0f0f0;
@@ -96,17 +97,40 @@
         .tile.subject-tile::after { background: var(--red-pink); }
         .tile.type-tile::after { background: #ff9800; }
 
+        /* COMING SOON / DISABLED TILES */
+        .tile.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #fafafa;
+        }
+        /* The ribbon tag */
+        .tile.disabled::before {
+            content: "COMING SOON";
+            position: absolute;
+            top: 15px;
+            right: -32px;
+            background: #7f8c8d;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 4px 30px;
+            transform: rotate(45deg);
+            z-index: 5;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
         /* --- QUIZ VIEWS --- */
         #view-quiz { height: 100%; display: flex; flex-direction: column; padding: 20px; }
         #quiz-question-area { flex-shrink: 0; max-height: 50%; overflow-y: auto; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        /* UPDATED: Added white-space to preserve formatting */
         .q-text { 
-            font-size: 1.2rem; 
-            font-weight: 600; 
-            color: #222; 
-            line-height: 1.6; 
-            white-space: pre-wrap; /* This makes new lines and paragraphs show correctly */
+             font-size: 1.2rem; 
+             font-weight: 600; 
+             color: #222; 
+             line-height: 1.6; 
+             white-space: pre-wrap;
         }
         
         .q-author { font-size: 0.8rem; color: #888; font-style: italic; margin: 10px 0; display: block; }
@@ -133,12 +157,39 @@
 
         /* --- FOOTER NAV --- */
         #quiz-footer { background: white; padding: 15px 20px; border-top: 1px solid #eee; height: 80px; display: none; }
-        .next-btn {
-            background: var(--red-pink); color: white; border: none; height: 100%; width: 100%;
-            border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3); transition: 0.3s;
+        
+        .footer-btn-container {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            height: 100%;
         }
-        .next-btn:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; }
+
+        .nav-btn {
+            border: none; 
+            height: 100%; 
+            border-radius: 50px; 
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+
+        .next-btn {
+            flex: 2; /* Takes up more space */
+            background: var(--red-pink); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
+        }
+        
+        .prev-btn {
+            flex: 1; /* Takes up less space */
+            background: #e2e8f0;
+            color: #4a5568;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .next-btn:disabled, .prev-btn:disabled { background: #cbd5e0; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
 
         /* --- SITE FOOTER --- */
         .site-footer { background: #fff; padding: 15px; text-align: center; border-top: 1px solid #eee; color: #888; font-size: 12px; flex-shrink: 0; }
@@ -161,7 +212,7 @@
             font-size: 1rem;
             line-height: 1.6;
             animation: fadeIn 0.3s ease-in;
-            white-space: pre-wrap; /* UPDATED: Preserves answer formatting too */
+            white-space: pre-wrap;
         }
 
         .btn-show-ans {
@@ -274,7 +325,10 @@
     </div>
 
     <div id="quiz-footer">
-        <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question ➡</button>
+        <div class="footer-btn-container">
+            <button class="nav-btn prev-btn" id="prev-btn" onclick="prevQuestion()" style="display: none;">⬅ Prev</button>
+            <button class="nav-btn next-btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question ➡</button>
+        </div>
     </div>
 
     <footer class="site-footer" id="main-footer">
@@ -296,14 +350,15 @@
             `;
         }
 
+        // ✅ REORDERED CONFIG: 5th and 8th Board at top, others disabled
         const examConfig = {
-            "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"] },
-            "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
-            "EKALABYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "English"] },
-            "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] },
-            "NMMS": { type: "MCQ", subjects: ["Mental Ability", "Math", "Science", "Social Science"] },
             "5TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] },
-            "8TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] }
+            "8TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] },
+            "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"], disabled: true },
+            "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"], disabled: true },
+            "EKALABYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "English"], disabled: true },
+            "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"], disabled: true },
+            "NMMS": { type: "MCQ", subjects: ["Mental Ability", "Math", "Science", "Social Science"], disabled: true }
         };
 
         let currentExam = "", currentSubject = "", currentCategory = "";
@@ -330,6 +385,7 @@
         const quizHeader = document.getElementById('quiz-header');
         const quizFooter = document.getElementById('quiz-footer');
         const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn'); // ✅ New Button Ref
         const quizContent = document.getElementById('quiz-card-content');
 
         window.onpopstate = function(event) { if (isQuizActive && confirm("Quit Quiz?")) exitQuiz(); else history.pushState(null, null, window.location.href); };
@@ -339,8 +395,18 @@
         function init() {
             const grid = document.getElementById('exam-grid'); grid.innerHTML = "";
             Object.keys(examConfig).forEach(exam => {
-                const tile = document.createElement('div'); tile.className = 'tile'; tile.innerText = exam;
-                tile.onclick = () => showSubjects(exam); grid.appendChild(tile);
+                const tile = document.createElement('div'); 
+                
+                // ✅ Check for disabled property to add style
+                if (examConfig[exam].disabled) {
+                    tile.className = 'tile disabled';
+                } else {
+                    tile.className = 'tile';
+                    tile.onclick = () => showSubjects(exam); 
+                }
+                
+                tile.innerText = exam;
+                grid.appendChild(tile);
             });
             initCanvas();
         }
@@ -402,8 +468,7 @@
                 sessionQuestions = questionBag.splice(0, 10);
             }
             resetAndStart();
-        };
-        
+        };        
         window.restartCurrentSet = () => { history.pushState(null, null, window.location.href); isQuizActive = true; resetAndStart(); };
 
         function resetAndStart() {
@@ -432,11 +497,21 @@
                 boardIsDirty = false; updateSmartBtn();
                 document.getElementById('q-counter').innerText = `Q ${currentIndex + 1}/${total}`;
                 document.getElementById('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
+                // Hide prev button for regular MCQ quizzes (optional, or keep if you want review)
+                prevBtn.style.display = "none";
             }
 
             if (isBoardMode) {
                 nextBtn.disabled = false; nextBtn.style.opacity = "1";
-                if (currentIndex === total - 1) { nextBtn.innerText = "🏠 Back to Menu"; nextBtn.style.background = "#555"; } 
+                
+                // ✅ Handle Previous Button Logic
+                if (currentIndex === 0) {
+                    prevBtn.style.display = "none";
+                } else {
+                    prevBtn.style.display = "block";
+                }
+
+                if (currentIndex === total - 1) { nextBtn.innerText = "Finish 🏁"; nextBtn.style.background = "#555"; } 
                 else { nextBtn.innerText = "Next ➡"; nextBtn.style.background = "var(--ert-blue)"; }
             } else {
                 nextBtn.disabled = true; 
@@ -477,11 +552,22 @@
             nextBtn.disabled = false; nextBtn.style.opacity = "1";
         };
 
+        // ✅ NEW: Previous Question Function
+        window.prevQuestion = () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderSlide();
+            }
+        };
+
+        // ✅ UPDATED: Next Question Function
         window.nextQuestion = () => {
-            if (isBoardMode && currentIndex === sessionQuestions.length - 1) { goHome(); return; }
-            currentIndex++;
-            if(currentIndex < sessionQuestions.length) renderSlide();
-            else showResults();
+            if(currentIndex < sessionQuestions.length - 1) {
+                currentIndex++;
+                renderSlide();
+            } else {
+                showResults();
+            }
         };
 
         function showResults() {
