@@ -321,17 +321,11 @@
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
             "NMMS": { type: "MCQ", subjects: ["MAT", "SAT"] },
             
-            // UPDATED: CLASS 5 Subjects
-            "5TH BOARD": { 
-                type: "SUBJECTIVE", 
-                subjects: ["Odia (Sahitya)", "English", "Hindi", "Mathematics", "Environmental Studies (EVS)"] 
-            },
+            // UPDATED: CLASS 5 Subjects (As requested)
+            "5TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] },
             
-            // UPDATED: CLASS 8 Subjects
-            "8TH BOARD": { 
-                type: "SUBJECTIVE", 
-                subjects: ["Odia (Sahitya)", "English", "Hindi", "Sanskrit", "Mathematics", "General Science", "History & Pol Sc", "Geography"] 
-            },
+            // UPDATED: CLASS 8 Subjects (As requested)
+            "8TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] },
             
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] }
         };
@@ -531,7 +525,8 @@
         };
 
         function toggleFormMode(mode) {
-            const isSub = mode === 'SUBJECTIVE';
+            // UPDATED: Treat both SUBJECTIVE and BOARD as subjective inputs
+            const isSub = (mode === 'SUBJECTIVE' || mode === 'BOARD');
             document.getElementById('mcq-inputs').classList.toggle('hidden', isSub);
             document.getElementById('subjective-inputs').classList.toggle('hidden', !isSub);
             document.getElementById('cat-wrapper').classList.toggle('hidden', !isSub);
@@ -695,11 +690,27 @@
             }, 100);
         };
 
+        // --- UPDATED: CLEAR FORM FUNCTION ---
         window.cancelEdit = () => {
             document.getElementById('editId').value = "";
             document.getElementById('qText').value = "";
+            document.getElementById('qImage').value = ""; // Clear question image
+            
+            // Clear MCQ Fields
+            document.getElementById('opA').value = "";
+            document.getElementById('opB').value = "";
+            document.getElementById('opC').value = "";
+            document.getElementById('opD').value = "";
+            document.getElementById('correctAns').value = "A";
+
+            // Clear Subjective Fields
+            document.getElementById('ansText').value = "";
+            document.getElementById('ansImage').value = ""; // Clear answer image
+
+            // Reset Dropdowns
             document.getElementById('qExam').value = "";
-            document.getElementById('qSubject').innerHTML = "";
+            document.getElementById('qSubject').innerHTML = '<option value="" disabled selected>-- Select Exam First --</option>';
+            
             document.getElementById('saveBtn').innerText = "Submit Question";
             document.getElementById('cancelBtn').classList.add('hidden');
         };
