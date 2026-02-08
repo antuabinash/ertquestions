@@ -182,10 +182,6 @@
                         <label>Exam Type</label>
                         <select id="qExam" onchange="handleExamChange()">
                             <option value="" disabled selected>-- Select --</option>
-                            <option value="OAV">OAV</option>
-                            <option value="NAVODAYA">NAVODAYA</option>
-                            <option value="NMMS">NMMS</option>
-                            <option value="PATHANI SAMANTA">PATHANI SAMANTA</option>
                             <option value="5TH BOARD">5th Board</option>
                             <option value="8TH BOARD">8th Board</option>
                         </select>
@@ -321,10 +317,10 @@
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
             "NMMS": { type: "MCQ", subjects: ["MAT", "SAT"] },
             
-            // UPDATED: CLASS 5 Subjects
+            // UPDATED: CLASS 5 Subjects (Removed Hindi)
             "5TH BOARD": { 
                 type: "SUBJECTIVE", 
-                subjects: ["Odia (Sahitya)", "English", "Hindi", "Mathematics", "Environmental Studies (EVS)"] 
+                subjects: ["Odia (Sahitya)", "English", "Mathematics", "Environmental Studies (EVS)"] 
             },
             
             // UPDATED: CLASS 8 Subjects
@@ -601,11 +597,26 @@
                 if(editId) {
                     await updateDoc(doc(db, "questions", editId), data);
                     showToast("Question Updated Successfully!");
+                    cancelEdit(); // Full reset if we were editing
                 } else {
                     await addDoc(collection(db, "questions"), data);
                     showToast("Question Published Successfully!");
+                    
+                    // --- PARTIAL RESET (Keep Exam/Subject Context) ---
+                    document.getElementById('qText').value = "";
+                    document.getElementById('qImage').value = "";
+                    
+                    // Reset MCQ Fields
+                    document.getElementById('opA').value = "";
+                    document.getElementById('opB').value = "";
+                    document.getElementById('opC').value = "";
+                    document.getElementById('opD').value = "";
+                    document.getElementById('correctAns').value = "A";
+
+                    // Reset Subjective Fields
+                    document.getElementById('ansText').value = "";
+                    document.getElementById('ansImage').value = "";
                 }
-                cancelEdit();
             } catch(e) {
                 showToast(e.message, "error");
             } finally {
