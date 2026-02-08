@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Migration Tool: Class 8 History</title>
+    <title>Migration: History ➡ History & Pol Sc</title>
     <style>
         body { font-family: sans-serif; padding: 40px; text-align: center; background: #f4f6f8; }
         .card { background: white; padding: 30px; max-width: 500px; margin: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { color: #d32f2f; margin-top: 0; }
+        h2 { color: #1a73e8; margin-top: 0; }
         p { color: #555; line-height: 1.6; }
         #status { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 5px; }
         .btn { background: #1a73e8; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 15px; }
@@ -16,23 +16,19 @@
 <body>
 
     <div class="card">
-        <h2>⚠️ Class 8 Database Migration</h2>
-        <p>This tool will move all <strong>8th Board</strong> questions from:</p>
-        <ul style="text-align:left; display:inline-block;">
-            <li>History & Pol Sc</li>
-            <li>Political Science</li>
-            <li>Pol Sc</li>
-        </ul>
-        <p>To the single subject: <strong>History</strong>.</p>
+        <h2>🔄 Correcting Subject Name</h2>
+        <p>This tool will find all <strong>8th Board</strong> questions currently labeled as:</p>
+        <h3 style="background:#eee; display:inline-block; padding:5px 10px; border-radius:4px;">History</h3>
+        <p>And rename them to:</p>
+        <h3 style="background:#e8f5e9; color:#2e7d32; display:inline-block; padding:5px 10px; border-radius:4px;">History & Pol Sc</h3>
         
-        <button id="runBtn" class="btn" onclick="runMigration()">Start Migration</button>
+        <button id="runBtn" class="btn" onclick="runMigration()">Start Update</button>
         
         <div id="status"></div>
         <div id="log" style="text-align: left; margin-top: 20px; font-size: 12px; color: #666; max-height: 200px; overflow-y: auto;"></div>
     </div>
 
     <script type="module">
-        // 1. Import your existing config
         import { db } from "./firebase-config.js";
         import { collection, query, where, getDocs, writeBatch, doc } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -43,12 +39,12 @@
             const log = document.getElementById('log');
             
             btn.disabled = true;
-            btn.innerText = "Scanning Database...";
-            status.innerText = "⏳ Scanning 8th Board questions...";
+            btn.innerText = "Scanning...";
+            status.innerText = "⏳ Looking for 'History' questions...";
             log.innerHTML = "";
 
             try {
-                // 2. Define the Query: Look for Class 8 questions
+                // 1. Find all 8th Board questions
                 const q = query(
                     collection(db, "questions"), 
                     where("exam", "==", "8TH BOARD")
@@ -62,30 +58,29 @@
                     return;
                 }
 
-                // 3. Filter for the subjects we want to consolidate
-                // We check for "History & Pol Sc" (from your old config) AND variations
-                const oldSubjects = ["History & Pol Sc", "Political Science", "Pol Sc", "Civics"];
+                // 2. Filter specifically for "History"
+                const targetSubject = "History";
                 const docsToUpdate = [];
 
                 snapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Check if current subject is in our "move list"
-                    if (oldSubjects.includes(data.subject)) {
+                    // Only pick questions that are EXACTLY "History"
+                    if (data.subject === targetSubject) {
                         docsToUpdate.push(doc);
                     }
                 });
 
                 if (docsToUpdate.length === 0) {
-                    status.innerText = "✅ No 'Political Science' subjects found to move.";
+                    status.innerText = "✅ No questions found labeled just 'History'.";
                     status.style.background = "#e8f5e9";
                     status.style.color = "#2e7d32";
                     btn.disabled = false;
                     return;
                 }
 
-                status.innerText = `🔄 Found ${docsToUpdate.length} questions to move...`;
+                status.innerText = `🔄 Updating ${docsToUpdate.length} questions...`;
 
-                // 4. Perform Batch Updates
+                // 3. Batch Update
                 const batchSize = 450; 
                 const chunks = [];
                 
@@ -100,10 +95,10 @@
                     chunk.forEach((docSnapshot) => {
                         const ref = doc(db, "questions", docSnapshot.id);
                         
-                        // THE UPDATE: Rename subject to "History"
-                        batch.update(ref, { subject: "History" });
+                        // THE FIX: Rename TO "History & Pol Sc"
+                        batch.update(ref, { subject: "History & Pol Sc" });
                         
-                        log.innerHTML += `<div>Moving: ${docSnapshot.id} (${docSnapshot.data().subject} ➡ History)</div>`;
+                        log.innerHTML += `<div>Fixed: ${docSnapshot.id}</div>`;
                     });
 
                     await batch.commit();
@@ -111,11 +106,10 @@
                     status.innerText = `🔄 Updated ${processed} / ${docsToUpdate.length} questions...`;
                 }
 
-                // 5. Success
-                status.innerText = "🎉 Success! All Politics questions are now under 'History'.";
+                status.innerText = "🎉 Done! All 'History' questions are now 'History & Pol Sc'.";
                 status.style.background = "#e8f5e9";
                 status.style.color = "#2e7d32";
-                btn.innerText = "Done";
+                btn.innerText = "Finished";
 
             } catch (error) {
                 console.error(error);
