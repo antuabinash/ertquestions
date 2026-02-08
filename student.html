@@ -352,7 +352,7 @@
 
         // ✅ REORDERED CONFIG: 5th and 8th Board at top, others disabled
         const examConfig = {
-            "5TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Paribesa Bigyan", "Samajika Bigyan", "Math"] },
+            "5TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Environmental Studies (EVS)", "Paribesa Bigyan", "Samajika Bigyan", "Math"] },
             "8TH BOARD": { type: "BOARD", subjects: ["Odia", "English", "Science", "History", "Geography", "Math", "Hindi", "Sanskrit"] },
             "OAV": { type: "MCQ", subjects: ["English", "Math", "Science", "Social Science"], disabled: true },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"], disabled: true },
@@ -365,7 +365,7 @@
         let isBoardMode = false;
         let allFetchedQuestions = [];  
         let questionBag = [];          
-        let sessionQuestions = [];     
+        let sessionQuestions = [];      
         let currentIndex = 0, score = 0, userReview = [], isQuizActive = false;
 
         let canvas, ctx, isDrawing = false, lastX = 0, lastY = 0, boardIsDirty = false;
