@@ -6,20 +6,26 @@
     <style>
         /* --- ADMIN THEME --- */
         :root {
-            --primary: #0d47a1;
-            --primary-hover: #002171;
-            --accent: #d32f2f;
-            --bg-color: #f4f6f8;
-            --success: #2e7d32;
-            --warning: #fb8c00;
+            --primary: #0d47a1; --primary-hover: #002171; --accent: #d32f2f;
+            --bg-color: #f4f6f8; --success: #2e7d32; --warning: #fb8c00;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: #333; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 0; border-radius: 12px; box-shadow: var(--card-shadow); overflow: hidden; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 0; border-radius: 12px; box-shadow: var(--card-shadow); overflow: hidden; min-height: 80vh;}
         
-        .header { background: var(--primary); padding: 20px 25px; color: white; display: flex; align-items: center; gap: 15px; }
+        /* LOGIN OVERLAY */
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #0d47a1; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 300px; color: #333; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .login-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;}
+        .login-box button { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .login-box button:hover { background: var(--primary-hover); }
+
+        /* DASHBOARD HEADER */
+        .header { background: var(--primary); padding: 20px 25px; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .brand { display: flex; align-items: center; gap: 15px; }
         .app-logo { height: 40px; width: 40px; border-radius: 50%; border: 2px solid white; background: white; }
         h1 { margin: 0; font-size: 1.5rem; color: white; }
+        .logout-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
 
         /* --- STATS DASHBOARD --- */
         .stats-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; border-bottom: 1px solid #ddd; }
@@ -27,34 +33,28 @@
         .stat-card:hover { background: #fcfcfc; }
         .stat-card h3 { margin: 0; font-size: 0.85em; text-transform: uppercase; color: #777; letter-spacing: 1px; }
         .stat-card .count { font-size: 2rem; font-weight: 800; margin-top: 5px; color: #333; }
-        
-        .c-total { color: var(--primary) !important; }
-        .c-pending { color: var(--accent) !important; }
-        .c-verified { color: var(--success) !important; }
+        .c-total { color: var(--primary) !important; } .c-pending { color: var(--accent) !important; } .c-verified { color: var(--success) !important; }
 
-        /* --- TABS --- */
+        /* --- TABS & TOOLS --- */
         .tabs { display: flex; background: #e3f2fd; border-bottom: 1px solid #bbdefb; border-top: 5px solid #e0e0e0;}
         .tab-btn { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #555; transition: 0.2s; border-bottom: 3px solid transparent; }
         .tab-btn:hover { background: #bbdefb; }
         .tab-btn.active { background: white; color: var(--primary); border-bottom: 3px solid var(--primary); }
 
-        /* Toolbar */
         .toolbar { display: flex; gap: 15px; padding: 20px; background: #fff; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid #eee; }
         .filter-group { display: flex; flex-direction: column; }
         .filter-group label { font-size: 0.8em; font-weight: bold; color: #777; margin-bottom: 5px; text-transform: uppercase; }
         select { padding: 8px; min-width: 160px; border-radius: 4px; border: 1px solid #ccc; background: #fafafa; }
-        
-        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-left: auto; display: flex; align-items: center; gap: 5px;}
+        .btn-dl { background: #00897b; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-left: auto; }
 
-        /* Table */
-        .table-wrap { padding: 0 20px 0 20px; overflow-x: auto; }
+        /* TABLE */
+        .table-wrap { padding: 0 20px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border-bottom: 1px solid #eee; padding: 15px 10px; text-align: left; vertical-align: top; }
-        th { color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+        th { color: #555; font-weight: 700; text-transform: uppercase; font-size: 0.85em; border-bottom: 2px solid #ddd; }
         tr:hover { background-color: #f9f9f9; }
-        
+        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 2px; background: white; border-radius: 4px; display: block; margin-top: 8px; }
         .content-text { word-wrap: break-word; color: #222; font-size: 0.95rem; line-height: 1.5; }
-        .thumb { max-width: 100px; max-height: 100px; border: 1px solid #ddd; padding: 2px; background: white; border-radius: 4px; display: block; margin-top: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
         
         /* Edit Box */
         .edit-box { display: none; margin-top: 15px; background: #fffde7; padding: 15px; border: 1px solid #fff59d; border-radius: 6px; }
@@ -62,16 +62,14 @@
         
         /* Buttons */
         .action-col { display: flex; flex-direction: column; gap: 6px; }
-        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;}
+        .btn-verify { background: var(--success); color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-unverify { background: #fb8c00; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
         .btn-edit { background: #1976d2; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
         .btn-delete { background: #d32f2f; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.9em;}
 
-        /* Bottom Load More Section */
         .load-more-section { padding: 30px; text-align: center; background: #f9f9f9; border-top: 1px solid #eee; }
-        .btn-load { background: #546e7a; color: white; border: none; padding: 12px 30px; cursor: pointer; border-radius: 30px; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;}
-        .btn-load:hover { background: #37474f; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-
+        .btn-load { background: #546e7a; color: white; border: none; padding: 12px 30px; cursor: pointer; border-radius: 30px; font-weight: bold; }
+        
         /* Rich Editor */
         #fs-editor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 5000; display: none; flex-direction: column; }
         .ed-toolbar { background: #eee; padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid #ccc; align-items: center; }
@@ -80,9 +78,21 @@
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
+
+    <div id="login-overlay">
+        <h2 style="margin-bottom:20px;">eRT Odisha Admin</h2>
+        <div class="login-box">
+            <p>Admin Access</p>
+            <input type="email" id="adminEmail" placeholder="Email Address">
+            <input type="password" id="adminPass" placeholder="Password">
+            <button onclick="handleAdminAuth()">Login / Create Admin</button>
+            <p id="login-msg" style="color:#666; font-size:0.8rem; margin-top:15px;">If account exists, logs in. If not, creates one.</p>
+        </div>
+    </div>
 
     <div id="fs-editor">
         <div class="ed-toolbar">
@@ -96,10 +106,13 @@
         <div id="ed-body" class="ed-content" contenteditable="true"></div>
     </div>
 
-    <div class="container">
+    <div class="container" id="main-dash" style="opacity:0.3; pointer-events:none;">
         <div class="header">
-            <img src="logo.jpg" alt="Logo" class="app-logo">
-            <h1>eRT Odisha Admin</h1>
+            <div class="brand">
+                <img src="logo.jpg" alt="Logo" class="app-logo">
+                <h1>Admin Panel</h1>
+            </div>
+            <button class="logout-btn" onclick="adminLogout()">Log Out</button>
         </div>
 
         <div class="stats-bar">
@@ -136,7 +149,7 @@
                 <select id="filterSubject" onchange="applyFilters()"><option value="all">All Subjects</option></select>
             </div>
             
-            <div style="margin-left: auto; display: flex; align-items: center;">
+            <div style="margin-left: auto;">
                 <button class="btn-dl" onclick="downloadJSON()">⬇ JSON</button>
             </div>
         </div>
@@ -152,7 +165,7 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div><p style="margin-top:10px; color:#666;">Connecting to Firebase...</p></td></tr>
+                    <tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>
                 </tbody>
             </table>
         </div>
@@ -164,40 +177,77 @@
     </div>
 
     <script type="module">
-        import { db } from "./firebase-config.js";
+        import { db, auth } from "./firebase-config.js";
+        import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { collection, getDocs, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy, limit, where, enableIndexedDbPersistence, getCountFromServer } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         // Persistence
-        enableIndexedDbPersistence(db).catch((err) => console.log("Persistence:", err.code));
+        try { enableIndexedDbPersistence(db).catch(() => {}); } catch(e){}
 
-        const pass = prompt("Enter Admin Password:");
-        if(pass !== "admin123") { document.body.innerHTML = "<h1 style='text-align:center; margin-top:50px; color:red;'>⛔ Access Denied</h1>"; throw new Error("Stop"); }
-
-        // --- STATE ---
+        // --- GLOBAL STATE ---
         let allData = [];
-        let filteredData = []; // Store filtered result for pagination
+        let filteredData = [];
         let allTeachers = new Set(); 
-        let activeEditId = '';
-        
-        // ⚡ KEY SETTINGS FOR SPEED ⚡
-        let queryLimit = 1500;  // Download LOTS of data (so filters work)
-        let visibleLimit = 50;  // But only RENDER 50 at a time (so it's fast)
-        
+        let queryLimit = 1500; 
+        let visibleLimit = 50; 
         let currentTab = 'unverified'; 
         let unsubscribe = null;
-
+        let activeEditId = '';
         const masterExams = ["OAV", "NAVODAYA", "NMMS", "PATHANI SAMANTA", "5TH BOARD", "8TH BOARD", "EKALABYA"];
 
-        // Elements
-        const examSelect = document.getElementById('filterExam');
-        const teacherSelect = document.getElementById('filterTeacher');
-        const subjectSelect = document.getElementById('filterSubject');
-        const tableBody = document.getElementById('tableBody');
-        const countLabel = document.getElementById('showing-count');
-        const loadBtn = document.querySelector('.btn-load');
+        // --- UNIFIED AUTHENTICATION ---
+        window.handleAdminAuth = async () => {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            const msg = document.getElementById('login-msg');
+            
+            if(!email || !pass) { msg.innerText = "Please enter email & password"; msg.style.color="red"; return; }
+            msg.innerText = "Processing..."; msg.style.color="#666";
 
-        // --- FETCH USER METADATA ---
+            try {
+                // Try Login
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    try {
+                        // Try Creating Account
+                        await createUserWithEmailAndPassword(auth, email, pass);
+                    } catch (createErr) {
+                        msg.innerText = "Error: " + createErr.message; msg.style.color="red";
+                    }
+                } else {
+                    msg.innerText = "Error: " + error.message; msg.style.color="red";
+                }
+            }
+        };
+
+        window.adminLogout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            const overlay = document.getElementById('login-overlay');
+            const dash = document.getElementById('main-dash');
+            
+            if (user) {
+                overlay.classList.add('hidden');
+                dash.style.opacity = "1";
+                dash.style.pointerEvents = "auto";
+                // Start loading data only when logged in
+                if(allData.length === 0) {
+                    fetchUserMetadata();
+                    updateStats();
+                    loadData();
+                }
+            } else {
+                overlay.classList.remove('hidden');
+                dash.style.opacity = "0.3";
+                dash.style.pointerEvents = "none";
+                document.getElementById('login-msg').innerText = "Logged Out";
+            }
+        });
+
+        // --- DATA LOGIC ---
         async function fetchUserMetadata() {
             try {
                 const snapshot = await getDocs(collection(db, "users"));
@@ -209,165 +259,109 @@
                 updateDropdowns(); 
             } catch (e) { console.error("Error fetching users:", e); }
         }
-        fetchUserMetadata();
 
-        // --- STATS LOGIC ---
         async function updateStats() {
             try {
                 const coll = collection(db, "questions");
                 const snapVerified = await getCountFromServer(query(coll, where("verified", "==", true)));
-                const countVerified = snapVerified.data().count;
                 const snapUnverified = await getCountFromServer(query(coll, where("verified", "==", false)));
+                const countVerified = snapVerified.data().count;
                 const countUnverified = snapUnverified.data().count;
 
                 document.getElementById('stat-verified').innerText = countVerified;
                 document.getElementById('stat-pending').innerText = countUnverified;
                 document.getElementById('stat-total').innerText = countVerified + countUnverified;
-            } catch (e) { console.error("Stats error", e); }
+            } catch (e) {}
         }
-        updateStats();
 
-        // --- TABS LOGIC ---
         window.switchTab = (tabName) => {
             currentTab = tabName;
-            visibleLimit = 50; // Reset visual limit on tab switch
+            visibleLimit = 50; 
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
             loadData();
         };
 
-        // --- DATA LOADING (FETCH 1000+, RENDER 50) ---
         function loadData() {
             if (unsubscribe) unsubscribe();
             const collectionRef = collection(db, "questions");
-            let q;
-
-            // REMOVED orderBy("timestamp") to ensure all questions appear
-            if (currentTab === 'unverified') {
-                q = query(collectionRef, where("verified", "==", false), limit(queryLimit));
-            } else {
-                q = query(collectionRef, where("verified", "==", true), limit(queryLimit));
-            }
+            let q = query(collectionRef, where("verified", "==", currentTab !== 'unverified'), limit(queryLimit));
             
             unsubscribe = onSnapshot(q, (snapshot) => {
                 allData = [];
                 snapshot.forEach(doc => allData.push({ ...doc.data(), id: doc.id }));
-                
-                // CLIENT SIDE SORT (Newest First)
-                allData.sort((a, b) => {
-                    const timeA = a.timestamp || 0;
-                    const timeB = b.timestamp || 0;
-                    return timeB - timeA;
-                });
-
-                console.log(`Downloaded ${allData.length} items. Rendering first ${visibleLimit}...`);
+                allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 updateDropdowns(); 
                 updateStats();
-            }, (error) => {
-                console.error("Firebase Error:", error);
             });
         }
 
-        // --- INSTANT LOAD MORE (NO NETWORK) ---
-        window.showMoreLocal = () => {
-            visibleLimit += 50;
-            applyFilters(); // Re-render with higher limit
-        };
+        window.showMoreLocal = () => { visibleLimit += 50; applyFilters(); };
 
         function updateDropdowns() {
-            const currentExam = examSelect.value;
-            const currentTeacher = teacherSelect.value;
-            const currentSubject = subjectSelect.value;
+            const currentExam = document.getElementById('filterExam').value;
+            const currentTeacher = document.getElementById('filterTeacher').value;
+            const currentSubject = document.getElementById('filterSubject').value;
 
             const loadedExams = allData.map(d => d.exam).filter(Boolean);
-            const combinedExams = new Set([...masterExams, ...loadedExams]);
-            const sortedExams = [...combinedExams].sort();
-            populateSelect(examSelect, sortedExams, "All Exams", currentExam);
+            const combinedExams = [...new Set([...masterExams, ...loadedExams])].sort();
+            populateSelect(document.getElementById('filterExam'), combinedExams, "All Exams", currentExam);
 
             const loadedTeachers = allData.map(d => d.teacher).filter(Boolean);
-            const combinedTeachers = new Set([...allTeachers, ...loadedTeachers]);
-            const sortedTeachers = [...combinedTeachers].sort();
-            populateSelect(teacherSelect, sortedTeachers, "All Teachers", currentTeacher);
+            const combinedTeachers = [...new Set([...allTeachers, ...loadedTeachers])].sort();
+            populateSelect(document.getElementById('filterTeacher'), combinedTeachers, "All Teachers", currentTeacher);
 
             const subjects = [...new Set(allData.map(d => d.subject).filter(Boolean))].sort();
-            populateSelect(subjectSelect, subjects, "All Subjects", currentSubject);
+            populateSelect(document.getElementById('filterSubject'), subjects, "All Subjects", currentSubject);
             
             applyFilters();
         }
 
         function populateSelect(el, items, defaultText, selectedValue) {
-            const prevVal = el.value !== "" ? el.value : selectedValue;
             el.innerHTML = `<option value="all">${defaultText}</option>`;
             items.forEach(item => {
                 const opt = document.createElement('option');
                 opt.value = item; opt.innerText = item;
-                if(item === prevVal) opt.selected = true;
+                if(item === selectedValue) opt.selected = true;
                 el.appendChild(opt);
             });
         }
 
-        // --- FILTER & RENDER LOGIC ---
         window.applyFilters = () => {
-            const e = examSelect.value.toUpperCase();
-            const t = teacherSelect.value;
-            const s = subjectSelect.value;
+            const e = document.getElementById('filterExam').value;
+            const t = document.getElementById('filterTeacher').value;
+            const s = document.getElementById('filterSubject').value;
             
-            // 1. FILTER ALL DATA
             filteredData = allData.filter(item => {
-                const itemExam = item.exam ? item.exam.toUpperCase() : "";
-                return (e === "ALL" || itemExam === e) && 
+                return (e === "all" || item.exam === e) && 
                        (t === "all" || item.teacher === t) && 
                        (s === "all" || item.subject === s);
             });
 
-            // 2. SLICE DATA FOR PERFORMANCE (Only render 'visibleLimit')
             const dataToRender = filteredData.slice(0, visibleLimit);
-            
-            // 3. UPDATE UI COUNTS
-            countLabel.innerText = `Showing ${dataToRender.length} of ${filteredData.length} questions`;
-            if(dataToRender.length >= filteredData.length) {
-                loadBtn.style.display = "none";
-            } else {
-                loadBtn.style.display = "inline-block";
-                loadBtn.innerText = `⬇ Show next 50 (Instant)`;
-            }
-
+            document.getElementById('showing-count').innerText = `Showing ${dataToRender.length} of ${filteredData.length} questions`;
+            document.querySelector('.btn-load').style.display = dataToRender.length >= filteredData.length ? "none" : "inline-block";
             renderTable(dataToRender);
         }
 
         function renderTable(data) {
-            tableBody.innerHTML = "";
-            if(data.length === 0) { 
-                const msg = currentTab === 'unverified' ? "🎉 No pending questions!" : "No verified questions found.";
-                tableBody.innerHTML = `<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>${msg}</td></tr>`; 
-                return; 
-            }
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = "";
+            if(data.length === 0) { tbody.innerHTML = `<tr><td colspan='4' style='text-align:center; padding:30px; color:#777;'>No data found.</td></tr>`; return; }
             
             const fragment = document.createDocumentFragment();
-
             data.forEach(item => {
                 const tr = document.createElement('tr');
-                const isSubjective = item.type === "SUBJECTIVE";
+                const isSubjective = item.type === "SUBJECTIVE" || item.type === "BOARD";
+                
+                let btn = currentTab === 'unverified' 
+                    ? `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Approve</button>`
+                    : `<button class="btn-unverify" onclick="window.toggleVerify(this, '${item.id}', false)">↩ Un-Approve</button>`;
 
-                let actionBtn = "";
-                if(currentTab === 'unverified') {
-                    actionBtn = `<button class="btn-verify" onclick="window.toggleVerify(this, '${item.id}', true)">✅ Approve</button>`;
-                } else {
-                    actionBtn = `<button class="btn-unverify" onclick="window.toggleVerify(this, '${item.id}', false)">↩ Un-Approve</button>`;
-                }
-
-                let answerDisplay = isSubjective ? `
-                    <div style="font-size:0.9em;">
-                        <span style="color:#d32f2f; font-weight:bold; font-size:0.8em; border:1px solid #d32f2f; padding:2px 4px; border-radius:4px;">${item.category || 'Subjective'}</span><br>
-                        <div class="content-text" style="margin-top:5px;">${item.answerText || '<i>No text answer</i>'}</div>
-                        ${item.answerImage ? `<a href="${item.answerImage}" target="_blank"><img src="${item.answerImage}" class="thumb"></a>` : ''}
-                    </div>` : `
-                    <div style="font-size:0.85em;">
-                        A: ${item.options?.A || ''}<br>B: ${item.options?.B || ''}<br>
-                        C: ${item.options?.C || ''}<br>D: ${item.options?.D || ''}<br>
-                        <strong style="color:#d32f2f; display:block; margin-top:8px; border-top:1px solid #eee; padding-top:4px;">Correct: ${item.answer}</strong>
-                    </div>`;
+                let answerContent = isSubjective 
+                    ? `<div style="font-size:0.9em;"><span style="color:#d32f2f; font-weight:bold;">${item.category || 'Board/Sub'}</span><br>${item.answerText || '<i>No text</i>'}${item.answerImage ? `<br><a href="${item.answerImage}" target="_blank">View Img</a>` : ''}</div>`
+                    : `<div style="font-size:0.85em;">A: ${item.options?.A}<br>B: ${item.options?.B}<br>C: ${item.options?.C}<br>D: ${item.options?.D}<br><strong style="color:green">Ans: ${item.answer}</strong></div>`;
 
                 let editFields = isSubjective ? `
                     <label>Category:</label>
@@ -397,50 +391,47 @@
                 `;
 
                 tr.innerHTML = `
-                        <td>
-                            <div style="background:#e3f2fd; color:#0d47a1; font-weight:bold; padding:4px 8px; border-radius:4px; font-size:0.8em; display:inline-block; margin-bottom:5px;">${item.exam || 'N/A'}</div>
-                            <div style="font-weight:bold;">${item.teacher}</div>
-                            <small style="color:gray">${item.subject}</small><br>
-                            <small style="color:#aaa; font-size:0.75em;">ID: ${item.id.substr(0,6)}...</small>
-                        </td>
-                        <td>
-                            <div id="disp-q-${item.id}" class="content-text">
-                                ${item.question}
-                                ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
+                    <td>
+                        <span style="background:#e3f2fd; color:#0d47a1; padding:2px 6px; border-radius:4px; font-size:0.8em; font-weight:bold;">${item.exam}</span>
+                        <div style="font-weight:bold; margin-top:5px;">${item.teacher}</div>
+                        <div style="color:gray; font-size:0.85em;">${item.subject}</div>
+                        <small style="color:#aaa; font-size:0.75em;">ID: ${item.id.substr(0,6)}...</small>
+                    </td>
+                    <td>
+                        <div id="disp-q-${item.id}" class="content-text">
+                            ${item.question}
+                            ${item.imageUrl ? `<br><a href="${item.imageUrl}" target="_blank"><img src="${item.imageUrl}" class="thumb"></a>` : ''}
+                        </div>
+                        <div id="edit-${item.id}" class="edit-box">
+                            <label>Question: <span class="visual-edit-btn" onclick="openAdminEditor('txt-${item.id}')">✏ Open Editor</span></label> 
+                            <textarea id="txt-${item.id}" rows="4">${item.question}</textarea>
+                            <label>New Question Img:</label> <input type="file" id="file-${item.id}">
+                            ${editFields}
+                            <div style="margin-top:10px;">
+                                <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#2e7d32; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Save Changes</button>
+                                <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Cancel</button>
                             </div>
-                            
-                            <div id="edit-${item.id}" class="edit-box">
-                                <label>Question: <span class="visual-edit-btn" onclick="openAdminEditor('txt-${item.id}')">✏ Open Editor</span></label> 
-                                <textarea id="txt-${item.id}" rows="4">${item.question}</textarea>
-                                <label>New Question Img:</label> <input type="file" id="file-${item.id}">
-                                ${editFields}
-                                <div class="edit-btns">
-                                    <button onclick="window.saveAdminEdit('${item.id}', '${item.type}')" style="background:#2e7d32; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Save Changes</button>
-                                    <button onclick="window.toggleEdit('${item.id}')" style="background:#777; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer;">Cancel</button>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${answerDisplay}</td>
-                        <td>
-                            <div class="action-col">
-                                ${actionBtn}
-                                <button class="btn-edit" onclick="window.toggleEdit('${item.id}')">✏ Edit</button>
-                                <button class="btn-delete" onclick="window.deleteQ('${item.id}')">🗑 Delete</button>
-                            </div>
-                        </td>
+                        </div>
+                    </td>
+                    <td>${answerContent}</td>
+                    <td>
+                        <div class="action-col">
+                            ${btn}
+                            <button class="btn-edit" onclick="window.toggleEdit('${item.id}')">✏ Edit</button>
+                            <button class="btn-delete" onclick="window.deleteQ('${item.id}')">🗑 Delete</button>
+                        </div>
+                    </td>
                 `;
                 fragment.appendChild(tr);
             });
-            tableBody.appendChild(fragment);
+            tbody.appendChild(fragment);
         }
 
+        // --- ACTIONS ---
         window.toggleVerify = async (btn, id, status) => { 
-            btn.innerText = "⏳"; btn.disabled = true;
-            try { 
-                await updateDoc(doc(db, "questions", id), { verified: status });
-            } catch (e) { alert(e.message); btn.innerText = "Error"; } 
+            btn.innerText = "..."; btn.disabled = true;
+            try { await updateDoc(doc(db, "questions", id), { verified: status }); } catch (e) { alert(e.message); } 
         }
-
         window.deleteQ = async (id) => { if(confirm("Delete permanently?")) await deleteDoc(doc(db, "questions", id)); }
         
         window.toggleEdit = (id) => {
@@ -450,6 +441,13 @@
             dispQ.style.display = dispQ.style.display === "none" ? "block" : "none";
         }
 
+        window.downloadJSON = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${currentTab}_${Date.now()}.json`);
+            dl.click();
+        }
+
+        // --- EDITOR & IMAGE ---
         window.openAdminEditor = (targetId) => {
             activeEditId = targetId;
             document.getElementById('ed-body').innerHTML = document.getElementById(targetId).value;
@@ -478,15 +476,14 @@
         };
 
         window.saveAdminEdit = async (id, type) => {
-            const btn = document.querySelector(`#edit-${id} .edit-btns button`);
-            const prevText = btn.innerText;
-            btn.innerText = "Saving..."; btn.disabled = true;
+            const btn = document.querySelector(`#edit-${id} button`);
+            const prevText = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
             try {
                 let updates = { question: document.getElementById(`txt-${id}`).value };
                 const qFile = document.getElementById(`file-${id}`).files[0];
                 if (qFile) updates.imageUrl = await compressImage(qFile);
 
-                if (type === "SUBJECTIVE") {
+                if (type === "SUBJECTIVE" || type === "BOARD") {
                     updates.category = document.getElementById(`cat-${id}`).value;
                     updates.answerText = document.getElementById(`ansTxt-${id}`).value;
                     const aFile = document.getElementById(`ansFile-${id}`).files[0];
@@ -496,7 +493,7 @@
                         A: document.getElementById(`opA-${id}`).value,
                         B: document.getElementById(`opB-${id}`).value,
                         C: document.getElementById(`opC-${id}`).value,
-                        D: document.getElementById('opD-' + id).value,
+                        D: document.getElementById(`opD-${id}`).value,
                     };
                     updates.answer = document.getElementById(`ansMCQ-${id}`).value;
                 }
@@ -505,18 +502,6 @@
             } catch (e) { alert("Error: " + e.message); }
             finally { btn.innerText = prevText; btn.disabled = false; }
         };
-
-        window.downloadJSON = () => {
-            if(currentTab !== 'verified') {
-                if(!confirm("You are currently in the PENDING list. Do you want to download only these pending questions?")) return;
-            }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
-            const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Data_${currentTab}_${Date.now()}.json`);
-            dl.click();
-        }
-        
-        // Initial Load
-        loadData();
     </script>
 </body>
 </html>
