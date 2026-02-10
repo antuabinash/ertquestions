@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Migration: 8th Board Math -> Mathematics</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; text-align: center; background: #f4f6f8; }
+        .card { background: white; padding: 30px; max-width: 500px; margin: auto; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: #1a73e8; margin-top: 0; }
+        p { color: #555; line-height: 1.6; }
+        #status { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 5px; }
+        .btn { background: #1a73e8; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 15px; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🔄 Math Migration Tool</h2>
+        <p>This tool will find all <strong>8th Board</strong> questions currently labeled as:</p>
+        <h3 style="background:#eee; display:inline-block; padding:5px 10px; border-radius:4px;">Math</h3>
+        <p>And rename them to:</p>
+        <h3 style="background:#e8f5e9; color:#2e7d32; display:inline-block; padding:5px 10px; border-radius:4px;">Mathematics</h3>
+        
+        <button id="runBtn" class="btn" onclick="runMigration()">Start Update</button>
+        
+        <div id="status"></div>
+        <div id="log" style="text-align: left; margin-top: 20px; font-size: 12px; color: #666; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, query, where, getDocs, writeBatch, doc } 
+        from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        window.runMigration = async () => {
+            const btn = document.getElementById('runBtn');
+            const status = document.getElementById('status');
+            const log = document.getElementById('log');
+            
+            btn.disabled = true;
+            btn.innerText = "Scanning...";
+            status.innerText = "⏳ Looking for 'Math' questions...";
+            log.innerHTML = "";
+
+            try {
+                // 1. Find all 8th Board questions
+                const q = query(
+                    collection(db, "questions"), 
+                    where("exam", "==", "8TH BOARD")
+                );
+
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    status.innerText = "❌ No Class 8 questions found.";
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 2. Filter specifically for "Math"
+                const targetSubject = "Math";
+                const docsToUpdate = [];
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Only pick questions that are EXACTLY "Math"
+                    if (data.subject === targetSubject) {
+                        docsToUpdate.push(doc);
+                    }
+                });
+
+                if (docsToUpdate.length === 0) {
+                    status.innerText = "✅ No 'Math' questions found (maybe already renamed?).";
+                    status.style.background = "#e8f5e9";
+                    status.style.color = "#2e7d32";
+                    btn.disabled = false;
+                    return;
+                }
+
+                status.innerText = `🔄 Updating ${docsToUpdate.length} questions...`;
+
+                // 3. Batch Update
+                const batchSize = 450; 
+                const chunks = [];
+                
+                for (let i = 0; i < docsToUpdate.length; i += batchSize) {
+                    chunks.push(docsToUpdate.slice(i, i + batchSize));
+                }
+
+                let processed = 0;
+
+                for (const chunk of chunks) {
+                    const batch = writeBatch(db);
+                    chunk.forEach((docSnapshot) => {
+                        const ref = doc(db, "questions", docSnapshot.id);
+                        
+                        // THE FIX: Rename TO "Mathematics"
+                        batch.update(ref, { subject: "Mathematics" });
+                        
+                        log.innerHTML += `<div>Fixed: ${docSnapshot.id}</div>`;
+                    });
+
+                    await batch.commit();
+                    processed += chunk.length;
+                    status.innerText = `🔄 Updated ${processed} / ${docsToUpdate.length} questions...`;
+                }
+
+                status.innerText = "🎉 Done! All 'Math' questions are now 'Mathematics'.";
+                status.style.background = "#e8f5e9";
+                status.style.color = "#2e7d32";
+                btn.innerText = "Finished";
+
+            } catch (error) {
+                console.error(error);
+                status.innerText = "❌ Error: " + error.message;
+                status.style.background = "#ffebee";
+                status.style.color = "#d32f2f";
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
