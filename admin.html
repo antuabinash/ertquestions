@@ -35,6 +35,13 @@
         .stat-card .count { font-size: 2rem; font-weight: 800; margin-top: 5px; color: #333; }
         .c-total { color: var(--primary) !important; } .c-pending { color: var(--accent) !important; } .c-verified { color: var(--success) !important; }
 
+        /* --- TEACHER CONTRIBUTION SUMMARY --- */
+        .contribution-section { padding: 15px 25px; background: #fff; border-bottom: 1px solid #eee; }
+        .contribution-title { font-size: 0.85rem; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .contribution-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .teacher-tag { background: #f1f3f4; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; color: #3c4043; border: 1px solid #dadce0; }
+        .teacher-tag b { color: var(--primary); }
+
         /* --- TABS & TOOLS --- */
         .tabs { display: flex; background: #e3f2fd; border-bottom: 1px solid #bbdefb; border-top: 5px solid #e0e0e0;}
         .tab-btn { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-weight: bold; font-size: 1rem; color: #555; transition: 0.2s; border-bottom: 3px solid transparent; }
@@ -130,6 +137,13 @@
             </div>
         </div>
 
+        <div class="contribution-section">
+            <span class="contribution-title">Teacher Contribution Summary (Loaded Items)</span>
+            <div id="teacher-summary-list" class="contribution-tags">
+                <span style="color:#999; font-size:0.8rem;">Calculating contributions...</span>
+            </div>
+        </div>
+
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('unverified')" id="tab-unverified">Pending Review</button>
             <button class="tab-btn" onclick="switchTab('verified')" id="tab-verified">Approved Database</button>
@@ -207,12 +221,10 @@
             msg.innerText = "Processing..."; msg.style.color="#666";
 
             try {
-                // Try Login
                 await signInWithEmailAndPassword(auth, email, pass);
             } catch (error) {
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
                     try {
-                        // Try Creating Account
                         await createUserWithEmailAndPassword(auth, email, pass);
                     } catch (createErr) {
                         msg.innerText = "Error: " + createErr.message; msg.style.color="red";
@@ -233,7 +245,6 @@
                 overlay.classList.add('hidden');
                 dash.style.opacity = "1";
                 dash.style.pointerEvents = "auto";
-                // Start loading data only when logged in
                 if(allData.length === 0) {
                     fetchUserMetadata();
                     updateStats();
@@ -274,6 +285,30 @@
             } catch (e) {}
         }
 
+        // NEW: Calculate teacher contributions based on allData
+        function updateContributionSummary() {
+            const container = document.getElementById('teacher-summary-list');
+            if (allData.length === 0) {
+                container.innerHTML = `<span style="color:#999; font-size:0.8rem;">No data loaded for this tab.</span>`;
+                return;
+            }
+
+            const counts = {};
+            allData.forEach(item => {
+                const rawName = item.teacher || "Unknown Teacher";
+                // Clean up name (extract part before the first '|')
+                const name = rawName.split('|')[0].trim();
+                counts[name] = (counts[name] || 0) + 1;
+            });
+
+            // Sort teachers by highest contribution
+            const sortedTeachers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+            container.innerHTML = sortedTeachers.map(([name, count]) => `
+                <div class="teacher-tag">${name}: <b>${count}</b></div>
+            `).join('');
+        }
+
         window.switchTab = (tabName) => {
             currentTab = tabName;
             visibleLimit = 50; 
@@ -294,6 +329,7 @@
                 allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 updateDropdowns(); 
                 updateStats();
+                updateContributionSummary(); // Trigger summary update
             });
         }
 
