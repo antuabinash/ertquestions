@@ -97,7 +97,7 @@
             <input type="email" id="adminEmail" placeholder="Email Address">
             <input type="password" id="adminPass" placeholder="Password">
             <button onclick="handleAdminAuth()">Login / Create Admin</button>
-            <p id="login-msg" style="color:#666; font-size:0.8rem; margin-top:15px;">If account exists, logs in. If not, creates one.</p>
+            <p id="login-msg" style="color:#666; font-size:0.8rem; margin-top:15px;">Enter credentials to access dashboard.</p>
         </div>
     </div>
 
@@ -138,7 +138,7 @@
         </div>
 
         <div class="contribution-section">
-            <span class="contribution-title">Teacher Contribution Summary (Loaded Items)</span>
+            <span class="contribution-title">Teacher Contribution Summary (Full Database)</span>
             <div id="teacher-summary-list" class="contribution-tags">
                 <span style="color:#999; font-size:0.8rem;">Calculating contributions...</span>
             </div>
@@ -204,7 +204,7 @@
         let allData = [];
         let filteredData = [];
         let allTeachers = new Set(); 
-        let queryLimit = 1500; 
+        let queryLimit = 6000; // UPDATED: Set to 6000
         let visibleLimit = 50; 
         let currentTab = 'unverified'; 
         let unsubscribe = null;
@@ -285,7 +285,6 @@
             } catch (e) {}
         }
 
-        // NEW: Calculate teacher contributions based on allData
         function updateContributionSummary() {
             const container = document.getElementById('teacher-summary-list');
             if (allData.length === 0) {
@@ -296,12 +295,10 @@
             const counts = {};
             allData.forEach(item => {
                 const rawName = item.teacher || "Unknown Teacher";
-                // Clean up name (extract part before the first '|')
                 const name = rawName.split('|')[0].trim();
                 counts[name] = (counts[name] || 0) + 1;
             });
 
-            // Sort teachers by highest contribution
             const sortedTeachers = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
             container.innerHTML = sortedTeachers.map(([name, count]) => `
@@ -329,7 +326,7 @@
                 allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 updateDropdowns(); 
                 updateStats();
-                updateContributionSummary(); // Trigger summary update
+                updateContributionSummary();
             });
         }
 
