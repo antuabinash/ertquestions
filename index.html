@@ -310,15 +310,15 @@
         let currentMode = "MCQ";
         
         // ============================================
-        // !!! IMPORTANT: CONFIGURE CERTIFICATE HERE !!!
+        // !!! CERTIFICATE CONFIGURATION !!!
         // ============================================
         const CERT_CONFIG = {
-            // Replace with your certificate image URL (Make sure it allows CORS or is base64)
-            imageUrl: "https://i.imgur.com/3Z6S9qD.jpg", 
+            // Must be in the same folder as this HTML file
+            imageUrl: "./certificate.jpg", 
             
-            // X and Y coordinates where the Name should be drawn
-            x: 500,  
-            y: 350,
+            // X and Y coordinates (Starting point of the text)
+            x: 629,  
+            y: 972,
             
             // Font styling
             fontSize: "40px",
@@ -656,7 +656,7 @@
             const ctx = canvas.getContext('2d');
             const img = new Image();
             
-            // To handle cross-origin images (if your image is hosted elsewhere)
+            // To handle cross-origin images
             img.crossOrigin = "Anonymous"; 
             img.src = CERT_CONFIG.imageUrl;
 
@@ -671,7 +671,9 @@
                 // Configure Text
                 ctx.font = `bold ${CERT_CONFIG.fontSize} Arial`;
                 ctx.fillStyle = CERT_CONFIG.color;
-                ctx.textAlign = "center"; // Centers text on the coordinate
+                
+                // Set Alignment to START writing from the X coordinate
+                ctx.textAlign = "left"; 
 
                 // Draw Name
                 ctx.fillText(name, CERT_CONFIG.x, CERT_CONFIG.y);
@@ -687,7 +689,7 @@
             };
 
             img.onerror = () => {
-                showToast("Error loading certificate template. Check URL.", "error");
+                showToast("Error: Place 'certificate.jpg' in this folder.", "error");
                 btn.innerText = "Retry Download";
                 btn.disabled = false;
             };
