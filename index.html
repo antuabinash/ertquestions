@@ -310,18 +310,19 @@
         let currentMode = "MCQ";
         
         // ============================================
-        // !!! CERTIFICATE CONFIGURATION !!!
+        // !!! UPDATED CERTIFICATE CONFIGURATION !!!
         // ============================================
         const CERT_CONFIG = {
             // Must be in the same folder as this HTML file
             imageUrl: "./certificate.jpg", 
             
             // X and Y coordinates (Starting point of the text)
-            x: 629,  
-            y: 972,
+            // UPDATED: 869 * 1381
+            x: 869,  
+            y: 1381,
             
-            // Font styling
-            fontSize: "40px",
+            // Font styling (UPDATED: 90px for Large Font)
+            fontSize: "90px",
             color: "#000000"
         };
         // ============================================
@@ -636,8 +637,9 @@
                 document.getElementById('stat-live').innerText = verified;
 
                 // --- CERTIFICATE LOGIC ---
-                // Show certificate section if questions >= 100
-                if(total >= 0) {
+                // TEMPORARY TEST: Show certificate immediately (total >= 0)
+                // CHANGE THIS BACK TO 100 WHEN DONE TESTING!
+                if(total >= 0) { 
                     document.getElementById('certificate-wrapper').classList.remove('hidden');
                 } else {
                     document.getElementById('certificate-wrapper').classList.add('hidden');
