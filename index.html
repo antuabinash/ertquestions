@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>eRT Odisha | Teacher Portal Pro</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
     <style>
-        :root {
+      :root {
             /* Professional Color Palette */
             --primary: #1a73e8;       /* Google Blue */
             --primary-dark: #1557b0;
@@ -21,6 +18,7 @@
             --card-bg: #ffffff;
             --text-main: #202124;
             --text-muted: #5f6368;
+            --gold: #FFD700;          /* Certificate Gold */
             
             --radius: 12px;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
@@ -42,6 +40,19 @@
             margin-bottom: 20px; 
             border: 1px solid #e0e0e0;
         }
+
+        /* --- CERTIFICATE CARD --- */
+        .cert-card {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%);
+            border: 1px solid #ffe082;
+            text-align: center;
+        }
+        .cert-icon { font-size: 2rem; margin-bottom: 10px; }
+        .btn-gold {
+            background: #fbc02d; color: #000;
+            box-shadow: 0 2px 5px rgba(249, 168, 37, 0.4);
+        }
+        .btn-gold:hover { background: #f9a825; }
 
         /* --- TOP BAR --- */
         .top-bar {
@@ -82,7 +93,6 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,115,232,0.15); }
 
         /* --- ANALYTICS DASHBOARD --- */
-        /* Changed to 2 columns since we removed one stat */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: var(--shadow-sm); }
         .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
@@ -117,184 +127,172 @@
         .fs-toolbar { padding: 10px 20px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
         #rich-content { flex: 1; padding: 30px; font-size: 1.2rem; outline: none; overflow-y: auto; max-width: 800px; margin: 0 auto; width: 100%; }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="top-bar">
-        <div class="brand-group">
-            <img src="logo.jpg" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" class="app-logo"> 
-            <div class="brand-text">
-                <h2>eRT Odisha</h2>
-            </div>
+      <div class="brand-group">
+        <img src="logo.jpg" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" class="app-logo" />
+        <div class="brand-text">
+          <h2>eRT Odisha</h2>
         </div>
+      </div>
+      <div id="auth-actions" class="hidden">
+        <button class="profile-btn" onclick="toggleView('profile')">
+          <img id="header-pfp" src="https://via.placeholder.com/50" class="header-pfp" />
+          <div class="header-info">
+            <span id="header-name" style="display:block; font-weight:600; font-size:0.85rem;">Teacher</span>
+            <span style="font-size:0.7rem; color:var(--text-muted);">View Profile</span>
+          </div>
+        </button>
+      </div>
+    </div>
+    
+    <div class="container">
+      <div id="auth-section" class="card" style="max-width: 400px; margin: 40px auto; text-align: center;">
+        <h3 id="auth-title" style="margin-top:0;">Teacher Portal Login</h3>
+        <p style="color:var(--text-muted); margin-bottom:20px;">Welcome back! Please enter your details.</p>
+        <input type="email" id="email" placeholder="Email Address" />
+        <input type="password" id="password" placeholder="Password" />
+        <div id="signup-fields" class="hidden">
+          <input type="text" id="tName" placeholder="Full Name" />
+          <input type="text" id="tDistrict" placeholder="District" />
+          <input type="text" id="tBlock" placeholder="Block" />
+        </div>
+        <button onclick="handleAuth()" id="authBtn" class="btn btn-primary">Login</button>
+        <p onclick="toggleAuthMode()" style="cursor:pointer; color:var(--primary); font-size:0.9rem; margin-top:15px;">
+          <span id="auth-toggle-text">New here? Create an account</span>
+        </p>
+      </div>
+
+      <div id="dashboard-section" class="hidden">
         
-        <div id="auth-actions" class="hidden">
-            <button class="profile-btn" onclick="toggleView('profile')">
-                <img id="header-pfp" src="https://via.placeholder.com/50" class="header-pfp">
-                <div class="header-info">
-                    <span id="header-name" style="display:block; font-weight:600; font-size:0.85rem;">Teacher</span>
-                    <span style="font-size:0.7rem; color:var(--text-muted);">View Profile</span>
-                </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Questions</div>
+            <div id="stat-total" class="stat-val">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Live Status</div>
+            <div id="stat-live" class="stat-val" style="color:var(--success)">0</div>
+          </div>
+        </div>
+
+        <div id="certificate-wrapper" class="card cert-card hidden">
+            <div class="cert-icon">🏆</div>
+            <h3 style="margin-top:0; color: #f57f17;">Certificate of Appreciation</h3>
+            <p style="color:var(--text-muted);">Congratulations! You have submitted <strong>100+ questions</strong>.</p>
+            <button id="certBtn" class="btn btn-gold" onclick="generateCertificate()">
+               Download Certificate
             </button>
         </div>
+
+        <div class="card">
+          <h3 style="margin-top:0;">Add New Question</h3>
+          <input type="hidden" id="editId" />
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <label>Exam Type</label>
+              <select id="qExam" onchange="handleExamChange()">
+                <option value="" disabled="" selected="">-- Select --</option>
+                <option value="5TH BOARD">5th Board</option>
+                <option value="8TH BOARD">8th Board</option>
+              </select>
+            </div>
+            <div>
+              <label>Subject</label>
+              <select id="qSubject">
+                <option value="" disabled="" selected="">-- Select Exam First --</option>
+              </select>
+            </div>
+          </div>
+          <div id="cat-wrapper" class="hidden">
+            <label>Question Category</label>
+            <select id="qCategory" onchange="handleCategoryChange()">
+              <option value="Very Short">Very Short Answer (1 Mark)</option>
+              <option value="Short">Short Answer (2-3 Marks)</option>
+              <option value="Long">Long Answer (5 Marks)</option>
+            </select>
+          </div>
+          <label style="display:flex; justify-content:space-between; align-items:center;">
+            Question Text
+            <button class="btn btn-sm btn-outline" onclick="openEditor('qText')">⛶ Fullscreen Editor</button>
+          </label>
+          <textarea id="qText" rows="3" placeholder="Type question here..."></textarea>
+          <input type="file" id="qImage" accept="image/*" style="padding: 5px;" />
+          <div id="mcq-inputs">
+            <label>Options</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom:15px;">
+              <input type="text" id="opA" placeholder="Option A" style="margin:0;" />
+              <input type="text" id="opB" placeholder="Option B" style="margin:0;" />
+              <input type="text" id="opC" placeholder="Option C" style="margin:0;" />
+              <input type="text" id="opD" placeholder="Option D" style="margin:0;" />
+            </div>
+            <label>Correct Answer</label>
+            <select id="correctAns">
+              <option value="A">Option A</option>
+              <option value="B">Option B</option>
+              <option value="C">Option C</option>
+              <option value="D">Option D</option>
+            </select>
+          </div>
+          <div id="subjective-inputs" class="hidden">
+            <label style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+              Answer Key
+              <button class="btn btn-sm btn-outline" onclick="openEditor('ansText')">⛶ Fullscreen Editor</button>
+            </label>
+            <textarea id="ansText" rows="3" placeholder="Type the answer here..."></textarea>
+            <label style="margin-top:10px;">Answer Image (Optional)</label>
+            <input type="file" id="ansImage" accept="image/*" style="padding: 5px;" />
+          </div>
+          <div style="display:flex; gap:10px; margin-top:15px;">
+            <button id="saveBtn" class="btn btn-primary" onclick="saveQuestion()">Submit Question</button>
+            <button id="cancelBtn" class="btn btn-danger hidden" onclick="cancelEdit()">Cancel Edit</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">My Submissions</h3>
+          <div id="my-questions-list">
+            <div class="skeleton" style="height:20px; width:40%;"></div>
+            <div class="skeleton" style="height:60px; width:100%;"></div>
+            <div class="skeleton" style="height:20px; width:70%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-section" class="hidden">
+        <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+          <h3 style="margin-top:0;">Edit Profile</h3>
+          <div class="pfp-wrapper" onclick="document.getElementById('pfpInput').click()">
+            <img id="pfp-preview" src="https://via.placeholder.com/150" class="pfp-large" />
+            <div class="cam-icon">📷</div>
+          </div>
+          <input type="file" id="pfpInput" hidden="" accept="image/*" onchange="previewPfp(this)" />
+          <div style="text-align: left;">
+            <label>Full Name</label>
+            <input type="text" id="editName" />
+            <label>District</label>
+            <input type="text" id="editDistrict" />
+            <label>Block</label>
+            <input type="text" id="editBlock" />
+          </div>
+          <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfileChanges()">Save Changes</button>
+          <button class="btn btn-outline" style="margin-top:10px;" onclick="toggleView('dashboard')">Cancel</button>
+          <div style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
+            <button class="btn btn-danger" style="width:100%;" onclick="logout()">Log Out</button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="container">
-        
-        <div id="auth-section" class="card" style="max-width: 400px; margin: 40px auto; text-align: center;">
-            <h3 id="auth-title" style="margin-top:0;">Teacher Portal Login</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Welcome back! Please enter your details.</p>
-            
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password">
-            
-            <div id="signup-fields" class="hidden">
-                <input type="text" id="tName" placeholder="Full Name">
-                <input type="text" id="tDistrict" placeholder="District">
-                <input type="text" id="tBlock" placeholder="Block">
-            </div>
-
-            <button onclick="handleAuth()" id="authBtn" class="btn btn-primary">Login</button>
-            <p onclick="toggleAuthMode()" style="cursor:pointer; color:var(--primary); font-size:0.9rem; margin-top:15px;">
-                <span id="auth-toggle-text">New here? Create an account</span>
-            </p>
-        </div>
-
-        <div id="dashboard-section" class="hidden">
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Total Questions</div>
-                    <div id="stat-total" class="stat-val">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Live Status</div>
-                    <div id="stat-live" class="stat-val" style="color:var(--success)">0</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-top:0;">Add New Question</h3>
-                <input type="hidden" id="editId">
-                
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div>
-                        <label>Exam Type</label>
-                        <select id="qExam" onchange="handleExamChange()">
-                            <option value="" disabled selected>-- Select --</option>
-                            <option value="5TH BOARD">5th Board</option>
-                            <option value="8TH BOARD">8th Board</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Subject</label>
-                        <select id="qSubject">
-                            <option value="" disabled selected>-- Select Exam First --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="cat-wrapper" class="hidden">
-                    <label>Question Category</label>
-                    <select id="qCategory" onchange="handleCategoryChange()">
-                        <option value="Very Short">Very Short Answer (1 Mark)</option>
-                        <option value="Short">Short Answer (2-3 Marks)</option>
-                        <option value="Long">Long Answer (5 Marks)</option>
-                    </select>
-                </div>
-
-                <label style="display:flex; justify-content:space-between; align-items:center;">
-                    Question Text 
-                    <button class="btn btn-sm btn-outline" onclick="openEditor('qText')">⛶ Fullscreen Editor</button>
-                </label>
-                <textarea id="qText" rows="3" placeholder="Type question here..."></textarea>
-                <input type="file" id="qImage" accept="image/*" style="padding: 5px;">
-
-                <div id="mcq-inputs">
-                    <label>Options</label>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom:15px;">
-                        <input type="text" id="opA" placeholder="Option A" style="margin:0;">
-                        <input type="text" id="opB" placeholder="Option B" style="margin:0;">
-                        <input type="text" id="opC" placeholder="Option C" style="margin:0;">
-                        <input type="text" id="opD" placeholder="Option D" style="margin:0;">
-                    </div>
-                    <label>Correct Answer</label>
-                    <select id="correctAns">
-                        <option value="A">Option A</option>
-                        <option value="B">Option B</option>
-                        <option value="C">Option C</option>
-                        <option value="D">Option D</option>
-                    </select>
-                </div>
-
-                <div id="subjective-inputs" class="hidden">
-                    <label style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-                        Answer Key
-                        <button class="btn btn-sm btn-outline" onclick="openEditor('ansText')">⛶ Fullscreen Editor</button>
-                    </label>
-                    <textarea id="ansText" rows="3" placeholder="Type the answer here..."></textarea>
-                    
-                    <label style="margin-top:10px;">Answer Image (Optional)</label>
-                    <input type="file" id="ansImage" accept="image/*" style="padding: 5px;">
-                </div>
-
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button id="saveBtn" class="btn btn-primary" onclick="saveQuestion()">Submit Question</button>
-                    <button id="cancelBtn" class="btn btn-danger hidden" onclick="cancelEdit()">Cancel Edit</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="margin-top:0;">My Submissions</h3>
-                <div id="my-questions-list">
-                    <div class="skeleton" style="height:20px; width:40%;"></div>
-                    <div class="skeleton" style="height:60px; width:100%;"></div>
-                    <div class="skeleton" style="height:20px; width:70%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="profile-section" class="hidden">
-            <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-                <h3 style="margin-top:0;">Edit Profile</h3>
-                
-                <div class="pfp-wrapper" onclick="document.getElementById('pfpInput').click()">
-                    <img id="pfp-preview" src="https://via.placeholder.com/150" class="pfp-large">
-                    <div class="cam-icon">📷</div>
-                </div>
-                <input type="file" id="pfpInput" hidden accept="image/*" onchange="previewPfp(this)">
-                
-                <div style="text-align: left;">
-                    <label>Full Name</label>
-                    <input type="text" id="editName">
-                    <label>District</label>
-                    <input type="text" id="editDistrict">
-                    <label>Block</label>
-                    <input type="text" id="editBlock">
-                </div>
-
-                <button class="btn btn-primary" id="saveProfileBtn" onclick="saveProfileChanges()">Save Changes</button>
-                <button class="btn btn-outline" style="margin-top:10px;" onclick="toggleView('dashboard')">Cancel</button>
-                <div style="margin-top:20px; border-top:1px solid #eee; padding-top:20px;">
-                    <button class="btn btn-danger" style="width:100%;" onclick="logout()">Log Out</button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
     <div id="fullscreen-editor">
-        <div class="fs-toolbar">
-            <strong>Rich Text Editor</strong>
-            <button class="btn btn-primary btn-sm" onclick="closeEditor()">Save & Close</button>
-        </div>
-        <div id="rich-content" contenteditable="true"></div>
+      <div class="fs-toolbar">
+        <strong>Rich Text Editor</strong>
+        <button class="btn btn-primary btn-sm" onclick="closeEditor()">Save &amp; Close</button>
+      </div>
+      <div id="rich-content" contenteditable="true"></div>
     </div>
-
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script type="module">
-        // --- 1. IMPORTS UPDATED TO 9.23.0 ---
         import { db, auth } from "./firebase-config.js"; 
         import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -302,7 +300,7 @@
         import { collection, addDoc, updateDoc, setDoc, getDoc, deleteDoc, doc, query, where, onSnapshot, orderBy, enableIndexedDbPersistence } 
         from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // Try offline persistence to make the app work faster
+        // Try offline persistence
         try { enableIndexedDbPersistence(db).catch(err => console.log("Persistence suppressed")); } catch(e){}
 
         // --- GLOBAL STATE ---
@@ -310,25 +308,37 @@
         let isSignup = false;
         let activeEditorTarget = "";
         let currentMode = "MCQ";
+        
+        // ============================================
+        // !!! IMPORTANT: CONFIGURE CERTIFICATE HERE !!!
+        // ============================================
+        const CERT_CONFIG = {
+            // Replace with your certificate image URL (Make sure it allows CORS or is base64)
+            imageUrl: "https://i.imgur.com/3Z6S9qD.jpg", 
+            
+            // X and Y coordinates where the Name should be drawn
+            x: 500,  
+            y: 350,
+            
+            // Font styling
+            fontSize: "40px",
+            color: "#000000"
+        };
+        // ============================================
 
         // --- CONFIGURATION ---
         const examConfig = {
             "OAV": { type: "MCQ", subjects: ["Math", "Science", "Social", "English"] },
             "NAVODAYA": { type: "MCQ", subjects: ["Mental Ability", "Math", "Language"] },
             "NMMS": { type: "MCQ", subjects: ["MAT", "SAT"] },
-            
-            // UPDATED: CLASS 5 Subjects (Removed Hindi)
             "5TH BOARD": { 
                 type: "SUBJECTIVE", 
                 subjects: ["Odia (Sahitya)", "English", "Mathematics", "Environmental Studies (EVS)"] 
             },
-            
-            // UPDATED: CLASS 8 Subjects
             "8TH BOARD": { 
                 type: "SUBJECTIVE", 
                 subjects: ["Odia (Sahitya)", "English", "Hindi", "Sanskrit", "Mathematics", "General Science", "History & Pol Sc", "Geography"] 
             },
-            
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] }
         };
 
@@ -403,14 +413,10 @@
 
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
                     
-                    // Set Auth Display Name
                     await updateProfile(cred.user, { displayName: `${name} | ${district} | ${block}` });
                     
-                    // Create Database Entry (Image storage)
                     await setDoc(doc(db, "users", cred.user.uid), {
-                        email: email,
-                        role: "teacher",
-                        base64Photo: "" 
+                        email: email, role: "teacher", base64Photo: "" 
                     });
 
                     showToast("Account created! Welcome.");
@@ -452,7 +458,6 @@
                     window.currentUserPhoto = "https://via.placeholder.com/50";
                 }
             } catch(e) {
-                console.log("Error loading pfp", e);
                 window.currentUserPhoto = "https://via.placeholder.com/50";
             }
         }
@@ -472,7 +477,6 @@
             document.getElementById('pfp-preview').src = window.currentUserPhoto;
         }
 
-        // 1. PROFILE PICTURE COMPRESSION (Aggressive)
         window.previewPfp = async (input) => {
             if(input.files && input.files[0]) {
                 const url = await compressImage(input.files[0], 200, 0.5); 
@@ -482,26 +486,18 @@
 
         window.saveProfileChanges = async () => {
             const btn = document.getElementById('saveProfileBtn');
-            btn.innerText = "Compressing & Saving..."; btn.disabled = true;
+            btn.innerText = "Saving..."; btn.disabled = true;
             try {
                 const name = document.getElementById('editName').value;
                 const dist = document.getElementById('editDistrict').value;
                 const block = document.getElementById('editBlock').value;
                 const pfpBase64 = document.getElementById('pfp-preview').src;
 
-                // Update Auth (Name)
-                await updateProfile(auth.currentUser, {
-                    displayName: `${name} | ${dist} | ${block}`
-                });
-
-                // Update DB (Image String)
-                await setDoc(doc(db, "users", auth.currentUser.uid), {
-                    base64Photo: pfpBase64
-                }, { merge: true });
+                await updateProfile(auth.currentUser, { displayName: `${name} | ${dist} | ${block}` });
+                await setDoc(doc(db, "users", auth.currentUser.uid), { base64Photo: pfpBase64 }, { merge: true });
 
                 window.currentUserPhoto = pfpBase64;
                 updateHeaderInfo(auth.currentUser);
-                
                 showToast("Profile Updated!");
                 toggleView('dashboard');
             } catch(e) {
@@ -512,7 +508,6 @@
         };
 
         // --- QUESTION LOGIC ---
-
         window.handleExamChange = () => {
             const exam = document.getElementById('qExam').value;
             const subSelect = document.getElementById('qSubject');
@@ -531,9 +526,7 @@
             document.getElementById('mcq-inputs').classList.toggle('hidden', isSub);
             document.getElementById('subjective-inputs').classList.toggle('hidden', !isSub);
             document.getElementById('cat-wrapper').classList.toggle('hidden', !isSub);
-
             if(isSub) {
-                // Ensure Very Short is selected by default for Subjective
                 document.getElementById('qCategory').value = "Very Short";
                 handleCategoryChange();
             }
@@ -542,17 +535,9 @@
         window.handleCategoryChange = () => {
             const cat = document.getElementById('qCategory').value;
             const ansInput = document.getElementById('ansText');
-            
-            if (cat === "Very Short") {
-                ansInput.rows = 1;
-                ansInput.placeholder = "Type one word or one sentence answer...";
-            } else if (cat === "Short") {
-                ansInput.rows = 3;
-                ansInput.placeholder = "Type short answer (2-3 lines)...";
-            } else {
-                ansInput.rows = 6;
-                ansInput.placeholder = "Type detailed explanation...";
-            }
+            if (cat === "Very Short") { ansInput.rows = 1; ansInput.placeholder = "Type one word or one sentence answer..."; }
+            else if (cat === "Short") { ansInput.rows = 3; ansInput.placeholder = "Type short answer (2-3 lines)..."; }
+            else { ansInput.rows = 6; ansInput.placeholder = "Type detailed explanation..."; }
         };
 
         window.saveQuestion = async () => {
@@ -572,11 +557,8 @@
                     timestamp: Date.now(), verified: false
                 };
 
-                // 2. QUESTION IMAGE COMPRESSION (Moderate)
                 const file = document.getElementById('qImage').files[0];
-                if(file) {
-                    data.imageUrl = await compressImage(file, 600, 0.6);
-                }
+                if(file) data.imageUrl = await compressImage(file, 600, 0.6);
 
                 if(currentMode === 'MCQ') {
                     data.options = {
@@ -587,35 +569,22 @@
                 } else {
                     data.category = document.getElementById('qCategory').value;
                     data.answerText = document.getElementById('ansText').value;
-                    
                     const ansFile = document.getElementById('ansImage').files[0];
-                    if(ansFile) {
-                        data.answerImage = await compressImage(ansFile, 600, 0.6);
-                    }
+                    if(ansFile) data.answerImage = await compressImage(ansFile, 600, 0.6);
                 }
 
                 if(editId) {
                     await updateDoc(doc(db, "questions", editId), data);
                     showToast("Question Updated Successfully!");
-                    cancelEdit(); // Full reset if we were editing
+                    cancelEdit();
                 } else {
                     await addDoc(collection(db, "questions"), data);
                     showToast("Question Published Successfully!");
-                    
-                    // --- PARTIAL RESET (Keep Exam/Subject Context) ---
                     document.getElementById('qText').value = "";
                     document.getElementById('qImage').value = "";
-                    
-                    // Reset MCQ Fields
-                    document.getElementById('opA').value = "";
-                    document.getElementById('opB').value = "";
-                    document.getElementById('opC').value = "";
-                    document.getElementById('opD').value = "";
-                    document.getElementById('correctAns').value = "A";
-
-                    // Reset Subjective Fields
-                    document.getElementById('ansText').value = "";
-                    document.getElementById('ansImage').value = "";
+                    document.getElementById('opA').value = ""; document.getElementById('opB').value = "";
+                    document.getElementById('opC').value = ""; document.getElementById('opD').value = "";
+                    document.getElementById('ansText').value = ""; document.getElementById('ansImage').value = "";
                 }
             } catch(e) {
                 showToast(e.message, "error");
@@ -639,15 +608,9 @@
                         total++;
                         if(d.verified) verified++;
                         
-                        // Badge Logic
-                        let typeBadge = "";
-                        if(d.type === 'MCQ') typeBadge = `<span class="q-tag tag-mcq">MCQ</span>`;
-                        else if(d.category === 'Very Short') typeBadge = `<span class="q-tag tag-short">Very Short</span>`;
-                        else typeBadge = `<span class="q-tag tag-long">${d.category || 'Long'}</span>`;
-
-                        const statusBadge = d.verified 
-                            ? `<span class="badge badge-live">● LIVE</span>` 
-                            : `<span class="badge badge-pending">● PENDING</span>`;
+                        let typeBadge = d.type === 'MCQ' ? `<span class="q-tag tag-mcq">MCQ</span>` : 
+                                        `<span class="q-tag tag-short">${d.category || 'Subj'}</span>`;
+                        const statusBadge = d.verified ? `<span class="badge badge-live">● LIVE</span>` : `<span class="badge badge-pending">● PENDING</span>`;
                             
                         const item = document.createElement('div');
                         item.className = "q-item";
@@ -667,10 +630,68 @@
                         list.appendChild(item);
                     });
                 }
+                
+                // Update Stats
                 document.getElementById('stat-total').innerText = total;
                 document.getElementById('stat-live').innerText = verified;
+
+                // --- CERTIFICATE LOGIC ---
+                // Show certificate section if questions >= 100
+                if(total >= 100) {
+                    document.getElementById('certificate-wrapper').classList.remove('hidden');
+                } else {
+                    document.getElementById('certificate-wrapper').classList.add('hidden');
+                }
             });
         }
+
+        // --- CERTIFICATE GENERATOR ---
+        window.generateCertificate = () => {
+            const btn = document.getElementById('certBtn');
+            btn.innerText = "Generating...";
+            btn.disabled = true;
+
+            const name = auth.currentUser.displayName.split('|')[0].trim();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            // To handle cross-origin images (if your image is hosted elsewhere)
+            img.crossOrigin = "Anonymous"; 
+            img.src = CERT_CONFIG.imageUrl;
+
+            img.onload = () => {
+                // Set canvas size to match image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Draw background
+                ctx.drawImage(img, 0, 0);
+
+                // Configure Text
+                ctx.font = `bold ${CERT_CONFIG.fontSize} Arial`;
+                ctx.fillStyle = CERT_CONFIG.color;
+                ctx.textAlign = "center"; // Centers text on the coordinate
+
+                // Draw Name
+                ctx.fillText(name, CERT_CONFIG.x, CERT_CONFIG.y);
+
+                // Trigger Download
+                const link = document.createElement('a');
+                link.download = `Certificate_${name.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+
+                btn.innerText = "Download Certificate";
+                btn.disabled = false;
+            };
+
+            img.onerror = () => {
+                showToast("Error loading certificate template. Check URL.", "error");
+                btn.innerText = "Retry Download";
+                btn.disabled = false;
+            };
+        };
 
         window.deleteQ = async (id) => {
             if(confirm("Delete?")) { await deleteDoc(doc(db, "questions", id)); showToast("Deleted", "info"); }
@@ -697,7 +718,7 @@
                     document.getElementById('correctAns').value = data.answer;
                 } else {
                     document.getElementById('qCategory').value = data.category;
-                    handleCategoryChange(); // Adjust UI size based on category
+                    handleCategoryChange(); 
                     document.getElementById('ansText').value = data.answerText;
                 }
                 document.getElementById('saveBtn').innerText = "Update Question";
@@ -724,7 +745,6 @@
             if(activeEditorTarget) document.getElementById(activeEditorTarget).value = document.getElementById('rich-content').innerText;
             document.getElementById('fullscreen-editor').style.display = "none";
         };
-
     </script>
-</body>
+  </body>
 </html>
