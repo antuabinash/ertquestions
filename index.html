@@ -310,20 +310,22 @@
         let currentMode = "MCQ";
         
         // ============================================
-        // !!! UPDATED CERTIFICATE CONFIGURATION !!!
+        // !!! CERTIFICATE CONFIGURATION !!!
         // ============================================
         const CERT_CONFIG = {
-            // Must be in the same folder as this HTML file
             imageUrl: "./certificate.jpg", 
             
-            // BOUNDARY COORDINATES
-            // The name will be centered between startX and endX
+            // --- NAME CONFIG (Centered Logic) ---
             y: 1381,
             startX: 869,  
             endX: 2633,
-            
-            // Starting Font Size (Will decrease if text is too long)
             baseFontSize: 90, 
+            
+            // --- DATE CONFIG (Autofilled) ---
+            dateX: 2141,
+            dateY: 2089,
+            dateFontSize: 45, 
+            
             color: "#000000"
         };
         // ============================================
@@ -344,7 +346,6 @@
             "PATHANI SAMANTA": { type: "MCQ", subjects: ["Math"] }
         };
 
-        // --- HELPER: IMAGE COMPRESSOR ---
         const compressImage = (file, maxWidth, quality) => {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -357,7 +358,6 @@
                         const scale = maxWidth / img.width;
                         canvas.width = Math.min(img.width, maxWidth);
                         canvas.height = img.height * (img.width > maxWidth ? scale : 1);
-                        
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         resolve(canvas.toDataURL('image/jpeg', quality));
@@ -367,7 +367,6 @@
             });
         };
 
-        // --- UI UTILS ---
         window.showToast = (msg, type="success") => {
             Toastify({
                 text: msg, duration: 3000, gravity: "top", position: "right",
@@ -388,7 +387,6 @@
             if(viewName === 'auth') document.getElementById('auth-section').classList.remove('hidden');
         };
 
-        // --- AUTH LOGIC ---
         window.toggleAuthMode = () => {
             isSignup = !isSignup;
             document.getElementById('auth-title').innerText = isSignup ? "Create Teacher Account" : "Teacher Portal Login";
@@ -414,13 +412,10 @@
                     if(!name) throw new Error("Name is required");
 
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                    
                     await updateProfile(cred.user, { displayName: `${name} | ${district} | ${block}` });
-                    
                     await setDoc(doc(db, "users", cred.user.uid), {
                         email: email, role: "teacher", base64Photo: "" 
                     });
-
                     showToast("Account created! Welcome.");
                 } else {
                     await signInWithEmailAndPassword(auth, email, pass);
@@ -450,7 +445,6 @@
             }
         });
 
-        // --- PROFILE & IMAGE LOGIC ---
         async function loadUserImage(uid) {
             try {
                 const docSnap = await getDoc(doc(db, "users", uid));
@@ -509,7 +503,6 @@
             }
         };
 
-        // --- QUESTION LOGIC ---
         window.handleExamChange = () => {
             const exam = document.getElementById('qExam').value;
             const subSelect = document.getElementById('qSubject');
@@ -633,13 +626,10 @@
                     });
                 }
                 
-                // Update Stats
                 document.getElementById('stat-total').innerText = total;
                 document.getElementById('stat-live').innerText = verified;
 
-                // --- CERTIFICATE LOGIC ---
-                // TEMPORARY TEST: Show certificate immediately (total >= 0)
-                // CHANGE THIS BACK TO 100 WHEN DONE TESTING!
+                // --- CERTIFICATE LOGIC (Total >= 0 for Testing) ---
                 if(total >= 0) { 
                     document.getElementById('certificate-wrapper').classList.remove('hidden');
                 } else {
@@ -659,46 +649,38 @@
             const ctx = canvas.getContext('2d');
             const img = new Image();
             
-            // To handle cross-origin images
             img.crossOrigin = "Anonymous"; 
             img.src = CERT_CONFIG.imageUrl;
 
             img.onload = () => {
-                // Set canvas size to match image
                 canvas.width = img.width;
                 canvas.height = img.height;
-
-                // Draw background
                 ctx.drawImage(img, 0, 0);
 
-                // --- NEW AUTO-SCALING & CENTERING LOGIC ---
-                
-                // 1. Calculate the available width and center point
+                // 1. DRAW NAME (Centered)
                 const maxWidth = CERT_CONFIG.endX - CERT_CONFIG.startX;
                 const centerX = CERT_CONFIG.startX + (maxWidth / 2);
-
-                // 2. Set Initial Font
                 let currentFontSize = CERT_CONFIG.baseFontSize;
                 ctx.font = `bold ${currentFontSize}px Arial`;
-
-                // 3. Measure Text
                 let textWidth = ctx.measureText(name).width;
 
-                // 4. Reduce font size if text exceeds maxWidth
                 if (textWidth > maxWidth) {
                     const ratio = maxWidth / textWidth;
-                    // Scale down the font size
                     currentFontSize = Math.floor(currentFontSize * ratio);
                     ctx.font = `bold ${currentFontSize}px Arial`;
                 }
-
-                // 5. Draw Text Centered
                 ctx.fillStyle = CERT_CONFIG.color;
                 ctx.textAlign = "center"; 
-                // Note: 'centerX' is the midpoint between 869 and 2633
                 ctx.fillText(name, centerX, CERT_CONFIG.y);
 
-                // Trigger Download
+                // 2. DRAW DATE (Bottom)
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('en-GB'); // DD/MM/YYYY
+                ctx.font = `bold ${CERT_CONFIG.dateFontSize}px Arial`;
+                ctx.textAlign = "left";
+                ctx.fillText(dateStr, CERT_CONFIG.dateX, CERT_CONFIG.dateY);
+
+                // Download
                 const link = document.createElement('a');
                 link.download = `Certificate_${name.replace(/\s+/g, '_')}.png`;
                 link.href = canvas.toDataURL("image/png");
