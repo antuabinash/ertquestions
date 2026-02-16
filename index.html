@@ -316,13 +316,14 @@
             // Must be in the same folder as this HTML file
             imageUrl: "./certificate.jpg", 
             
-            // X and Y coordinates (Starting point of the text)
-            // UPDATED: 869 * 1381
-            x: 869,  
+            // BOUNDARY COORDINATES
+            // The name will be centered between startX and endX
             y: 1381,
+            startX: 869,  
+            endX: 2633,
             
-            // Font styling (UPDATED: 90px for Large Font)
-            fontSize: "90px",
+            // Starting Font Size (Will decrease if text is too long)
+            baseFontSize: 90, 
             color: "#000000"
         };
         // ============================================
@@ -670,15 +671,32 @@
                 // Draw background
                 ctx.drawImage(img, 0, 0);
 
-                // Configure Text
-                ctx.font = `bold ${CERT_CONFIG.fontSize} Arial`;
-                ctx.fillStyle = CERT_CONFIG.color;
+                // --- NEW AUTO-SCALING & CENTERING LOGIC ---
                 
-                // Set Alignment to START writing from the X coordinate
-                ctx.textAlign = "left"; 
+                // 1. Calculate the available width and center point
+                const maxWidth = CERT_CONFIG.endX - CERT_CONFIG.startX;
+                const centerX = CERT_CONFIG.startX + (maxWidth / 2);
 
-                // Draw Name
-                ctx.fillText(name, CERT_CONFIG.x, CERT_CONFIG.y);
+                // 2. Set Initial Font
+                let currentFontSize = CERT_CONFIG.baseFontSize;
+                ctx.font = `bold ${currentFontSize}px Arial`;
+
+                // 3. Measure Text
+                let textWidth = ctx.measureText(name).width;
+
+                // 4. Reduce font size if text exceeds maxWidth
+                if (textWidth > maxWidth) {
+                    const ratio = maxWidth / textWidth;
+                    // Scale down the font size
+                    currentFontSize = Math.floor(currentFontSize * ratio);
+                    ctx.font = `bold ${currentFontSize}px Arial`;
+                }
+
+                // 5. Draw Text Centered
+                ctx.fillStyle = CERT_CONFIG.color;
+                ctx.textAlign = "center"; 
+                // Note: 'centerX' is the midpoint between 869 and 2633
+                ctx.fillText(name, centerX, CERT_CONFIG.y);
 
                 // Trigger Download
                 const link = document.createElement('a');
