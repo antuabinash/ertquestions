@@ -204,7 +204,7 @@
         let allData = [];
         let filteredData = [];
         let allTeachers = new Set(); 
-        let queryLimit = 6000; // Limit set to 6000 to cover full database
+        let queryLimit = 10000; // Limit set to 10000 to cover full database
         let visibleLimit = 50; 
         let currentTab = 'unverified'; 
         let unsubscribe = null;
@@ -247,7 +247,7 @@
                 dash.style.pointerEvents = "auto";
                 if(allData.length === 0) {
                     fetchUserMetadata();
-                    // updateStats called inside loadData flow now
+                    // updateStats is called inside loadData now
                     loadData();
                 }
             } else {
@@ -274,8 +274,8 @@
         // UPDATED: Calculate stats locally from allData
         function updateStats() {
             try {
+                // Count verified questions based on data currently in memory
                 const countVerified = allData.filter(d => d.verified === true).length;
-                // Count anything not strictly verified as pending (false, undefined, null)
                 const countPending = allData.length - countVerified;
 
                 document.getElementById('stat-verified').innerText = countVerified;
@@ -314,19 +314,14 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
             document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding:40px;"><div class="loader"></div></td></tr>`;
-            loadData();
+            applyFilters(); // Re-apply filters to update the view without re-fetching
         };
 
         function loadData() {
             if (unsubscribe) unsubscribe();
             const collectionRef = collection(db, "questions");
             
-            // NOTE: We download everything (limit 6000) so we can count accurately locally
-            // We removed the 'where' clause for verified status so we get EVERYTHING in one go for accurate stats
-            // Wait, if we remove 'where verified', we get everything, but previously we toggled tabs.
-            // BETTER STRATEGY: Load EVERYTHING once (since you have only ~2000 questions) and filter tabs locally.
-            // This fixes ALL sync issues.
-            
+            // Download everything once
             let q = query(collectionRef, limit(queryLimit));
             
             unsubscribe = onSnapshot(q, (snapshot) => {
@@ -337,8 +332,9 @@
                 allData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 
                 updateDropdowns(); 
-                updateStats(); // Updates top bars
+                updateStats(); // Updates top bars with local calculation
                 updateContributionSummary(); // Updates teacher list
+                applyFilters(); // Initial render
             });
         }
 
@@ -360,7 +356,7 @@
             const subjects = [...new Set(allData.map(d => d.subject).filter(Boolean))].sort();
             populateSelect(document.getElementById('filterSubject'), subjects, "All Subjects", currentSubject);
             
-            applyFilters();
+            // Don't call applyFilters here directly, let loadData or user action handle it
         }
 
         function populateSelect(el, items, defaultText, selectedValue) {
